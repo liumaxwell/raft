@@ -44,6 +44,7 @@ while True:
 
 	if votes >= majority and candidate:
 		print("got enough votes")
+		current_leader = my_id
 		leader = True
 		candidate = False
 
@@ -55,7 +56,6 @@ while True:
 
 		# received heartbeat
 		if msg['type'] == "heartbeat":
-			print("got heartbeat")
 			past_beats.append(1)
 			current_leader = msg['src']
 			candidate = False
