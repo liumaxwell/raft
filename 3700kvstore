@@ -33,7 +33,7 @@ log = {}
 while True:
 	ready = select.select([sock], [], [], 0.1)[0]
 
-	if votes >= majority:
+	if votes >= majority and candidate:
 		print("got enough votes")
 		leader = True
 		candidate = False
@@ -50,7 +50,7 @@ while True:
 			current_leader = msg['src']
 			candidate = False
 
-		if msg['type'] == "RequestVote" and msg['term'] > current_term:
+		if msg['type'] == "RequestVote":
 			return_msg = {"src": my_id, "dst": msg['src'],
 						  "leader": msg['leader'], "type": "vote"}
 			return_msg_json = json.dumps(return_msg)
