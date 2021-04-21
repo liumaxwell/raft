@@ -78,8 +78,12 @@ while True:
 
 		# For now, ignore get() and put() from clients
 		if msg['type'] == 'put':
+			if current_leader == "":
+				return_msg = {"src": my_id, "dst": msg['src'],
+							  "leader": "FFFF", "type": "fail",
+							  "MID": msg['MID']}
 			# redirect to leader
-			if not leader:
+			elif not leader:
 				return_msg = {"src": my_id, "dst": msg['src'],
 							  "leader": current_leader, "type": "redirect",
 							  "MID": msg['MID']}
@@ -93,7 +97,11 @@ while True:
 			sock.send(return_msg_json.encode())
 
 		if msg['type'] == 'get':
-			if not leader:
+			if current_leader == "":
+				return_msg = {"src": my_id, "dst": msg['src'],
+							  "leader": "FFFF", "type": "fail",
+							  "MID": msg['MID']}
+			elif not leader:
 				return_msg = {"src": my_id, "dst": msg['src'],
 							  "leader": current_leader, "type": "redirect",
 							  "MID": msg['MID']}
