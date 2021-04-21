@@ -32,6 +32,13 @@ current_leader = ""
 
 log = {}
 
+def send_append_entry(msg):
+	send_to_all_msg = {"src": my_id, "dst": "FFFF",
+				  "leader": my_id, "type": "append_entry",
+				  "key": msg['key'], "value": msg['value']}
+	json_msg = json.dumps(send_to_all_msg)
+	sock.send(json_msg.encode())
+
 while True:
 	ready = select.select([sock], [], [], 0.1)[0]
 
@@ -59,6 +66,13 @@ while True:
 			voted = True
 			sock.send(return_msg_json.encode())
 
+		if msg['type'] == 'append_entry':
+			log[msg['key']] = msg['value']
+			return_msg = {"src": my_id, "dst": msg['src'],
+						  "leader": msg['src'], "type": "ok"}
+			return_msg_json = json.dumps(return_msg)
+			sock.send(return_msg_json.encode())
+
 		if msg['type'] == "vote" and candidate:
 			votes += 1
 
@@ -71,6 +85,7 @@ while True:
 							  "MID": msg['MID']}
 			else:
 				log[msg['key']] = msg['value']
+				send_append_entry(msg)
 				return_msg = {"src": my_id, "dst": msg['src'],
 							  "leader": my_id, "type": "ok",
 							  "MID": msg['MID']}
