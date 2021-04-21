@@ -1,0 +1,108 @@
+#!/usr/bin/env python
+
+import sys, socket, select, time, json, random
+
+# Your ID number
+my_id = sys.argv[1]
+
+# The ID numbers of all the other replicas
+replica_ids = sys.argv[2:]
+
+# Connect to the network. All messages to/from other replicas and clients will
+# occur over this socket
+sock = socket.socket(socket.AF_UNIX, socket.SOCK_SEQPACKET)
+sock.connect(my_id)
+
+num_others = len(replica_ids)
+last = 0
+last_other = 0
+past_beats = []
+election_timeout = False
+current_term = 0
+leader = False
+candidate = False
+votes = 0
+majority = round(num_others / 2)
+current_leader = ""
+
+log = {}
+
+while True:
+	ready = select.select([sock], [], [], 0.1)[0]
+
+	if sock in ready:
+		msg_raw = sock.recv(32768)
+
+		if len(msg_raw) == 0: continue
+		msg = json.loads(msg_raw)
+
+		# received heartbeat
+		if msg['type'] == "heartbeat":
+			past_beats.append(msg['type'])
+			current_leader = msg['src']
+			candidate = False
+
+		if msg['type'] == "RequestVote" and msg['term'] > current_term:
+			return_msg = {"src": my_id, "dst": msg['src'],
+						  "leader": msg['leader'], "type": "vote"}
+			return_msg_json = json.dumps(return_msg)
+			sock.send(return_msg_json.encode())
+
+		if msg['type'] == "vote" and candidate:
+			votes += 1
+
+		# For now, ignore get() and put() from clients
+		if msg['type'] == 'put':
+			# redirect to leader
+			if not leader:
+				return_msg = {"src": my_id, "dst": msg['src'],
+							  "leader": msg['leader'], "type": "redirect",
+							  "MID": msg['MID']}
+			else:
+				log[msg['key']] = msg['value']
+				return_msg = {"src": my_id, "dst": msg['src'],
+							  "leader": my_id, "type": "ok",
+							  "MID": msg['MID']}
+			return_msg_json = json.dumps(return_msg)
+			sock.send(return_msg_json.encode())
+
+		if msg['type'] == 'get':
+			value = log.get(msg['key'], "")
+			return_msg = {"src": my_id, "dst": msg['src'],
+						  "leader": msg['leader'], "type": "ok", "MID": msg['MID'], "value": value}
+			return_msg_json = json.dumps(return_msg)
+			sock.send(return_msg_json.encode())
+
+		if votes >= majority:
+			leader = True
+
+	clock = time.time()
+	second_clock = time.time()
+
+	# code runs every 2 seconds
+	if clock - last > 2:
+		if leader:
+			# send heartbeat
+			msg = {'src': my_id, 'dst': "FFFF", 'leader': my_id,
+				   'type': 'heartbeat', "term": current_term}
+			sock.send(json.dumps(msg).encode())
+		last = clock
+
+	# if have not received a heart beat... (empty list)
+	if second_clock - last_other > 6 and not leader:
+		if not past_beats:
+			time.sleep(random.randint(1, 15))
+			election_timeout = True
+		else:
+			past_beats = []
+		last_other = second_clock
+
+	if election_timeout:
+		candidate = True
+		current_term += 1
+		votes = 1
+
+		msg = {'src': my_id, 'dst': "FFFF", 'leader': my_id, 'type': 'RequestVote', "term": current_term}
+		sock.send(json.dumps(msg).encode())
+		print("requesting votes")
+		election_timeout = False
