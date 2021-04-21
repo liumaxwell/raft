@@ -130,7 +130,7 @@ while True:
 		last = clock
 
 	# if have not received a heart beat... (empty list)
-	if second_clock - last_other > 6 and not leader:
+	if second_clock - last_other > random.randint(4,8) and not leader:
 		if len(past_beats) == 0:
 			election_timeout = True
 		else:
