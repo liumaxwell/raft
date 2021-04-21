@@ -29,7 +29,7 @@ print("num total" + str(num_total))
 print("majority" + str(majority))
 
 current_leader = ""
-voting_hist = [0]
+voting_hist = []
 log = {}
 
 def send_append_entry(msg):
@@ -62,6 +62,8 @@ while True:
 
 		if msg['type'] == "RequestVote":
 			if msg['term'] not in voting_hist:
+				print("term " + str(msg['term']))
+				print(voting_hist)
 				return_msg = {"src": my_id, "dst": msg['src'],
 							  "leader": "FFFF", "type": "vote"}
 				return_msg_json = json.dumps(return_msg)
@@ -129,7 +131,6 @@ while True:
 	# if have not received a heart beat... (empty list)
 	if second_clock - last_other > 6 and not leader:
 		if len(past_beats) == 0:
-			#time.sleep(random.randint(1, 5))
 			election_timeout = True
 		else:
 			past_beats = []
