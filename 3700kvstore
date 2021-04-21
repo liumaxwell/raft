@@ -47,6 +47,10 @@ while True:
 		current_leader = my_id
 		leader = True
 		candidate = False
+		msg = {'src': my_id, 'dst': "FFFF", 'leader': my_id,
+			   'type': 'heartbeat', "term": current_term}
+		print("sent heartbeat")
+		sock.send(json.dumps(msg).encode())
 
 	if sock in ready:
 		msg_raw = sock.recv(32768)
