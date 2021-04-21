@@ -139,9 +139,10 @@ while True:
 
 	if election_timeout:
 		candidate = True
+		majority -= current_term
 		current_term += 1
 		votes = 1
-		majority -= 1
+	
 
 		msg = {'src': my_id, 'dst': "FFFF", 'leader': "FFFF", 'type': 'RequestVote', "term": current_term}
 		sock.send(json.dumps(msg).encode())
