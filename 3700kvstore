@@ -29,7 +29,7 @@ print("num total" + str(num_total))
 print("majority" + str(majority))
 
 current_leader = ""
-
+voting_hist = [0]
 log = {}
 
 def send_append_entry(msg):
@@ -63,14 +63,14 @@ while True:
 			past_beats.append(1)
 			current_leader = msg['src']
 			candidate = False
-			voted = False
 
-		if msg['type'] == "RequestVote" and not voted:
-			return_msg = {"src": my_id, "dst": msg['src'],
-						  "leader": "FFFF", "type": "vote"}
-			return_msg_json = json.dumps(return_msg)
-			voted = True
-			sock.send(return_msg_json.encode())
+		if msg['type'] == "RequestVote":
+			if msg['term'] not in voting_hist:
+				return_msg = {"src": my_id, "dst": msg['src'],
+							  "leader": "FFFF", "type": "vote"}
+				return_msg_json = json.dumps(return_msg)
+				voting_hist.append(msg['term'])
+				sock.send(return_msg_json.encode())
 
 		if msg['type'] == 'append_entry':
 			log[msg['key']] = msg['value']
