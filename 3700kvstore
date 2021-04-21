@@ -23,7 +23,7 @@ leader = False
 candidate = False
 votes = 0
 voted = False
-majority = math.ceil(num_total / 2)
+majority = math.ceil(num_total / 2) + 1
 
 print("num total" + str(num_total))
 print("majority" + str(majority))
