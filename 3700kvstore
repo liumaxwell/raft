@@ -78,9 +78,14 @@ while True:
 			sock.send(return_msg_json.encode())
 
 		if msg['type'] == 'get':
-			value = log.get(msg['key'], "")
-			return_msg = {"src": my_id, "dst": msg['src'],
-						  "leader": msg['leader'], "type": "ok", "MID": msg['MID'], "value": value}
+			if not leader:
+				return_msg = {"src": my_id, "dst": msg['src'],
+							  "leader": current_leader, "type": "redirect",
+							  "MID": msg['MID']}
+			else:
+				value = log.get(msg['key'], "")
+				return_msg = {"src": my_id, "dst": msg['src'],
+							  "leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
 			return_msg_json = json.dumps(return_msg)
 			sock.send(return_msg_json.encode())
 
