@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, socket, select, time, json, random
+import sys, socket, select, time, json, random, math
 
 # Your ID number
 my_id = sys.argv[1]
@@ -13,7 +13,7 @@ replica_ids = sys.argv[2:]
 sock = socket.socket(socket.AF_UNIX, socket.SOCK_SEQPACKET)
 sock.connect(my_id)
 
-num_others = len(replica_ids)
+num_total = len(replica_ids) + 1
 last = 0
 last_other = 0
 past_beats = []
@@ -22,7 +22,8 @@ current_term = 0
 leader = False
 candidate = False
 votes = 0
-majority = round(num_others / 2)
+voted = False
+majority = int(math.ceil(num_total / 2))
 
 print("majority" + str(majority))
 
@@ -50,10 +51,11 @@ while True:
 			current_leader = msg['src']
 			candidate = False
 
-		if msg['type'] == "RequestVote":
+		if msg['type'] == "RequestVote" and not voted:
 			return_msg = {"src": my_id, "dst": msg['src'],
 						  "leader": msg['leader'], "type": "vote"}
 			return_msg_json = json.dumps(return_msg)
+			voted = True
 			sock.send(return_msg_json.encode())
 
 		if msg['type'] == "vote" and candidate:
