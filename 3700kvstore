@@ -80,7 +80,7 @@ while True:
 		if msg['type'] == 'put':
 			if current_leader == "":
 				return_msg = {"src": my_id, "dst": msg['src'],
-							  "leader": "FFFF", "type": "fail",
+							  "leader": msg['leader'], "type": "fail",
 							  "MID": msg['MID']}
 			# redirect to leader
 			elif not leader:
@@ -99,7 +99,7 @@ while True:
 		if msg['type'] == 'get':
 			if current_leader == "":
 				return_msg = {"src": my_id, "dst": msg['src'],
-							  "leader": "FFFF", "type": "fail",
+							  "leader": msg['leader'], "type": "fail",
 							  "MID": msg['MID']}
 			elif not leader:
 				return_msg = {"src": my_id, "dst": msg['src'],
