@@ -164,7 +164,7 @@ while True:
 		# send heartbeat
 		msg = {'src': my_id, 'dst': "FFFF", 'leader': my_id,
 			   'type': 'heartbeat', "term": current_term}
-		print("sent heartbeat")
+		print(str(my_id) + " sent heartbeat")
 		sock.send(json.dumps(msg).encode())
 		last = clock
 
