@@ -91,7 +91,7 @@ while True:
 			index, term, key, value = break_down_str(msg["prev"])
 
 			# if the previous log entry matches up...
-			if log_index[index] == term + " " + key + " " + value or (len(log_index) == 0 and msg['prev'] == ""):
+			if (len(log_index) == 0 and msg['prev'] == "") or log_index[index] == term + " " + key + " " + value:
 				# add to end of log as "term key value"
 				log_index.append(msg['term'] + " " + msg['key'] + " " + msg['value'])
 				log[msg['key']] = msg['value']
