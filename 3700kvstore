@@ -51,7 +51,7 @@ def send_append_entry(msg):
 
 def break_down_str(str):
 	#index_term_key_value
-	prev = msg["prev_str"].split(" ")
+	prev = str.split(" ")
 	return int(prev[0]), prev[1], prev[2], prev[3]
 
 while True:
