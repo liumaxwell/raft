@@ -119,6 +119,8 @@ while True:
 
 		# if you get a put message
 		if msg['type'] == 'put':
+			print(msg['key'])
+			print(msg['value'])
 			# if there is no current leader, fail and make client retry until leader is found
 			if current_leader == "":
 				return_msg = {"src": my_id, "dst": msg['src'],
