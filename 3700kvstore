@@ -22,7 +22,6 @@ current_term = 0
 leader = False
 candidate = False
 votes = 0
-voted = False
 majority = math.ceil(num_total / 2) + 1
 
 print("num total" + str(num_total))
@@ -34,13 +33,26 @@ voting_hist = []
 votes_sent = 0
 
 log = {}
+reach_majority = False
+log_index = []
 
 def send_append_entry(msg):
+	if len(log_index) == 0:
+		prev_str = ""
+	else:
+		prev_str = [-1]
+
 	send_to_all_msg = {"src": my_id, "dst": "FFFF",
 				  "leader": my_id, "type": "append_entry",
-				  "key": msg['key'], "value": msg['value']}
+				  "key": msg['key'], "value": msg['value'], "term": current_term,
+					   "prev": prev_str}
 	json_msg = json.dumps(send_to_all_msg)
 	sock.send(json_msg.encode())
+
+def break_down_str(str):
+	#index_term_key_value
+	prev = msg["prev_str"].split(" ")
+	return int(prev[0]), prev[1], prev[2], prev[3]
 
 while True:
 	ready = select.select([sock], [], [], 0.1)[0]
@@ -58,11 +70,13 @@ while True:
 		msg = json.loads(msg_raw)
 
 		# received heartbeat
+		# heartbeat is from the new leader, stop candidacy
 		if msg['type'] == "heartbeat":
 			past_beats.append(1)
 			current_leader = msg['src']
 			candidate = False
 
+		# if you get a request vote, vote for them if you have not yet voted in this term
 		if msg['type'] == "RequestVote":
 			if votes_sent < msg['term']:
 				return_msg = {"src": my_id, "dst": msg['src'],
@@ -71,17 +85,29 @@ while True:
 				sock.send(return_msg_json.encode())
 				votes_sent += 1
 
+		# append_entry from leader, append to own and send back OK
 		if msg['type'] == 'append_entry':
-			log[msg['key']] = msg['value']
-			return_msg = {"src": my_id, "dst": msg['src'],
-						  "leader": msg['src'], "type": "ok"}
-			return_msg_json = json.dumps(return_msg)
-			sock.send(return_msg_json.encode())
+			# index_term_key_value
+			index, term, key, value = break_down_str(msg["prev_str"])
 
+			# if the previous log entry matches up...
+			if log_index[index] == term + " " + key + " " + value or (len(log_index) == 0 and msg['prev'] == ""):
+				# add to end of log as "term key value"
+				log_index.append(msg['term'] + " " + msg['key'] + " " + msg['value'])
+				log[msg['key']] = msg['value']
+
+				return_msg = {"src": my_id, "dst": msg['src'],
+							  "leader": msg['src'], "type": "ok"}
+				return_msg_json = json.dumps(return_msg)
+				sock.send(return_msg_json.encode())
+
+		# if you get a vote, keep track
 		if msg['type'] == "vote" and candidate:
 			votes += 1
 
+		# if you get a put message
 		if msg['type'] == 'put':
+			# if there is no current leader, fail and make client retry until leader is found
 			if current_leader == "":
 				return_msg = {"src": my_id, "dst": msg['src'],
 							  "leader": msg['leader'], "type": "fail",
@@ -91,8 +117,12 @@ while True:
 				return_msg = {"src": my_id, "dst": msg['src'],
 							  "leader": current_leader, "type": "redirect",
 							  "MID": msg['MID']}
+			# you are leader, append to own log and send out to replicas
 			else:
+				# put into own log
 				log[msg['key']] = msg['value']
+
+				# send out append entries
 				send_append_entry(msg)
 				return_msg = {"src": my_id, "dst": msg['src'],
 							  "leader": my_id, "type": "ok",
@@ -100,15 +130,19 @@ while True:
 			return_msg_json = json.dumps(return_msg)
 			sock.send(return_msg_json.encode())
 
+		# get message from client
 		if msg['type'] == 'get':
+			# if no current leader, make client retry
 			if current_leader == "":
 				return_msg = {"src": my_id, "dst": msg['src'],
 							  "leader": msg['leader'], "type": "fail",
 							  "MID": msg['MID']}
+			# redirect to leader
 			elif not leader:
 				return_msg = {"src": my_id, "dst": msg['src'],
 							  "leader": current_leader, "type": "redirect",
 							  "MID": msg['MID']}
+			# if leader, get the value and send back
 			else:
 				value = log.get(msg['key'], "")
 				return_msg = {"src": my_id, "dst": msg['src'],
@@ -131,6 +165,7 @@ while True:
 
 	# if have not received a heart beat... (empty list)
 	if second_clock - last_other > random.randint(4,8) and not leader:
+		# if no heartbeats received.. then begin election timeout
 		if len(past_beats) == 0:
 			election_timeout = True
 		else:
@@ -138,12 +173,19 @@ while True:
 		last_other = second_clock
 
 	if election_timeout:
+		# transition to candidate
 		candidate = True
-		majority -= current_term
-		current_term += 1
-		votes = 1
-	
 
+		# majority is -1 given the leader failed
+		majority -= current_term
+
+		# increment the current term
+		current_term += 1
+
+		# vote for yourself
+		votes = 1
+
+		# request votes from others
 		msg = {'src': my_id, 'dst': "FFFF", 'leader': "FFFF", 'type': 'RequestVote', "term": current_term}
 		sock.send(json.dumps(msg).encode())
 		print("requesting votes")
