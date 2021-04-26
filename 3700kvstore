@@ -93,6 +93,7 @@ while True:
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
 			else:
+				print('log is mismatched')
 				return_msg = {"src": my_id, "dst": msg['src'],
 							  "leader": msg['src'], "type": "log_behind"}
 				return_msg_json = json.dumps(return_msg)
@@ -127,7 +128,7 @@ while True:
 				# send out append entries
 				send_append_entry(msg)
 
-				log_index.append(str(current_term) + " " + msg['key'] + " " + msg['value'])
+				log_index.append(msg['key'] + " " + msg['value'])
 
 				return_msg = {"src": my_id, "dst": msg['src'],
 							  "leader": my_id, "type": "ok",
