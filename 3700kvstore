@@ -91,7 +91,7 @@ while True:
 			# if the previous log entry matches up...
 			if (len(log_index) == 0 and msg['prev'] == ""):
 				# add to end of log as "term key value"
-				log_index.append(msg['term'] + " " + msg['key'] + " " + msg['value'])
+				log_index.append(str(msg['term']) + " " + msg['key'] + " " + msg['value'])
 				log[msg['key']] = msg['value']
 
 				return_msg = {"src": my_id, "dst": msg['src'],
@@ -105,7 +105,7 @@ while True:
 
 				if(log_index[index] == term + " " + key + " " + value):
 					# add to end of log as "term key value"
-					log_index.append(msg['term'] + " " + msg['key'] + " " + msg['value'])
+					log_index.append(str(msg['term']) + " " + msg['key'] + " " + msg['value'])
 					log[msg['key']] = msg['value']
 
 					return_msg = {"src": my_id, "dst": msg['src'],
