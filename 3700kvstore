@@ -88,7 +88,7 @@ while True:
 		# append_entry from leader, append to own and send back OK
 		if msg['type'] == 'append_entry':
 			# index_term_key_value
-			index, term, key, value = break_down_str(msg["prev_str"])
+			index, term, key, value = break_down_str(msg["prev"])
 
 			# if the previous log entry matches up...
 			if log_index[index] == term + " " + key + " " + value or (len(log_index) == 0 and msg['prev'] == ""):
