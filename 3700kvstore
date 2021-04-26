@@ -54,7 +54,7 @@ while True:
 	ready = select.select([sock], [], [], 0.1)[0]
 
 	if votes >= majority and candidate:
-		print("got enough votes")
+		print(str(my_id) + " got enough votes")
 		current_leader = my_id
 		leader = True
 		candidate = False
