@@ -30,16 +30,22 @@ print("majority" + str(majority))
 current_leader = ""
 voting_hist = []
 
-votes_sent = 0
-
 log = {}
-reach_majority = False
 log_index = []
+
+def up_to_date(log):
+	if log['term'] > current_term:
+		return True
+	elif log['term'] == current_term:
+		return log['index'] >= len(log_index) - 1
+	else:
+		return False
 
 def send_append_entry(msg):
 	send_to_all_msg = {"src": my_id, "dst": "FFFF",
 				  "leader": my_id, "type": "append_entry",
-				  "key": msg['key'], "value": msg['value'], "term": current_term,
+				  "key": msg['key'], "value": msg['value'],
+					   "term": current_term, "index": len(log_index) - 1,
 					   "prev": log_index[-1:]}
 	json_msg = json.dumps(send_to_all_msg)
 	sock.send(json_msg.encode())
@@ -68,23 +74,34 @@ while True:
 
 		# if you get a request vote, vote for them if you have not yet voted in this term
 		if msg['type'] == "RequestVote":
-			if votes_sent < msg['term']:
+			# if you haven't voted yet this term and they have greater or equal term
+			if msg['term'] not in voting_hist and up_to_date(msg):
 				return_msg = {"src": my_id, "dst": msg['src'],
 							  "leader": "FFFF", "type": "vote"}
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
-				votes_sent += 1
+				voting_hist.append(msg['term'])
 
 		# append_entry from leader, append to own and send back OK
 		if msg['type'] == 'append_entry':
 			if msg['prev'] == log_index[-1:]:
-				log_index.append(str(msg['term']) + " " + msg['key'] + " " + msg['value'])
+				log_index.append(msg['key'] + " " + msg['value'])
 				log[msg['key']] = msg['value']
 
 				return_msg = {"src": my_id, "dst": msg['src'],
 							  "leader": msg['src'], "type": "ok"}
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
+			else:
+				return_msg = {"src": my_id, "dst": msg['src'],
+							  "leader": msg['src'], "type": "log_behind"}
+				return_msg_json = json.dumps(return_msg)
+				sock.send(return_msg_json.encode())
+
+		# # followers log is not the same as yours
+		# if msg['type'] == "log_behind":
+		#
+
 
 		# if you get a vote, keep track
 		if msg['type'] == "vote" and candidate:
@@ -174,7 +191,10 @@ while True:
 		votes = 1
 
 		# request votes from others
-		msg = {'src': my_id, 'dst': "FFFF", 'leader': "FFFF", 'type': 'RequestVote', "term": current_term}
+		msg = {'src': my_id, 'dst': "FFFF", 'leader': "FFFF",
+			   'type': 'RequestVote', "term": current_term,
+			   "index": len(log_index) - 1,
+					   "prev": log_index[-1:]}
 		sock.send(json.dumps(msg).encode())
 		print("requesting votes")
 		election_timeout = False
