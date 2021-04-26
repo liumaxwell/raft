@@ -37,10 +37,11 @@ reach_majority = False
 log_index = []
 
 def send_append_entry(msg):
-	if len(log_index) == 0:
+	list_length = len(log_index)
+	if list_length == 0:
 		prev_str = ""
 	else:
-		prev_str = [-1]
+		prev_str = str(list_length - 1) + " " + log_index[-1]
 
 	send_to_all_msg = {"src": my_id, "dst": "FFFF",
 				  "leader": my_id, "type": "append_entry",
@@ -89,7 +90,7 @@ while True:
 		if msg['type'] == 'append_entry':
 
 			# if the previous log entry matches up...
-			if (len(log_index) == 0 and msg['prev'] == ""):
+			if len(log_index) == 0 and msg['prev'] == "":
 				# add to end of log as "term key value"
 				log_index.append(str(msg['term']) + " " + msg['key'] + " " + msg['value'])
 				log[msg['key']] = msg['value']
@@ -119,8 +120,6 @@ while True:
 
 		# if you get a put message
 		if msg['type'] == 'put':
-			print(msg['key'])
-			print(msg['value'])
 			# if there is no current leader, fail and make client retry until leader is found
 			if current_leader == "":
 				return_msg = {"src": my_id, "dst": msg['src'],
@@ -135,6 +134,7 @@ while True:
 			else:
 				# put into own log
 				log[msg['key']] = msg['value']
+				log_index.append(str(current_term) + " " + msg['key'] + " " + msg['value'])
 
 				# send out append entries
 				send_append_entry(msg)
