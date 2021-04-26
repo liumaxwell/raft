@@ -37,16 +37,10 @@ reach_majority = False
 log_index = []
 
 def send_append_entry(msg):
-	list_length = len(log_index)
-	if list_length == 0:
-		prev_str = ""
-	else:
-		prev_str = str(list_length - 1) + " " + log_index[-1]
-
 	send_to_all_msg = {"src": my_id, "dst": "FFFF",
 				  "leader": my_id, "type": "append_entry",
 				  "key": msg['key'], "value": msg['value'], "term": current_term,
-					   "prev": prev_str}
+					   "prev": log_index}
 	json_msg = json.dumps(send_to_all_msg)
 	sock.send(json_msg.encode())
 
@@ -88,10 +82,7 @@ while True:
 
 		# append_entry from leader, append to own and send back OK
 		if msg['type'] == 'append_entry':
-
-			# if the previous log entry matches up...
-			if len(log_index) == 0 and msg['prev'] == "":
-				# add to end of log as "term key value"
+			if msg['prev'] == log_index:
 				log_index.append(str(msg['term']) + " " + msg['key'] + " " + msg['value'])
 				log[msg['key']] = msg['value']
 
@@ -99,20 +90,6 @@ while True:
 							  "leader": msg['src'], "type": "ok"}
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
-
-			else:
-				# index_term_key_value
-				index, term, key, value = break_down_str(msg["prev"])
-
-				if(log_index[index] == term + " " + key + " " + value):
-					# add to end of log as "term key value"
-					log_index.append(str(msg['term']) + " " + msg['key'] + " " + msg['value'])
-					log[msg['key']] = msg['value']
-
-					return_msg = {"src": my_id, "dst": msg['src'],
-								  "leader": msg['src'], "type": "ok"}
-					return_msg_json = json.dumps(return_msg)
-					sock.send(return_msg_json.encode())
 
 		# if you get a vote, keep track
 		if msg['type'] == "vote" and candidate:
