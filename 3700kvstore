@@ -40,7 +40,7 @@ def send_append_entry(msg):
 	send_to_all_msg = {"src": my_id, "dst": "FFFF",
 				  "leader": my_id, "type": "append_entry",
 				  "key": msg['key'], "value": msg['value'], "term": current_term,
-					   "prev": log_index[:-1]}
+					   "prev": log_index[-1:]}
 	json_msg = json.dumps(send_to_all_msg)
 	sock.send(json_msg.encode())
 
@@ -77,7 +77,7 @@ while True:
 
 		# append_entry from leader, append to own and send back OK
 		if msg['type'] == 'append_entry':
-			if msg['prev'] == log_index[:-1]:
+			if msg['prev'] == log_index[-1:]:
 				log_index.append(str(msg['term']) + " " + msg['key'] + " " + msg['value'])
 				log[msg['key']] = msg['value']
 
