@@ -134,10 +134,12 @@ while True:
 			else:
 				# put into own log
 				log[msg['key']] = msg['value']
-				log_index.append(str(current_term) + " " + msg['key'] + " " + msg['value'])
 
 				# send out append entries
 				send_append_entry(msg)
+
+				log_index.append(str(current_term) + " " + msg['key'] + " " + msg['value'])
+
 				return_msg = {"src": my_id, "dst": msg['src'],
 							  "leader": my_id, "type": "ok",
 							  "MID": msg['MID']}
