@@ -24,9 +24,6 @@ candidate = False
 votes = 0
 majority = math.ceil(num_total / 2) + 1
 
-print("num total" + str(num_total))
-print("majority" + str(majority))
-
 current_leader = ""
 voting_hist = []
 
@@ -58,7 +55,6 @@ def send_append_entry(msg):
 		if len(log) == 0:
 			term = 1
 		else:
-			print(rep_next_index)
 			term = log[rep_next_index]["term"]
 		msg = {"src": my_id, "dst": id,
 			   "leader": my_id, "type": "append_entry",
@@ -231,6 +227,7 @@ while True:
 		val = log[applied_index][key]
 		print("apply to KVSTORE")
 		kvstore[key] = val
+		print(kvstore)
 		# client ID, MID
 		return_msg = {"src": my_id, "dst": log[applied_index]['client_ID'],
 					  "leader": current_leader, "type": "ok", "MID": log[applied_index]['MID']}
