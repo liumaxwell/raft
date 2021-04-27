@@ -130,6 +130,7 @@ while True:
 				past_beats.append(1)
 				current_leader = msg['src']
 				candidate = False
+				continue
 			if msg['term'] < current_term:
 				# log is mismatched
 				return_msg = {"src": my_id, "dst": msg['src'],
@@ -138,10 +139,6 @@ while True:
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
 				continue
-			if msg['prev_index'] == -1:
-				return_msg = {"src": my_id, "dst": msg['src'],
-							  "leader": current_leader, "index": 0,
-							  "type": "append_ok"}
 			elif len(log) - 1 < msg['prev_index'] or \
 					log[int(msg["prev_index"])]["term"] != current_term:
 				# log is mismatched
