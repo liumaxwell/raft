@@ -70,6 +70,7 @@ def send_append_entry(msg):
 			"prev_term": term, "lead_commit_index": commit_index,
 			"client_ID": msg['src'], "MID": msg["MID"], "time": time.time()}
 		sock.send(json.dumps(msg).encode())
+		messages[msg["MID"] + "AE" + str(the_id)] = msg
 
 # def resend_to_follower(i):
 # 	msg = appends.pop(i)
@@ -98,6 +99,7 @@ def send_to_follower(dst, msg):
 		   "client_ID": msg['client_ID'], "MID": msg["MID"], "time": time.time()}
 	json_msg = json.dumps(msg)
 	sock.send(json_msg.encode())
+	messages[msg["MID"] + "AE" + str(dst)] = msg
 
 def reply_false(msg):
 	return_msg = {"src": my_id, "dst": msg['src'], "leader": msg["src"],
@@ -151,6 +153,7 @@ while True:
 				"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
+				messages[msg["MID"] + "PT"] = return_msg
 
 	# if have not received a heart beat... (empty list)
 	# if not leader and second_clock - last_other > r:
@@ -176,6 +179,7 @@ while True:
 						"leader": my_id, "type": "ok", "MID": log[applied_index]['MID']}
 			return_msg_json = json.dumps(return_msg)
 			sock.send(return_msg_json.encode())
+			messages[log[applied_index]["MID"] + "PT"] = return_msg
 
 	if candidate and votes >= majority:
 		print(str(my_id) + " got enough votes")
@@ -208,9 +212,6 @@ while True:
 		if len(msg_raw) == 0:
 			continue
 		msg = json.loads(msg_raw)
-
-		if "MID" in msg:
-			messages[msg["MID"]] = msg
 
 		# if you get a request vote, vote for them if you have not yet voted in this term
 		if msg['type'] == "RequestVote":
@@ -247,7 +248,7 @@ while True:
 				print("term mismatched")
 			elif msg['prev_index'] == -1:
 				log.append({msg['key']: msg['value'], "term": msg['term'],
-				"client_ID": msg['src'], "MID": msg['MID']})
+				"client_ID": msg['client_ID'], "MID": msg['MID']})
 				reply_true(msg)
 			elif log_idx < msg['prev_index'] or \
 					log[int(msg["prev_index"])]["term"] != msg['prev_term']:
@@ -255,13 +256,13 @@ while True:
 				print("log index mismatched")
 			elif log_idx == msg["prev_index"]:
 				log.append({msg['key']: msg['value'], "term": msg['term'], 
-				"client_ID": msg['src'], "MID": msg['MID']})
+				"client_ID": msg['client_ID'], "MID": msg['MID']})
 				reply_true(msg)
 			elif log_idx > msg['prev_index']:
 				if log[msg['prev_index'] + 1]["term"] != msg['term']:
 					log = log[0 : msg['prev_index']]
 				log.append({msg['key']: msg['value'], "term": msg['term'], 
-				"client_ID": msg['src'], "MID": msg['MID']})
+				"client_ID": msg['client_ID'], "MID": msg['MID']})
 				reply_true(msg)
 
 			if msg['lead_commit_index'] > commit_index:
@@ -282,6 +283,9 @@ while True:
 				sock.send(return_msg_json.encode())
 			# you are leader, append to own log and send out to replicas
 			else:
+				if msg["MID"] + "PT" in messages:
+					sock.send(json.dumps(messages[msg["MID"] + "PT"]).encode())
+					continue
 				if not leader_ready:
 					puts_cache.append(msg)
 				else:
@@ -302,6 +306,9 @@ while True:
 				sock.send(return_msg_json.encode())
 			# if leader, get the value and send back
 			else:
+				if msg["MID"] + "GT" in messages:
+					sock.send(json.dumps(messages[msg["MID"] + "GT"]).encode())
+					continue
 				value = kvstore.get(msg['key'], "")
 				if not leader_ready:
 					gets_cache.append(msg)
@@ -311,6 +318,7 @@ while True:
 								"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
 					return_msg_json = json.dumps(return_msg)
 					sock.send(return_msg_json.encode())
+					messages[msg["MID"] + "GT"] = return_msg
 
 	if election_timeout:
 		# transition to candidate
