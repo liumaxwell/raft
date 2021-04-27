@@ -216,7 +216,7 @@ while True:
 				"prev_term": prev_term, "lead_commit_index": commit_index,
 				"client_ID": "no-op", "MID": "no-op", "time": time.time()}
 			sock.send(json.dumps(msg))
-			messages[msg["MID"] + "AE" + str(the_id)] = msg
+			#messages[msg["MID"] + "AE" + str(the_id)] = msg
 		log.append({"no-op": "", "term": current_term, "client_ID": "no-op", "MID": "no-op"})
 
 	ready = select.select([sock], [], [], 0.1)[0]
