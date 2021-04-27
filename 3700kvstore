@@ -117,6 +117,7 @@ def resend_unacked():
 	for the_id in replica_ids:
 		keys = [x for x in messages if x[16:18] == "AE" + str(the_id) and time.time() - messages[x]["time"] > .0000001]
 		for key in keys:
+			print(key)
 			messages["key"]["time"] = time.time()
 			msg = messages["key"]
 			sock.send(json.dumps(msg).encode())
