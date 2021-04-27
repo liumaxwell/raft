@@ -258,7 +258,7 @@ while True:
 
 		# vote for yourself
 		votes = 1
-
+		print(log)
 		# request votes from others
 		if len(log) == 0:
 			term = 1
