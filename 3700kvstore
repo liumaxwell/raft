@@ -284,7 +284,7 @@ while True:
 			# you are leader, append to own log and send out to replicas
 			else:
 				if msg["MID"] + "PT" in messages:
-					sock.send(json.dumps(messages[msg["MID"] + "PT"]).encode())
+					#sock.send(json.dumps(messages[msg["MID"] + "PT"]).encode())
 					continue
 				if not leader_ready:
 					puts_cache.append(msg)
@@ -307,7 +307,7 @@ while True:
 			# if leader, get the value and send back
 			else:
 				if msg["MID"] + "GT" in messages:
-					sock.send(json.dumps(messages[msg["MID"] + "GT"]).encode())
+					#sock.send(json.dumps(messages[msg["MID"] + "GT"]).encode())
 					continue
 				value = kvstore.get(msg['key'], "")
 				if not leader_ready:
