@@ -26,9 +26,8 @@ majority = math.ceil(num_total / 2) + 1
 r = random.randint(4, 8)
 
 current_leader = ""
+most_recent_leader = ""
 voting_hist = []
-
-msg_cache = []
 
 log = []
 kvstore = {}
@@ -168,17 +167,6 @@ while True:
 
 	ready = select.select([sock], [], [], 0.1)[0]
 	if sock in ready:
-		cache_len = len(msg_cache)
-		if current_leader != "" and cache_len > 0:
-			for i in range(cache_len):
-				msg = msg_cache[i]
-				return_msg = {"src": my_id, "dst": msg['src'],
-					"leader": current_leader, "type": "redirect",
-					"MID": msg['MID']}
-				return_msg_json = json.dumps(return_msg)
-				sock.send(return_msg_json.encode())
-			msg_cache = []
-
 		msg_raw = sock.recv(32768)
 		if len(msg_raw) == 0:
 			continue
@@ -207,6 +195,7 @@ while True:
 		if not leader and msg['type'] == 'append_entry':
 			current_term = msg['term']
 			current_leader = msg['leader']
+			most_recent_leader = current_leader
 			candidate = False
 			log_idx = len(log) - 1
 			if msg['key'] == "":
@@ -245,7 +234,9 @@ while True:
 		elif msg['type'] == 'put':
 			# if there is no current leader, fail and make client retry until leader is found
 			if current_leader == "":
-				msg_cache.append(msg)
+				return_msg = {"src": my_id, "dst": msg['src'],
+				"leader": most_recent_leader, "type": "redirect",
+				"MID": msg['MID']}
 			# redirect to leader
 			elif not leader:
 				return_msg = {"src": my_id, "dst": msg['src'],
@@ -255,6 +246,7 @@ while True:
 				sock.send(return_msg_json.encode())
 			# you are leader, append to own log and send out to replicas
 			else:
+				if already_executed
 				# put into own log
 				log.append({msg["key"]: msg["value"], "term": current_term,
 							"client_ID": msg['src'], "MID": msg['MID']})
@@ -266,7 +258,9 @@ while True:
 		elif msg['type'] == 'get':
 			# if no current leader, make client retry
 			if current_leader == "":
-				msg_cache.append(msg)
+				return_msg = {"src": my_id, "dst": msg['src'],
+				"leader": most_recent_leader, "type": "redirect",
+				"MID": msg['MID']}
 			# redirect to leader
 			elif not leader:
 				return_msg = {"src": my_id, "dst": msg['src'],
