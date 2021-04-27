@@ -154,7 +154,7 @@ while True:
 			sock.send(return_msg_json.encode())
 
 	if candidate and votes >= majority:
-		print("LEADER_LEN: " + len(log))
+		print("LEADER_LEN: " + str(len(log)))
 		print(str(my_id) + " got enough votes")
 		current_leader = my_id
 		leader = True
@@ -169,7 +169,7 @@ while True:
 
 		if len(msg_raw) == 0: continue
 		msg = json.loads(msg_raw)
-		print(str(my_id) + " LEN: " + len(log))
+		print(str(my_id) + " LEN: " + str(len(log)))
 
 		# if you get a request vote, vote for them if you have not yet voted in this term
 		if msg['type'] == "RequestVote":
