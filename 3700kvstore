@@ -114,6 +114,7 @@ def reply_true(msg):
 	sock.send(return_msg_json.encode())
 
 def resend_unacked():
+	print(messages)
 	for the_id in replica_ids:
 		keys = [x for x in messages if x[16:18] == "AE" + str(the_id) and time.time() - messages[x]["time"] > .1]
 		for key in keys:
