@@ -53,18 +53,20 @@ def up_to_date(log):
 		return False
 
 def send_append_entry(msg):
-	if len(log) != 0:
-		term = log[-1]['term']
-	else:
-		term = 1
+	for id in replica_ids:
+		rep_next_index = next_index[id]
+		if len(log) == 0:
+			term = 1
+		else:
+			print(rep_next_index)
+			term = log[rep_next_index]["term"]
+		msg = {"src": my_id, "dst": id,
+			   "leader": my_id, "type": "append_entry",
+			   "key": msg['key'], "value": msg['value'],
+			   "term": current_term, "prev_index": rep_next_index - 1,
+			   "prev_term": term, "lead_commit_index": commit_index}
+		sock.send(json.dumps(msg).encode())
 
-	send_to_all_msg = {"src": my_id, "dst": "FFFF",
-				  "leader": my_id, "type": "append_entry",
-				  "key": msg['key'], "value": msg['value'],
-					   "term": current_term, "prev_index": len(log) - 1,
-					   "prev_term" : term, "lead_commit_index": commit_index}
-	json_msg = json.dumps(send_to_all_msg)
-	sock.send(json_msg.encode())
 
 def send_to_follower(id):
 	index = next_index[id]
@@ -140,16 +142,16 @@ while True:
 				sock.send(return_msg_json.encode())
 				print("term mismatched")
 				continue
-			# elif len(log) - 1 < msg['prev_index'] or \
-			# 		log[int(msg["prev_index"])]["term"] != current_term:
-			# 	# log is mismatched
-			# 	return_msg = {"src": my_id, "dst": msg['src'],
-			# 				  "leader": current_leader, "index": len(log) - 1,
-			# 				  "type": "append_fail"}
-			# 	return_msg_json = json.dumps(return_msg)
-			# 	sock.send(return_msg_json.encode())
-			# 	print("log index mismatched")
-			# 	continue
+			elif len(log) - 1 < msg['prev_index'] or \
+					log[int(msg["prev_index"])]["term"] != current_term:
+				# log is mismatched
+				return_msg = {"src": my_id, "dst": msg['src'],
+							  "leader": current_leader, "index": len(log) - 1,
+							  "type": "append_fail"}
+				return_msg_json = json.dumps(return_msg)
+				sock.send(return_msg_json.encode())
+				print("log index mismatched")
+				continue
 			elif len(log) - 1 >= int(msg['prev_index']) + 1:
 				if log[msg['prev_index'] + 1]["term"] != msg['term']:
 					log = log[0 : msg['prev_index'] + 1]
