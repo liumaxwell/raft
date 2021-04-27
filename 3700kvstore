@@ -25,12 +25,11 @@ votes = 0
 majority = math.ceil(num_total / 2) + 1
 r = random.randint(4, 8)
 
-current_leader = ""
 most_recent_leader = ""
 voting_hist = []
 
-puts = []
-oks = []
+# puts = []
+# oks = []
 
 log = []
 kvstore = {}
@@ -90,25 +89,23 @@ def send_to_follower(msg):
 	sock.send(json_msg.encode())
 
 def reply_false(msg):
-	return_msg = {"src": my_id, "dst": msg['src'],
-				"leader": current_leader, "type": "append_fail",
+	return_msg = {"src": my_id, "dst": msg['src'], "type": "append_fail",
 				"client_ID": msg['src'], "MID": msg["MID"]}
 	return_msg_json = json.dumps(return_msg)
 	sock.send(return_msg_json.encode())
 
 def reply_true(msg):
-	return_msg = {"src": my_id, "dst": msg['src'],
-			"leader": current_leader, "type": "append_ok",
+	return_msg = {"src": my_id, "dst": msg['src'], "type": "append_ok",
 			"client_ID": msg['src'], "MID": msg["MID"]}
 	return_msg_json = json.dumps(return_msg)
 	sock.send(return_msg_json.encode())
 
-def print_diff():
-	out = []
-	for put in puts:
-		if put not in oks:
-			out.append(puts)
-	print(out)
+# def print_diff():
+# 	out = []
+# 	for put in puts:
+# 		if put not in oks:
+# 			out.append(puts)
+# 	print(out)
 
 while True:
 	clock = time.time()
@@ -144,7 +141,6 @@ while True:
 		# if no heartbeats received.. then begin election timeout
 		if len(past_beats) == 0:
 			election_timeout = True
-			current_leader = ""
 		else:
 			past_beats = []
 		last_other = second_clock
@@ -159,15 +155,14 @@ while True:
 		val = log[applied_index][the_key]
 		kvstore[the_key] = val
 		if leader:
-			oks.append(log[applied_index]['MID'])
+			# oks.append(log[applied_index]['MID'])
 			return_msg = {"src": my_id, "dst": log[applied_index]['client_ID'],
-						"leader": current_leader, "type": "ok", "MID": log[applied_index]['MID']}
+						"leader": my_id, "type": "ok", "MID": log[applied_index]['MID']}
 			return_msg_json = json.dumps(return_msg)
 			sock.send(return_msg_json.encode())
 
 	if candidate and votes >= majority:
 		print(str(my_id) + " got enough votes")
-		current_leader = my_id
 		most_recent_leader = my_id
 		leader = True
 		candidate = False
@@ -181,8 +176,6 @@ while True:
 		if len(msg_raw) == 0:
 			continue
 		msg = json.loads(msg_raw)
-		if leader:
-			print_diff()
 
 		# if you get a request vote, vote for them if you have not yet voted in this term
 		if msg['type'] == "RequestVote":
@@ -206,8 +199,7 @@ while True:
 		# append_entry from leader, append to own and send back OK
 		if not leader and msg['type'] == 'append_entry':
 			current_term = msg['term']
-			current_leader = msg['leader']
-			most_recent_leader = current_leader
+			most_recent_leader = msg['leader']
 			candidate = False
 			log_idx = len(log) - 1
 			if msg['key'] == "":
@@ -244,21 +236,16 @@ while True:
 
 		# if you get a put message
 		elif msg['type'] == 'put':
-			# if there is no current leader, fail and make client retry until leader is found
-			if current_leader == "":
-				return_msg = {"src": my_id, "dst": msg['src'],
-				"leader": most_recent_leader, "type": "redirect",
-				"MID": msg['MID']}
 			# redirect to leader
-			elif not leader:
+			if not leader:
 				return_msg = {"src": my_id, "dst": msg['src'],
-							  "leader": current_leader, "type": "redirect",
+							  "leader": most_recent_leader, "type": "redirect",
 							  "MID": msg['MID']}
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
 			# you are leader, append to own log and send out to replicas
 			else:
-				puts.append(msg["MID"])
+				# puts.append(msg["MID"])
 				# put into own log
 				log.append({msg["key"]: msg["value"], "term": current_term,
 							"client_ID": msg['src'], "MID": msg['MID']})
@@ -268,15 +255,10 @@ while True:
 
 		# get message from client
 		elif msg['type'] == 'get':
-			# if no current leader, make client retry
-			if current_leader == "":
-				return_msg = {"src": my_id, "dst": msg['src'],
-				"leader": most_recent_leader, "type": "redirect",
-				"MID": msg['MID']}
 			# redirect to leader
-			elif not leader:
+			if not leader:
 				return_msg = {"src": my_id, "dst": msg['src'],
-							  "leader": current_leader, "type": "redirect",
+							  "leader": most_recent_leader, "type": "redirect",
 							  "MID": msg['MID']}
 			# if leader, get the value and send back
 			else:
