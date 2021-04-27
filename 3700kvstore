@@ -176,11 +176,11 @@ while True:
 		if len(msg_raw) == 0:
 			continue
 		msg = json.loads(msg_raw)
-		# if leader:
-		# 	print("NEXT:")
-		# 	print(next_index)
-		# 	print("MATCH:")
-		# 	print(match_index)
+		if leader:
+			print("NEXT:")
+			print(next_index)
+			print("MATCH:")
+			print(match_index)
 
 		# if you get a request vote, vote for them if you have not yet voted in this term
 		if msg['type'] == "RequestVote":
