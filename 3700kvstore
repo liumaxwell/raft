@@ -195,7 +195,7 @@ while True:
 		# follower committed
 		if msg['type'] == 'append_ok':
 			next_index[msg['src']] = msg["index"] + 1
-			match_index[msg['src']] = msg["index"] + 1
+			match_index[msg['src']] = msg["index"]
 
 		if msg['type'] == "append_fail":
 			next_index[msg['src']] -= 1
