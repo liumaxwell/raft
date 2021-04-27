@@ -115,7 +115,6 @@ def reply_true(msg):
 
 def resend_unacked():
 	for the_id in replica_ids:
-		print(messages)
 		keys = [x for x in messages if x[16:18] == "AE" + str(the_id) and time.time() - messages[x]["time"] > .1]
 		for key in keys:
 			messages["key"]["time"] = time.time()
@@ -189,7 +188,7 @@ while True:
 						"leader": my_id, "type": "ok", "MID": log[applied_index]['MID']}
 			return_msg_json = json.dumps(return_msg)
 			sock.send(return_msg_json.encode())
-			messages[log[applied_index]["MID"] + "PT"] = return_msg
+			#messages[log[applied_index]["MID"] + "PT"] = return_msg
 
 	if candidate and votes >= majority:
 		print(str(my_id) + " got enough votes")
@@ -330,7 +329,7 @@ while True:
 								"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
 					return_msg_json = json.dumps(return_msg)
 					sock.send(return_msg_json.encode())
-					messages[msg["MID"] + "GT"] = return_msg
+					#messages[msg["MID"] + "GT"] = return_msg
 
 	if election_timeout:
 		# transition to candidate
