@@ -115,7 +115,7 @@ def reply_true(msg):
 
 def resend_unacked():
 	for the_id in replica_ids:
-		keys = [x for x in messages if x[16:22] == "AE" + str(the_id) and time.time() - messages[x]["time"] > .01]
+		keys = [x for x in messages if x[16:22] == "AE" + str(the_id) and time.time() - messages[x]["time"] > .1]
 		for key in keys:
 			print("resending")
 			messages[key]["time"] = time.time()
@@ -126,7 +126,6 @@ while True:
 	clock = time.time()
 	second_clock = time.time()
 	if leader:
-		print(messages)
 		resend_unacked()
 		for N in range(commit_index + 1, len(log)):
 			num_matched = 0
@@ -193,7 +192,6 @@ while True:
 			#messages[log[applied_index]["MID"] + "PT"] = return_msg
 
 	if candidate and votes >= majority:
-		print(messages)
 		print(str(my_id) + " got enough votes")
 		most_recent_leader = my_id
 		leader = True
