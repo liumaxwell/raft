@@ -126,8 +126,7 @@ while True:
 	clock = time.time()
 	second_clock = time.time()
 	if leader:
-		if leader_ready:
-			resend_unacked()
+		resend_unacked()
 		for N in range(commit_index + 1, len(log)):
 			num_matched = 0
 			for the_id in replica_ids:
@@ -157,14 +156,16 @@ while True:
 			for msg in puts_cache:
 				log.append({msg["key"]: msg["value"], "term": current_term,
 							"client_ID": msg['src'], "MID": msg['MID']})
+				msg["time"] = time.time()
 				send_append_entry(msg)
+				#messages[msg["MID"] + "PT"] = return_msg
 			for msg in gets_cache:
 				value = kvstore.get(msg['key'], "")
 				return_msg = {"src": my_id, "dst": msg['src'],
 				"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
-				messages[msg["MID"] + "PT"] = return_msg
+				#messages[msg["MID"] + "GT"] = return_msg
 
 	# if have not received a heart beat... (empty list)
 	# if not leader and second_clock - last_other > r:
