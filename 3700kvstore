@@ -105,13 +105,6 @@ while True:
 		if len(msg_raw) == 0: continue
 		msg = json.loads(msg_raw)
 
-		# received heartbeat
-		# heartbeat is from the new leader, stop candidacy
-		if msg['type'] == "heartbeat":
-			past_beats.append(1)
-			current_leader = msg['src']
-			candidate = False
-
 		# if you get a request vote, vote for them if you have not yet voted in this term
 		if msg['type'] == "RequestVote":
 			# if you haven't voted yet this term and they have greater or equal term
@@ -133,7 +126,7 @@ while True:
 
 		# append_entry from leader, append to own and send back OK
 		if msg['type'] == 'append_entry':
-			current_leader = msg['src']
+			current_leader = msg['leader']
 			if msg['key'] == "":
 				past_beats.append(1)
 				candidate = False
@@ -205,8 +198,6 @@ while True:
 
 				# send out append entries
 				send_append_entry(msg)
-
-
 
 
 		# get message from client
@@ -283,9 +274,6 @@ while True:
 	if election_timeout:
 		# transition to candidate
 		candidate = True
-
-		# majority is -1 given the leader failed
-		# majority -= current_term
 
 		# increment the current term
 		current_term += 1
