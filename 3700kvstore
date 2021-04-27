@@ -13,8 +13,6 @@ replica_ids = sys.argv[2:]
 sock = socket.socket(socket.AF_UNIX, socket.SOCK_SEQPACKET)
 sock.connect(my_id)
 
-time.sleep(1)
-
 num_total = len(replica_ids) + 1
 last = 0
 last_other = 0
@@ -96,9 +94,9 @@ def reply_false(msg):
 	return_msg_json = json.dumps(return_msg)
 	sock.send(return_msg_json.encode())
 
-def reply_true(msg, index):
+def reply_true(msg):
 	return_msg = {"src": my_id, "dst": msg['src'], "leader": msg['src'],
-	"type": "append_ok", "client_ID": msg['src'], "MID": msg["MID"], "index": index}
+	"type": "append_ok", "client_ID": msg['src'], "MID": msg["MID"]}
 	return_msg_json = json.dumps(return_msg)
 	sock.send(return_msg_json.encode())
 
@@ -108,6 +106,7 @@ def reply_true(msg, index):
 # 		if put not in oks:
 # 			out.append(puts)
 # 	print(out)
+
 while True:
 	clock = time.time()
 	second_clock = time.time()
@@ -117,7 +116,6 @@ while True:
 			for the_id in replica_ids:
 				if match_index[the_id] >= N:
 					num_matched += 1
-			# majority - 1 because the leader agrees with itself
 			if num_matched >= majority - 1 and log[N]["term"] == current_term:
 				commit_index = N
 		# code runs every 2 seconds
@@ -157,6 +155,7 @@ while True:
 		val = log[applied_index][the_key]
 		kvstore[the_key] = val
 		if leader:
+			# oks.append(log[applied_index]['MID'])
 			return_msg = {"src": my_id, "dst": log[applied_index]['client_ID'],
 						"leader": my_id, "type": "ok", "MID": log[applied_index]['MID']}
 			return_msg_json = json.dumps(return_msg)
@@ -177,11 +176,6 @@ while True:
 		if len(msg_raw) == 0:
 			continue
 		msg = json.loads(msg_raw)
-		# if leader:
-		# 	print("NEXT:")
-		# 	print(next_index)
-		# 	print("MATCH:")
-		# 	print(match_index)
 
 		# if you get a request vote, vote for them if you have not yet voted in this term
 		if msg['type'] == "RequestVote":
@@ -217,7 +211,7 @@ while True:
 			elif msg['prev_index'] == -1:
 				log.append({msg['key']: msg['value'], "term": msg['term'],
 				"client_ID": msg['src'], "MID": msg['MID']})
-				reply_true(msg, 0)
+				reply_true(msg)
 			elif log_idx < msg['prev_index'] or \
 					log[int(msg["prev_index"])]["term"] != msg['prev_term']:
 				reply_false(msg)
@@ -225,13 +219,13 @@ while True:
 			elif log_idx == msg["prev_index"]:
 				log.append({msg['key']: msg['value'], "term": msg['term'], 
 				"client_ID": msg['src'], "MID": msg['MID']})
-				reply_true(msg, log_idx + 1)
+				reply_true(msg)
 			elif log_idx > msg['prev_index']:
 				if log[msg['prev_index'] + 1]["term"] != msg['term']:
 					log = log[0 : msg['prev_index']]
 				log.append({msg['key']: msg['value'], "term": msg['term'], 
 				"client_ID": msg['src'], "MID": msg['MID']})
-				reply_true(msg, len(log) - 1)
+				reply_true(msg)
 
 			if msg['lead_commit_index'] > commit_index:
 				commit_index = min(msg['lead_commit_index'], len(log) - 1)
