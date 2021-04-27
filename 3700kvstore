@@ -232,6 +232,7 @@ while True:
 			if len(log) == 0:
 				term = 1
 			else:
+				print(rep_next_index)
 				term = log[rep_next_index]["term"]
 			msg = {"src": my_id, "dst": id,
 				   "leader": my_id, "type": "append_entry",
