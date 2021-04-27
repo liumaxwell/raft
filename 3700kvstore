@@ -182,25 +182,25 @@ while True:
 				return_msg = {"src": my_id, "dst": msg['src'],
 							  "leader": msg['leader'], "type": "fail",
 							  "MID": msg['MID']}
+				return_msg_json = json.dumps(return_msg)
+				sock.send(return_msg_json.encode())
 			# redirect to leader
 			elif not leader:
 				return_msg = {"src": my_id, "dst": msg['src'],
 							  "leader": current_leader, "type": "redirect",
 							  "MID": msg['MID']}
+				return_msg_json = json.dumps(return_msg)
+				sock.send(return_msg_json.encode())
 			# you are leader, append to own log and send out to replicas
 			else:
 				# put into own log
-				log.append({msg["key"]: msg["value"], "term": current_term})
+				log.append({msg["key"]: msg["value"], "term": current_term,
+							"client_ID": msg['src'], "MID": msg['MID']})
 
 				# send out append entries
 				send_append_entry(msg)
 
-				return_msg = {"src": my_id, "dst": msg['src'],
-							  "leader": my_id, "type": "ok",
-							  "MID": msg['MID']}
 
-			return_msg_json = json.dumps(return_msg)
-			sock.send(return_msg_json.encode())
 
 
 		# get message from client
@@ -227,7 +227,13 @@ while True:
 		applied_index += 1
 		key = list(log[applied_index].keys())[0]
 		val = log[applied_index][key]
+		print("apply to KVSTORE")
 		kvstore[key] = val
+		# client ID, MID
+		return_msg = {"src": my_id, "dst": log[applied_index]['client_id'],
+					  "leader": my_id, "type": "ok", "MID": log[applied_index]['MID']}
+		return_msg_json = json.dumps(return_msg)
+		sock.send(return_msg_json.encode())
 
 	elif leader:
 		for N in range(commit_index + 1, len(log)):
