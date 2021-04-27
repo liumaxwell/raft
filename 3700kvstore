@@ -101,7 +101,9 @@ while True:
 			match_index[id] = 0
 			msg = {"src": my_id, "dst": id,
 			   "leader": my_id, "type": "append_entry",
-			   "key": "", "value": ""}
+			   "key": "", "value": "",
+			   "term": current_term, "prev_index": len(log) - 1,
+			   "prev_term": current_term, "lead_commit_index": commit_index}
 			sock.send(json.dumps(msg).encode())
 
 	if sock in ready:
