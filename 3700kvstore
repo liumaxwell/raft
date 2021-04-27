@@ -32,7 +32,7 @@ gets_cache = []
 # r = random.randint(4, 8)
 messages = {}
 
-first append_entry = 0
+first_append_entry = 0
 
 most_recent_leader = ""
 voting_hist = []
