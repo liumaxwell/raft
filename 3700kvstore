@@ -31,7 +31,7 @@ log = []
 kvstore = {}
 
 commit_index = 0
-applied_index = -1
+applied_index = 0
 
 next_index = {}
 match_index = {}
@@ -244,7 +244,6 @@ while True:
 	
 
 	if commit_index > applied_index:
-		applied_index += 1
 		the_key = ""
 		for key in list(log[applied_index].keys()):
 			if key != 'term' and key != 'client_ID' and key != 'MID':
@@ -256,6 +255,7 @@ while True:
 		oks.append(log[applied_index]["MID"])
 		return_msg_json = json.dumps(return_msg)
 		sock.send(return_msg_json.encode())
+		applied_index += 1
 
 	clock = time.time()
 	second_clock = time.time()
