@@ -30,25 +30,58 @@ print("majority" + str(majority))
 current_leader = ""
 voting_hist = []
 
-log = {}
-log_index = []
+log = [{}]
+kvstore = {}
+
+commit_index = 0
+applied_index = 0
+
+next_index = {}
+match_index = {}
+appended = {}
+
+for id in replica_ids:
+	next_index[id] = 0
+	match_index[id] = 0
 
 def up_to_date(log):
-	if log['term'] > current_term:
+	if log['prev']['term'] > current_term:
 		return True
-	elif log['term'] == current_term:
-		return log['index'] >= len(log_index) - 1
+	elif log['prev']['term'] == current_term:
+		return log['index'] >= len(log) - 1
 	else:
 		return False
 
 def send_append_entry(msg):
+	if len(log) != 0:
+		term = log[-1]['term']
+	else:
+		term = 1
+
 	send_to_all_msg = {"src": my_id, "dst": "FFFF",
 				  "leader": my_id, "type": "append_entry",
 				  "key": msg['key'], "value": msg['value'],
-					   "term": current_term, "index": len(log_index) - 1,
-					   "prev": log_index[-1:]}
+					   "term": current_term, "prev_index": len(log) - 1,
+					   "prev_term" : term, "lead_commit_index": commit_index}
 	json_msg = json.dumps(send_to_all_msg)
 	sock.send(json_msg.encode())
+
+def send_to_follower(id):
+	index = next_index[id]
+	key = list(log[index].keys())[0]
+	if index == 0:
+		prev_term = 1
+	else:
+		prev_term = log[index-1]['term']
+
+	msg = {"src": my_id, "dst": id,
+		   "leader": my_id, "type": "append_entry",
+		   "key": key, "value": log[index][key],
+		   "term": log[index]['term'], "prev_index": index - 1,
+			"prev_term": prev_term, "lead_commit_index": commit_index}
+	json_msg = json.dumps(msg)
+	sock.send(json_msg.encode())
+
 
 while True:
 	ready = select.select([sock], [], [], 0.1)[0]
@@ -82,27 +115,49 @@ while True:
 				sock.send(return_msg_json.encode())
 				voting_hist.append(msg['term'])
 
+		# follower committed
+		if msg['type'] == 'append_ok':
+			next_index[msg['src']] = msg['index']
+			match_index[msg['src']] = msg['index']
+
+		if msg['type'] == "append_fail":
+			next_index[msg['src']] -= 1
+			send_to_follower(msg['src'])
+
 		# append_entry from leader, append to own and send back OK
 		if msg['type'] == 'append_entry':
-			if msg['prev'] == log_index[-1:]:
-				log_index.append(msg['key'] + " " + msg['value'])
-				log[msg['key']] = msg['value']
-
+			if msg['key'] == "":
+				past_beats.append(1)
+				current_leader = msg['src']
+				candidate = False
+			if msg['term'] < current_term:
+				# log is mismatched
 				return_msg = {"src": my_id, "dst": msg['src'],
-							  "leader": msg['src'], "type": "ok"}
+							  "leader": current_leader, "index": len(log) - 1,
+							  "type": "append_fail"}
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
-			else:
-				print('log is mismatched')
+				continue
+			elif len(log) - 1 < msg['prev_index'] or log[int(msg["prev_index"])]["term"] != current_term:
+				# log is mismatched
 				return_msg = {"src": my_id, "dst": msg['src'],
-							  "leader": msg['src'], "type": "log_behind"}
+							  "leader": current_leader, "index": len(log) - 1,
+							  "type": "append_fail"}
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
+				continue
+			elif len(log) - 1 >= int(msg['prev_index']) + 1:
+				if log[msg['prev_index'] + 1]["term"] != msg['term']:
+					log = log[0 : msg['prev_index'] + 1]
+			log.append({msg['key']: msg['value'], "term": msg['term']})
+			return_msg = {"src": my_id, "dst": msg['src'],
+						  "leader": current_leader, "index": len(log) - 1,
+						  "type": "append_ok"}
+			return_msg_json = json.dumps(return_msg)
+			sock.send(return_msg_json.encode())
 
-		# # followers log is not the same as yours
-		# if msg['type'] == "log_behind":
-		#
-
+			if msg['lead_commit_index'] > commit_index:
+				commit_index = min(msg['lead_commit_index'], len(log) - 1)
 
 		# if you get a vote, keep track
 		if msg['type'] == "vote" and candidate:
@@ -123,18 +178,10 @@ while True:
 			# you are leader, append to own log and send out to replicas
 			else:
 				# put into own log
-				log[msg['key']] = msg['value']
+				log.append({msg["key"]: msg["value"], "term": current_term})
 
 				# send out append entries
 				send_append_entry(msg)
-
-				log_index.append(msg['key'] + " " + msg['value'])
-
-				return_msg = {"src": my_id, "dst": msg['src'],
-							  "leader": my_id, "type": "ok",
-							  "MID": msg['MID']}
-			return_msg_json = json.dumps(return_msg)
-			sock.send(return_msg_json.encode())
 
 		# get message from client
 		if msg['type'] == 'get':
@@ -150,12 +197,24 @@ while True:
 							  "MID": msg['MID']}
 			# if leader, get the value and send back
 			else:
-				value = log.get(msg['key'], "")
+				value = kvstore.get(msg['key'], "")
 				return_msg = {"src": my_id, "dst": msg['src'],
 							  "leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
 			return_msg_json = json.dumps(return_msg)
 			sock.send(return_msg_json.encode())
 
+	if commit_index > applied_index:
+		applied_index += 1
+		key = list(log[applied_index].keys())[0]
+		val = log[applied_index][key]
+		kvstore[key] = val
+
+	elif leader:
+		for N in range(commit_index + 1, len(log)):
+			num_matched = 0
+			for id in replica_ids:
+				if match_index[id] >= N and log[N]["term"] == current_term:
+					commit_index = N
 
 	clock = time.time()
 	second_clock = time.time()
@@ -163,10 +222,19 @@ while True:
 	# code runs every 2 seconds
 	if clock - last > 2 and leader:
 		# send heartbeat
-		msg = {'src': my_id, 'dst': "FFFF", 'leader': my_id,
-			   'type': 'heartbeat', "term": current_term}
-		print(str(my_id) + " sent heartbeat")
-		sock.send(json.dumps(msg).encode())
+		for id in replica_ids:
+			rep_next_index = next_index[id]
+			if len(log) == 0:
+				term = 1
+			else:
+				term = log[rep_next_index]["term"]
+			msg = {"src": my_id, "dst": id,
+				   "leader": my_id, "type": "append_entry",
+				   "key": "", "value": "",
+				   "term": current_term, "prev_index": rep_next_index - 1,
+				   "prev_term": term, "lead_commit_index": commit_index}
+			print(str(my_id) + " sent heartbeat")
+			sock.send(json.dumps(msg).encode())
 		last = clock
 
 	# if have not received a heart beat... (empty list)
@@ -183,7 +251,7 @@ while True:
 		candidate = True
 
 		# majority is -1 given the leader failed
-		majority -= current_term
+		# majority -= current_term
 
 		# increment the current term
 		current_term += 1
@@ -194,8 +262,8 @@ while True:
 		# request votes from others
 		msg = {'src': my_id, 'dst': "FFFF", 'leader': "FFFF",
 			   'type': 'RequestVote', "term": current_term,
-			   "index": len(log_index) - 1,
-					   "prev": log_index[-1:]}
+			   "index": len(log) - 1,
+					   "prev": log[-1:]}
 		sock.send(json.dumps(msg).encode())
 		print("requesting votes")
 		election_timeout = False
