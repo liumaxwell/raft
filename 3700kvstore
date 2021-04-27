@@ -68,13 +68,14 @@ def send_append_entry(msg):
 def send_to_follower(msg):
 	index = next_index[msg['src']]
 	the_key = ""
-	for key in list(log[applied_index].keys()):
-		if key != 'term' and key != 'client_ID' and key != 'MID':
-			the_key = key
 	if index == 0:
 		prev_term = 1
 	else:
 		prev_term = log[index-1]['term']
+
+	for key in list(log[index - 1].keys()):
+		if key != 'term' and key != 'client_ID' and key != 'MID':
+			the_key = key
 
 	msg = {"src": my_id, "dst": id,
 		   "leader": my_id, "type": "append_entry",
