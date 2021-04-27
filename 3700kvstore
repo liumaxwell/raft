@@ -263,6 +263,8 @@ while True:
 			print(str(my_id) + " sent heartbeat")
 			sock.send(json.dumps(msg).encode())
 		last = clock
+	if msg["type"] == "redirect":
+		print("TEST ------------")
 
 	# if have not received a heart beat... (empty list)
 	if second_clock - last_other > random.randint(4,8) and not leader:
