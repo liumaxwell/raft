@@ -73,7 +73,7 @@ def send_to_follower(msg):
 	else:
 		prev_term = log[index-1]['term']
 
-	for key in list(log[index - 1].keys()):
+	for key in list(log[index].keys()):
 		if key != 'term' and key != 'client_ID' and key != 'MID':
 			the_key = key
 
