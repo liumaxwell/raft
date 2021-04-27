@@ -99,6 +99,10 @@ while True:
 		for id in replica_ids:
 			next_index[id] = len(log)
 			match_index[id] = 0
+			msg = {"src": my_id, "dst": id,
+			   "leader": my_id, "type": "append_entry",
+			   "key": "", "value": ""}
+			sock.send(json.dumps(msg).encode())
 
 	if sock in ready:
 		msg_raw = sock.recv(32768)
