@@ -149,6 +149,9 @@ while True:
 				"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
+		for msg in appends:
+			if time.time() - msg["time"] >= .01:
+				send_to_follower(msg)
 
 	# if have not received a heart beat... (empty list)
 	# if not leader and second_clock - last_other > r:
