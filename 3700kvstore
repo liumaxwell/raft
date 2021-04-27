@@ -131,12 +131,9 @@ while True:
 			send_to_follower(msg)
 
 		# append_entry from leader, append to own and send back OK
-		if msg['type'] == 'append_entry':
-			if (msg['term'] > current_term):
-				current_term = msg['term']
-				current_leader = msg['src']
-			else:
-				current_leader = msg['leader']
+		if not leader and msg['type'] == 'append_entry':
+			current_term = msg['term']
+			current_leader = msg['leader']
 			candidate = False
 			if msg['key'] == "":
 				past_beats.append(1)
@@ -276,7 +273,6 @@ while True:
 	if second_clock - last_other > random.randint(4,8) and not leader:
 		# if no heartbeats received.. then begin election timeout
 		if len(past_beats) == 0:
-			print("election started")
 			election_timeout = True
 			current_leader = ""
 		else:
