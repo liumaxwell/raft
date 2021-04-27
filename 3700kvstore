@@ -42,11 +42,10 @@ for id in replica_ids:
 	match_index[id] = 0
 
 def up_to_date(log):
-	print("up_to")
 	if log['term'] > current_term:
 		return True
 	elif log['term'] == current_term:
-		print("reached")
+		print(log['term'])
 		return log['index'] >= len(log) - 1
 	else:
 		return False
