@@ -232,12 +232,12 @@ while True:
 		elif msg['type'] == 'put':
 			# if there is no current leader, fail and make client retry until leader is found
 			if current_leader == "":
-				print("FFFF from put")
-				return_msg = {"src": my_id, "dst": msg['src'],
-							  "leader": "FFFF", "type": "redirect",
-							  "MID": msg['MID']}
-				return_msg_json = json.dumps(return_msg)
-				sock.send(return_msg_json.encode())
+				# print("FFFF from put")
+				# return_msg = {"src": my_id, "dst": msg['src'],
+				# 			  "leader": "FFFF", "type": "redirect",
+				# 			  "MID": msg['MID']}
+				# return_msg_json = json.dumps(return_msg)
+				# sock.send(return_msg_json.encode())
 			# redirect to leader
 			elif not leader:
 				return_msg = {"src": my_id, "dst": msg['src'],
@@ -260,10 +260,10 @@ while True:
 		elif msg['type'] == 'get':
 			# if no current leader, make client retry
 			if current_leader == "":
-				print("FFFF from get")
-				return_msg = {"src": my_id, "dst": msg['src'],
-							  "leader": "FFFF", "type": "redirect",
-							  "MID": msg['MID']}
+				# print("FFFF from get")
+				# return_msg = {"src": my_id, "dst": msg['src'],
+				# 			  "leader": "FFFF", "type": "redirect",
+				# 			  "MID": msg['MID']}
 			# redirect to leader
 			elif not leader:
 				return_msg = {"src": my_id, "dst": msg['src'],
