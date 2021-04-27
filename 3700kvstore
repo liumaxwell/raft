@@ -275,8 +275,7 @@ while True:
 			# you are leader, append to own log and send out to replicas
 			else:
 				if not leader_ready:
-					puts_cache.append({msg["key"]: msg["value"], "term": current_term,
-					"client_ID": msg['src'], "MID": msg['MID']})
+					puts_cache.append(msg)
 				else:
 					# put into own log
 					log.append({msg["key"]: msg["value"], "term": current_term,
@@ -297,8 +296,7 @@ while True:
 			else:
 				value = kvstore.get(msg['key'], "")
 				if not leader_ready:
-					gets_cache.append({"src": my_id, "dst": msg['src'],
-					"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value})
+					gets_cache.append(msg)
 				else:
 					value = kvstore.get(msg['key'], "")
 					return_msg = {"src": my_id, "dst": msg['src'],
