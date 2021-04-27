@@ -276,7 +276,7 @@ while True:
 	if second_clock - last_other > random.randint(4,8) and not leader:
 		# if no heartbeats received.. then begin election timeout
 		if len(past_beats) == 0:
-		    print("election started")
+			print("election started")
 			election_timeout = True
 			current_leader = ""
 		else:
