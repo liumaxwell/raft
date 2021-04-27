@@ -240,7 +240,7 @@ while True:
 		if msg['type'] == 'append_ok':
 			next_index[msg['src']] += 1
 			match_index[msg['src']] = next_index[msg['src']] - 1
-			messages.pop(msg["MID"] + "AE" + str(msg["src"]))
+			messages.pop(msg["MID"] + "AE" + str(msg["src"]), "")
 
 		if msg['type'] == "append_fail":
 			next_index[msg['src']] -= 1
