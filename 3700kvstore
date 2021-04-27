@@ -138,6 +138,7 @@ while True:
 							  "type": "append_fail"}
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
+				print("term mismatched")
 				continue
 			elif len(log) - 1 < msg['prev_index'] or \
 					log[int(msg["prev_index"])]["term"] != current_term:
@@ -147,6 +148,8 @@ while True:
 							  "type": "append_fail"}
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
+				print("log index mismatched")
+
 				continue
 			elif len(log) - 1 >= int(msg['prev_index']) + 1:
 				if log[msg['prev_index'] + 1]["term"] != msg['term']:
