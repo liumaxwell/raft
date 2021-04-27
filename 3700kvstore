@@ -174,7 +174,8 @@ while True:
 		msg_raw = sock.recv(32768)
 		if len(msg_raw) == 0:
 			continue
-		print(puts - oks)
+		if leader:
+			print(puts - oks)
 		msg = json.loads(msg_raw)
 
 		# if you get a request vote, vote for them if you have not yet voted in this term
