@@ -126,6 +126,7 @@ while True:
 	clock = time.time()
 	second_clock = time.time()
 	if leader:
+		print(messages)
 		resend_unacked()
 		for N in range(commit_index + 1, len(log)):
 			num_matched = 0
