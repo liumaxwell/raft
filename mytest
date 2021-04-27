@@ -1,6 +1,6 @@
 {
     "lifetime": 10,
-    "replicas": 2,
+    "replicas": 3,
     "requests": 10,
     "mix" : 0,
     "events" : [{"type": "kill_leader", "time": 3},
