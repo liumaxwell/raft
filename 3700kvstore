@@ -94,9 +94,9 @@ def reply_false(msg):
 	return_msg_json = json.dumps(return_msg)
 	sock.send(return_msg_json.encode())
 
-def reply_true(msg):
+def reply_true(msg, index):
 	return_msg = {"src": my_id, "dst": msg['src'], "leader": msg['src'],
-	"type": "append_ok", "client_ID": msg['src'], "MID": msg["MID"]}
+	"type": "append_ok", "client_ID": msg['src'], "MID": msg["MID"], "index": index}
 	return_msg_json = json.dumps(return_msg)
 	sock.send(return_msg_json.encode())
 
@@ -194,8 +194,8 @@ while True:
 
 		# follower committed
 		if msg['type'] == 'append_ok':
-			next_index[msg['src']] += 1
-			match_index[msg['src']] = next_index[msg['src']] - 1
+			next_index[msg['src']] = msg["index"] + 1
+			match_index[msg['src']] = msg["index"]
 
 		if msg['type'] == "append_fail":
 			next_index[msg['src']] -= 1
@@ -216,7 +216,7 @@ while True:
 			elif msg['prev_index'] == -1:
 				log.append({msg['key']: msg['value'], "term": msg['term'],
 				"client_ID": msg['src'], "MID": msg['MID']})
-				reply_true(msg)
+				reply_true(msg, -1)
 			elif log_idx < msg['prev_index'] or \
 					log[int(msg["prev_index"])]["term"] != msg['prev_term']:
 				reply_false(msg)
@@ -224,13 +224,13 @@ while True:
 			elif log_idx == msg["prev_index"]:
 				log.append({msg['key']: msg['value'], "term": msg['term'], 
 				"client_ID": msg['src'], "MID": msg['MID']})
-				reply_true(msg)
+				reply_true(msg, log_idx)
 			elif log_idx > msg['prev_index']:
 				if log[msg['prev_index'] + 1]["term"] != msg['term']:
 					log = log[0 : msg['prev_index']]
 				log.append({msg['key']: msg['value'], "term": msg['term'], 
 				"client_ID": msg['src'], "MID": msg['MID']})
-				reply_true(msg)
+				reply_true(msg, len(log) - 1)
 
 			if msg['lead_commit_index'] > commit_index:
 				commit_index = min(msg['lead_commit_index'], len(log) - 1)
