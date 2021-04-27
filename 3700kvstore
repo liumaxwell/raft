@@ -42,9 +42,11 @@ for id in replica_ids:
 	match_index[id] = 0
 
 def up_to_date(log):
+	print("up_to")
 	if log['term'] > current_term:
 		return True
 	elif log['term'] == current_term:
+		print("reached")
 		return log['index'] >= len(log) - 1
 	else:
 		return False
@@ -127,6 +129,7 @@ while True:
 		# append_entry from leader, append to own and send back OK
 		if msg['type'] == 'append_entry':
 			current_leader = msg['leader']
+			candidate = False
 			if msg['key'] == "":
 				past_beats.append(1)
 				candidate = False
