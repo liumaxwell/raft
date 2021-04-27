@@ -73,9 +73,8 @@ def send_append_entry(msg):
 		appends.append(msg)
 		sock.send(json.dumps(msg).encode())
 
-def send_to_follower(src, dst, msg):
-	print(next_index)
-	index = next_index[src]
+def send_to_follower(msg):
+	index = next_index[msg["src"]]
 	the_key = ""
 	if index == 0:
 		prev_term = 1
@@ -148,10 +147,10 @@ while True:
 				"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
-		for msg in appends:
-			print(time.time() - msg["time"])
-			if time.time() - msg["time"] >= .01:
-				send_to_follower(msg["dst"], msg["src"], msg)
+		# for msg in appends:
+		# 	print(time.time() - msg["time"])
+		# 	if time.time() - msg["time"] >= .01:
+		# 		send_to_follower(msg["dst"], msg["src"], msg)
 
 	# if have not received a heart beat... (empty list)
 	# if not leader and second_clock - last_other > r:
@@ -228,7 +227,7 @@ while True:
 
 		if msg['type'] == "append_fail":
 			next_index[msg['src']] -= 1
-			send_to_follower(msg["src"], msg["dst"], msg)
+			send_to_follower(msg)
 
 		# append_entry from leader, append to own and send back OK
 		if not leader and msg['type'] == 'append_entry':
