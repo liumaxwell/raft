@@ -188,7 +188,7 @@ while True:
 		# follower committed
 		if msg['type'] == 'append_ok':
 			next_index[msg['src']] += 1
-			match_index[msg['src']] += 1
+			match_index[msg['src']] = next_index[msg['src']] - 1
 
 		if msg['type'] == "append_fail":
 			next_index[msg['src']] -= 1
@@ -209,8 +209,8 @@ while True:
 				log.append({msg['key']: msg['value'], "term": msg['term'],
 				"client_ID": msg['src'], "MID": msg['MID']})
 				reply_true(msg)
-			elif len(log) - 1 < msg['prev_index']:
-					#log[int(msg["prev_index"])]["term"] != msg['prev_term']:
+			elif len(log) - 1 < msg['prev_index'] or \
+					log[int(msg["prev_index"])]["term"] != msg['prev_term']:
 				reply_false(msg)
 				print("log index mismatched")
 			elif len(log) - 1 >= int(msg['prev_index']):
