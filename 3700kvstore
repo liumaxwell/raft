@@ -224,6 +224,14 @@ while True:
 			return_msg_json = json.dumps(return_msg)
 			sock.send(return_msg_json.encode())
 
+	elif leader:
+		for N in range(commit_index + 1, len(log)):
+			num_matched = 0
+			for id in replica_ids:
+				if match_index[id] >= N and log[N]["term"] == current_term:
+					commit_index = N
+	
+
 	if commit_index > applied_index:
 		applied_index += 1
 		the_key = ""
@@ -236,13 +244,6 @@ while True:
 					  "leader": current_leader, "type": "ok", "MID": log[applied_index]['MID']}
 		return_msg_json = json.dumps(return_msg)
 		sock.send(return_msg_json.encode())
-
-	elif leader:
-		for N in range(commit_index + 1, len(log)):
-			num_matched = 0
-			for id in replica_ids:
-				if match_index[id] >= N and log[N]["term"] == current_term:
-					commit_index = N
 
 	clock = time.time()
 	second_clock = time.time()
