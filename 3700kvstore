@@ -65,7 +65,7 @@ def send_append_entry(msg):
 			term = 1
 		else:
 			term = log[rep_next_index - 1]["term"]
-		print("SENDING TO %s: %s  at %f" % (the_id, msg["MID"], time.time()))
+		# print("SENDING TO %s: %s  at %f" % (the_id, msg["MID"], time.time()))
 		msg = {"src": my_id, "dst": the_id,
 			"leader": my_id, "type": "append_entry",
 			"key": msg['key'], "value": msg['value'],
@@ -241,7 +241,7 @@ while True:
 
 		# follower committed
 		if msg['type'] == 'append_ok':
-			print("GOT OK FROM %s: %s   at %f" % (msg["src"], msg["MID"], time.time()))
+			# print("GOT OK FROM %s: %s   at %f" % (msg["src"], msg["MID"], time.time()))
 			next_index[msg['src']] += 1
 			match_index[msg['src']] = next_index[msg['src']] - 1
 			messages.pop(msg["MID"] + "AE" + str(msg["src"]), "")
