@@ -193,7 +193,6 @@ while True:
 				sock.send(return_msg_json.encode())
 			# you are leader, append to own log and send out to replicas
 			else:
-				puts.append(msg["MID"])
 				# put into own log
 				log.append({msg["key"]: msg["value"], "term": current_term,
 							"client_ID": msg['src'], "MID": msg['MID']})
@@ -241,7 +240,6 @@ while True:
 		kvstore[the_key] = val
 		return_msg = {"src": my_id, "dst": log[applied_index]['client_ID'],
 					  "leader": current_leader, "type": "ok", "MID": log[applied_index]['MID']}
-		oks.append(log[applied_index]["MID"])
 		return_msg_json = json.dumps(return_msg)
 		sock.send(return_msg_json.encode())
 
