@@ -224,10 +224,11 @@ while True:
 	if commit_index > applied_index:
 		applied_index += 1
 		key = list(log[applied_index].keys())[0]
+		if key == 'term':
+			print(log)
+			print("key kv store append")
 		val = log[applied_index][key]
-		print("apply to KVSTORE")
 		kvstore[key] = val
-		print(kvstore)
 		# client ID, MID
 		return_msg = {"src": my_id, "dst": log[applied_index]['client_ID'],
 					  "leader": current_leader, "type": "ok", "MID": log[applied_index]['MID']}
