@@ -100,6 +100,8 @@ def reply_true(msg):
 	sock.send(return_msg_json.encode())
 
 while True:
+	clock = time.time()
+	second_clock = time.time()
 	if leader:
 		for N in range(commit_index + 1, len(log)):
 			num_matched = 0
@@ -126,6 +128,17 @@ while True:
 				sock.send(json.dumps(msg).encode())
 			last = clock
 
+
+	# if have not received a heart beat... (empty list)
+	if not leader and second_clock - last_other > random.randint(4,8):
+		# if no heartbeats received.. then begin election timeout
+		if len(past_beats) == 0:
+			election_timeout = True
+			current_leader = ""
+		else:
+			past_beats = []
+		last_other = second_clock
+
 	while commit_index > applied_index:
 		applied_index += 1
 		the_key = ""
@@ -139,9 +152,8 @@ while True:
 						"leader": current_leader, "type": "ok", "MID": log[applied_index]['MID']}
 			return_msg_json = json.dumps(return_msg)
 			sock.send(return_msg_json.encode())
-	ready = select.select([sock], [], [], 0.1)[0]
 
-	if votes >= majority and candidate:
+	if candidate and votes >= majority:
 		print(str(my_id) + " got enough votes")
 		current_leader = my_id
 		leader = True
@@ -156,6 +168,7 @@ while True:
 			   "prev_term": current_term, "lead_commit_index": commit_index}
 			sock.send(json.dumps(msg).encode())
 
+	ready = select.select([sock], [], [], 0.1)[0]
 	if sock in ready:
 		msg_raw = sock.recv(32768)
 
@@ -260,19 +273,6 @@ while True:
 							  "leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
 			return_msg_json = json.dumps(return_msg)
 			sock.send(return_msg_json.encode())
-
-	clock = time.time()
-	second_clock = time.time()
-
-	# if have not received a heart beat... (empty list)
-	if second_clock - last_other > random.randint(4,8) and not leader:
-		# if no heartbeats received.. then begin election timeout
-		if len(past_beats) == 0:
-			election_timeout = True
-			current_leader = ""
-		else:
-			past_beats = []
-		last_other = second_clock
 
 	if election_timeout:
 		# transition to candidate
