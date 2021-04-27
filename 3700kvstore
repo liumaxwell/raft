@@ -133,7 +133,6 @@ while True:
 			last = clock
 		if not leader_ready and commit_index >= no_op_index:
 			leader_ready = True
-
 			for msg in puts_cache:
 				log.append({msg["key"]: msg["value"], "term": current_term,
 							"client_ID": msg['src'], "MID": msg['MID']})
@@ -185,13 +184,13 @@ while True:
 			prev_term = 1
 		else:
 			prev_term = log[log_len - 1]['term']
-		log.append({"no-op": "", "term": current_term, "client_ID": "no-op", "MID": "no-op"})
 		msg = {"src": my_id, "dst": "FFFF",
 			"leader": my_id, "type": "append_entry",
 			"key": "no-op", "value": "",
 			"term": current_term, "prev_index": log_len - 1,
 			"prev_term": prev_term, "lead_commit_index": commit_index,
 			"client_ID": "no-op", "MID": "no-op"}
+		log.append({"no-op": "", "term": current_term, "client_ID": "no-op", "MID": "no-op"})
 
 	ready = select.select([sock], [], [], 0.1)[0]
 	if sock in ready:
