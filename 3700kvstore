@@ -224,7 +224,7 @@ while True:
 				commit_index = min(msg['lead_commit_index'], len(log) - 1)
 
 		# if you get a vote, keep track
-	    if msg['type'] == "vote" and candidate:
+		if msg['type'] == "vote" and candidate:
 			votes += 1
 
 		# if you get a put message
