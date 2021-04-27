@@ -233,7 +233,7 @@ while True:
 		kvstore[key] = val
 		# client ID, MID
 		return_msg = {"src": my_id, "dst": log[applied_index]['client_ID'],
-					  "leader": my_id, "type": "ok", "MID": log[applied_index]['MID']}
+					  "leader": current_leader, "type": "ok", "MID": log[applied_index]['MID']}
 		return_msg_json = json.dumps(return_msg)
 		sock.send(return_msg_json.encode())
 
