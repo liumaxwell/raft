@@ -229,7 +229,7 @@ while True:
 				if match_index[the_id] >= N and log[N]["term"] == current_term:
 					commit_index = N
 	
-	if commit_index > applied_index:
+	while commit_index > applied_index:
 		applied_index += 1
 		the_key = ""
 		for key in list(log[applied_index].keys()):
