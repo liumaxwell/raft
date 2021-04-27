@@ -27,7 +27,6 @@ votes = 0
 majority = math.ceil(num_total / 2) + 1
 leader_ready = False
 no_op_index = 0
-
 puts_cache = {}
 gets_cache = {}
 # r = random.randint(4, 8)
@@ -271,7 +270,7 @@ while True:
 				sock.send(return_msg_json.encode())
 			# you are leader, append to own log and send out to replicas
 			else:
-				if cache:
+				if not leader_ready:
 					puts_cache.append({msg["key"]: msg["value"], "term": current_term,
 					"client_ID": msg['src'], "MID": msg['MID']})
 				else:
@@ -293,7 +292,7 @@ while True:
 			# if leader, get the value and send back
 			else:
 				value = kvstore.get(msg['key'], "")
-				if cache:
+				if not leader_ready:
 					gets_cache.append({"src": my_id, "dst": msg['src'],
 					"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value})
 				else:
