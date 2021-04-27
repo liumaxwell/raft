@@ -2,15 +2,15 @@
     "lifetime": 10,
     "replicas": 3,
     "requests": 10,
-    "mix" : 0,
-    "events" : [{"type": "kill_leader", "time": 3},
-	        {"type": "kill_leader", "time": 5}],
+    "mix" : 0.2,
+    "drops" : 0.2,
     "tests" : {
         "benchmarks" : {
-            "total_msgs"     : [1800, 4000, 5000],
-            "failures"       : [1, 4, 10],
-            "duplicates"     : [0, 2, 10],
-            "median_latency" : [0.00015, 0.005, 0.05]
+            "total_msgs"     : [2200, 4500, 5500],
+            "failures"       : [0, 1, 2],
+            "duplicates"     : [0, 2, 5],
+            "median_latency" : [0.001, 0.005, 0.05]
         }
     }
 }
+
