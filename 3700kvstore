@@ -155,9 +155,9 @@ while True:
 		val = log[applied_index][the_key]
 		kvstore[the_key] = val
 		if leader:
-			# acc += 1
+			acc += 1
 			# oks.append(log[applied_index]['MID'])
-			# print(str(my_id) + " " + str(acc))
+			print(str(my_id) + " " + str(acc))
 			return_msg = {"src": my_id, "dst": log[applied_index]['client_ID'],
 						"leader": my_id, "type": "ok", "MID": log[applied_index]['MID']}
 			return_msg_json = json.dumps(return_msg)
