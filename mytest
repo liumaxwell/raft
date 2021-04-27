@@ -3,7 +3,7 @@
     "replicas": 3,
     "requests": 10,
     "mix" : 0.2,
-    "drops" : 0.4,
+    "drops" : 0.2,
     "tests" : {
         "benchmarks" : {
             "total_msgs"     : [2200, 4500, 5500],
