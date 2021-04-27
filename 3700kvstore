@@ -194,7 +194,6 @@ while True:
 		if not leader and msg['type'] == 'append_entry':
 			current_term = msg['term']
 			current_leader = msg['leader']
-			print(msg["leader"])
 			candidate = False
 			log_idx = len(log) - 1
 			if msg['key'] == "":
@@ -261,7 +260,7 @@ while True:
 			# if no current leader, make client retry
 			if current_leader == "":
 				return_msg = {"src": my_id, "dst": msg['src'],
-							  "leader": "FFFF", "type": "fail",
+							  "leader": "FFFA", "type": "fail",
 							  "MID": msg['MID']}
 			# redirect to leader
 			elif not leader:
@@ -279,10 +278,8 @@ while True:
 	if election_timeout:
 		# transition to candidate
 		candidate = True
-
 		# increment the current term
 		current_term += 1
-
 		# vote for yourself
 		votes = 1
 		# request votes from others
