@@ -211,7 +211,7 @@ while True:
 				reply_true(msg)
 			elif len(log) - 1 < msg['prev_index'] or \
 					log[int(msg["prev_index"])]["term"] != msg['prev_term']:
-				reply_false()
+				reply_false(msg)
 				print("log index mismatched")
 			elif len(log) - 1 >= int(msg['prev_index']):
 				if log[msg['prev_index']]["term"] != msg['term']:
@@ -224,7 +224,7 @@ while True:
 				commit_index = min(msg['lead_commit_index'], len(log) - 1)
 
 		# if you get a vote, keep track
-		if msg['type'] == "vote" and candidate:
+	    if msg['type'] == "vote" and candidate:
 			votes += 1
 
 		# if you get a put message
@@ -253,7 +253,7 @@ while True:
 				send_append_entry(msg)
 
 		if msg["type"] == "redirect":
-			print("TEST ------------")
+			print("REDIRECT ------------")
 		# get message from client
 		if msg['type'] == 'get':
 			# if no current leader, make client retry
