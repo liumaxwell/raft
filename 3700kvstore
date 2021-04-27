@@ -25,13 +25,12 @@ leader = False
 candidate = False
 votes = 0
 majority = math.ceil(num_total / 2) + 1
+leader_ready = False
+no_op_index = 0
 # r = random.randint(4, 8)
 
 most_recent_leader = ""
 voting_hist = []
-
-# puts = []
-# oks = []
 
 log = []
 kvstore = {}
@@ -102,13 +101,6 @@ def reply_true(msg):
 	return_msg_json = json.dumps(return_msg)
 	sock.send(return_msg_json.encode())
 
-# def print_diff():
-# 	out = []
-# 	for put in puts:
-# 		if put not in oks:
-# 			out.append(puts)
-# 	print(out)
-
 while True:
 	clock = time.time()
 	second_clock = time.time()
@@ -137,6 +129,8 @@ while True:
 				print(str(my_id) + " sent heartbeat")
 				sock.send(json.dumps(msg).encode())
 			last = clock
+		if not leader_ready and commit_index >= no_op_index:
+			leader_ready = True
 
 	# if have not received a heart beat... (empty list)
 	# if not leader and second_clock - last_other > r:
@@ -158,7 +152,6 @@ while True:
 		val = log[applied_index][the_key]
 		kvstore[the_key] = val
 		if leader:
-			# oks.append(log[applied_index]['MID'])
 			return_msg = {"src": my_id, "dst": log[applied_index]['client_ID'],
 						"leader": my_id, "type": "ok", "MID": log[applied_index]['MID']}
 			return_msg_json = json.dumps(return_msg)
@@ -169,9 +162,23 @@ while True:
 		most_recent_leader = my_id
 		leader = True
 		candidate = False
+		log_len = len(log)
+		leader_ready = False
+		no_op_index = log_len
 		for the_id in replica_ids:
-			next_index[the_id] = len(log)
+			next_index[the_id] = log_len
 			match_index[the_id] = -1
+		if log_len == 0:
+			prev_term = 1
+		else:
+			prev_term = log[log_len - 1]['term']
+		log.append("no-op": "", "term": current_term, "client_ID": "no-op", "MID": "no-op")
+		msg = {"src": my_id, "dst": "FFFF",
+			"leader": my_id, "type": "append_entry",
+			"key": "no-op", "value": "",
+			"term": current_term, "prev_index": log_len - 1,
+			"prev_term": prev_term, "lead_commit_index": commit_index,
+			"client_ID": "no-op", "MID": "no-op"}
 
 	ready = select.select([sock], [], [], 0.1)[0]
 	if sock in ready:
@@ -250,7 +257,6 @@ while True:
 				sock.send(return_msg_json.encode())
 			# you are leader, append to own log and send out to replicas
 			else:
-				# puts.append(msg["MID"])
 				# put into own log
 				log.append({msg["key"]: msg["value"], "term": current_term,
 							"client_ID": msg['src'], "MID": msg['MID']})
