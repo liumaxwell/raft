@@ -115,7 +115,7 @@ def reply_true(msg):
 
 def resend_unacked():
 	for the_id in replica_ids:
-		keys = [x for x in messages if x[16:18] == "AE" + str(the_id) and time.time() - messages[x]["time"] > 1]
+		keys = [x for x in messages if x[16:18] == "AE" + str(the_id) and time.time() - messages[x]["time"] > .1]
 		for key in keys:
 			messages["key"]["time"] = time.time()
 			msg = messages["key"]
