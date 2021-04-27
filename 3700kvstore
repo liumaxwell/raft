@@ -30,8 +30,7 @@ no_op_index = 0
 puts_cache = []
 gets_cache = []
 # r = random.randint(4, 8)
-
-appends = []
+messages = {}
 
 most_recent_leader = ""
 voting_hist = []
@@ -70,19 +69,16 @@ def send_append_entry(msg):
 			"term": current_term, "prev_index": rep_next_index - 1,
 			"prev_term": term, "lead_commit_index": commit_index,
 			"client_ID": msg['src'], "MID": msg["MID"], "time": time.time()}
-		appends.insert(0, msg)
 		sock.send(json.dumps(msg).encode())
 
-def resend_to_follower(i):
-	msg = appends.pop(i)
-	msg["time"] = time.time()
-	appends.insert(0, msg)
-	json_msg = json.dumps(msg)
-	sock.send(json_msg.encode())
+# def resend_to_follower(i):
+# 	msg = appends.pop(i)
+# 	msg["time"] = time.time()
+# 	appends.insert(0, msg)
+# 	json_msg = json.dumps(msg)
+# 	sock.send(json_msg.encode())
 
 def send_to_follower(dst, msg):
-	if msg in appends:
-		appends.remove(msg)
 	index = next_index[dst]
 	the_key = ""
 	if index == 0:
@@ -100,7 +96,6 @@ def send_to_follower(dst, msg):
 		   "term": current_term, "prev_index": index - 1,
 		   "prev_term": prev_term, "lead_commit_index": commit_index,
 		   "client_ID": msg['client_ID'], "MID": msg["MID"], "time": time.time()}
-	appends.insert(0, msg)
 	json_msg = json.dumps(msg)
 	sock.send(json_msg.encode())
 
@@ -156,11 +151,6 @@ while True:
 				"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
-		for i in range(len(appends) - 1, -1, -1):
-			msg = appends[i]
-			if time.time() - msg["time"] >= 1:
-				print(msg)
-				resend_to_follower(i)
 
 	# if have not received a heart beat... (empty list)
 	# if not leader and second_clock - last_other > r:
@@ -182,7 +172,6 @@ while True:
 		val = log[applied_index][the_key]
 		kvstore[the_key] = val
 		if leader and log[applied_index]['client_ID'] != "no-op":
-			appends = [x for x in appends if x["prev_index"] + 1 >= applied_index]
 			return_msg = {"src": my_id, "dst": log[applied_index]['client_ID'],
 						"leader": my_id, "type": "ok", "MID": log[applied_index]['MID']}
 			return_msg_json = json.dumps(return_msg)
@@ -210,7 +199,6 @@ while True:
 				"term": current_term, "prev_index": log_len - 1,
 				"prev_term": prev_term, "lead_commit_index": commit_index,
 				"client_ID": "no-op", "MID": "no-op", "time": time.time()}
-			#appends.insert(0, msg)
 			sock.send(json.dumps(msg))
 		log.append({"no-op": "", "term": current_term, "client_ID": "no-op", "MID": "no-op"})
 
@@ -220,6 +208,8 @@ while True:
 		if len(msg_raw) == 0:
 			continue
 		msg = json.loads(msg_raw)
+
+		messages[msg["MID"]] = msg
 
 		# if you get a request vote, vote for them if you have not yet voted in this term
 		if msg['type'] == "RequestVote":
