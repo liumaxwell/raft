@@ -36,9 +36,6 @@ applied_index = -1
 next_index = {}
 match_index = {}
 
-puts = []
-oks = []
-
 for the_id in replica_ids:
 	next_index[the_id] = 0
 	match_index[the_id] = 0
@@ -102,13 +99,6 @@ def reply_true(msg):
 	return_msg_json = json.dumps(return_msg)
 	sock.send(return_msg_json.encode())
 
-def check_puts():
-	out = []
-	for the_id in puts:
-		if the_id not in oks:
-			out.append(the_id)
-	print(out)
-
 while True:
 	ready = select.select([sock], [], [], 0.1)[0]
 
@@ -132,8 +122,6 @@ while True:
 
 		if len(msg_raw) == 0: continue
 		msg = json.loads(msg_raw)
-		if leader:
-			check_puts()
 
 		# if you get a request vote, vote for them if you have not yet voted in this term
 		if msg['type'] == "RequestVote":
