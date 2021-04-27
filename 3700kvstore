@@ -172,7 +172,7 @@ while True:
 			prev_term = 1
 		else:
 			prev_term = log[log_len - 1]['term']
-		log.append("no-op": "", "term": current_term, "client_ID": "no-op", "MID": "no-op")
+		log.append({"no-op": "", "term": current_term, "client_ID": "no-op", "MID": "no-op"})
 		msg = {"src": my_id, "dst": "FFFF",
 			"leader": my_id, "type": "append_entry",
 			"key": "no-op", "value": "",
