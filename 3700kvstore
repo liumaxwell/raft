@@ -75,6 +75,7 @@ def send_append_entry(msg):
 			sock.send(json.dumps(msg).encode())
 
 def send_to_follower(msg):
+	print(next_index)
 	index = next_index[msg['src']]
 	the_key = ""
 	if index == 0:
