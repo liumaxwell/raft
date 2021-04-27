@@ -209,7 +209,7 @@ while True:
 				"term": current_term, "prev_index": log_len - 1,
 				"prev_term": prev_term, "lead_commit_index": commit_index,
 				"client_ID": "no-op", "MID": "no-op", "time": time.time()}
-			appends.insert(0, msg)
+			#appends.insert(0, msg)
 			sock.send(json.dumps(msg))
 		log.append({"no-op": "", "term": current_term, "client_ID": "no-op", "MID": "no-op"})
 
