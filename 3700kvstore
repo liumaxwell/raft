@@ -100,6 +100,19 @@ def reply_true(msg):
 	sock.send(return_msg_json.encode())
 
 while True:
+	while commit_index > applied_index:
+		applied_index += 1
+		the_key = ""
+		for key in list(log[applied_index].keys()):
+			if key != 'term' and key != 'client_ID' and key != 'MID':
+				the_key = key
+		val = log[applied_index][the_key]
+		kvstore[the_key] = val
+		if leader:
+			return_msg = {"src": my_id, "dst": log[applied_index]['client_ID'],
+						"leader": current_leader, "type": "ok", "MID": log[applied_index]['MID']}
+			return_msg_json = json.dumps(return_msg)
+			sock.send(return_msg_json.encode())
 	ready = select.select([sock], [], [], 0.1)[0]
 
 	if votes >= majority and candidate:
@@ -230,20 +243,6 @@ while True:
 					num_matched += 1
 			if num_matched >= majority:
 				commit_index = N
-	
-	while commit_index > applied_index:
-		applied_index += 1
-		the_key = ""
-		for key in list(log[applied_index].keys()):
-			if key != 'term' and key != 'client_ID' and key != 'MID':
-				the_key = key
-		val = log[applied_index][the_key]
-		kvstore[the_key] = val
-		if leader:
-			return_msg = {"src": my_id, "dst": log[applied_index]['client_ID'],
-						"leader": current_leader, "type": "ok", "MID": log[applied_index]['MID']}
-			return_msg_json = json.dumps(return_msg)
-			sock.send(return_msg_json.encode())
 
 	clock = time.time()
 	second_clock = time.time()
