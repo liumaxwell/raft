@@ -249,7 +249,6 @@ while True:
 				# put into own log
 				log.append({msg["key"]: msg["value"], "term": current_term,
 							"client_ID": msg['src'], "MID": msg['MID']})
-
 				# send out append entries
 				send_append_entry(msg)
 
