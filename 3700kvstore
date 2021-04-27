@@ -77,7 +77,7 @@ def send_to_follower(id):
 	msg = {"src": my_id, "dst": id,
 		   "leader": my_id, "type": "append_entry",
 		   "key": key, "value": log[index][key],
-		   "term": log[index]['term'], "prev_index": index - 1,
+		   "term": log[index]['term'], "prev_index": 0 if index == 0 else index - 1,
 			"prev_term": prev_term, "lead_commit_index": commit_index}
 	json_msg = json.dumps(msg)
 	sock.send(json_msg.encode())
@@ -138,7 +138,8 @@ while True:
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
 				continue
-			elif len(log) - 1 < msg['prev_index'] or log[int(msg["prev_index"])]["term"] != current_term:
+			elif len(log) - 1 < msg['prev_index'] or \
+					log[int(msg["prev_index"])]["term"] != current_term:
 				# log is mismatched
 				return_msg = {"src": my_id, "dst": msg['src'],
 							  "leader": current_leader, "index": len(log) - 1,
