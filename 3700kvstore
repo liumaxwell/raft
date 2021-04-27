@@ -59,7 +59,7 @@ def up_to_date(msg):
 
 def send_append_entry(msg):
 	if leader_ready:
-		print("LEADER %s: %d" % (my_id, time.time() - leader_ready))
+		print("LEADER %s: %f" % (my_id, time.time() - leader_ready))
 	for the_id in replica_ids:
 		rep_next_index = next_index[the_id]
 		if len(log) == 0:
