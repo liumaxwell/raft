@@ -169,7 +169,7 @@ while True:
 	ready = select.select([sock], [], [], 0.1)[0]
 	if sock in ready:
 		cache_len = len(msg_cache)
-		if current_leader and cache_len > 0:
+		if current_leader != "" and cache_len > 0:
 			for i in range(cache_len):
 				msg = msg_cache[i]
 				return_msg = {"src": my_id, "dst": msg['src'],
