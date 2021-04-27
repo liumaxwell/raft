@@ -29,9 +29,6 @@ current_leader = ""
 most_recent_leader = ""
 voting_hist = []
 
-puts = 0
-oks = 0
-
 log = []
 kvstore = {}
 
@@ -132,7 +129,6 @@ while True:
 				sock.send(json.dumps(msg).encode())
 			last = clock
 
-
 	# if have not received a heart beat... (empty list)
 	if not leader and second_clock - last_other > r:
 		# if no heartbeats received.. then begin election timeout
@@ -144,7 +140,7 @@ while True:
 		last_other = second_clock
 		r = random.randint(4, 8)
 
-	while commit_index > applied_index:
+	if commit_index > applied_index:
 		applied_index += 1
 		the_key = ""
 		for key in list(log[applied_index].keys()):
@@ -153,7 +149,6 @@ while True:
 		val = log[applied_index][the_key]
 		kvstore[the_key] = val
 		if leader:
-			oks += 1
 			return_msg = {"src": my_id, "dst": log[applied_index]['client_ID'],
 						"leader": current_leader, "type": "ok", "MID": log[applied_index]['MID']}
 			return_msg_json = json.dumps(return_msg)
@@ -174,8 +169,6 @@ while True:
 		msg_raw = sock.recv(32768)
 		if len(msg_raw) == 0:
 			continue
-		if leader:
-			print(puts - oks)
 		msg = json.loads(msg_raw)
 
 		# if you get a request vote, vote for them if you have not yet voted in this term
@@ -252,7 +245,6 @@ while True:
 				sock.send(return_msg_json.encode())
 			# you are leader, append to own log and send out to replicas
 			else:
-				puts += 1
 				# put into own log
 				log.append({msg["key"]: msg["value"], "term": current_term,
 							"client_ID": msg['src'], "MID": msg['MID']})
