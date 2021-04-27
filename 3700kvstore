@@ -158,9 +158,8 @@ while True:
 				sock.send(return_msg_json.encode())
 		for i in range(len(appends) - 1, -1, -1):
 			msg = appends[i]
-			print(time.time() - msg["time"])
 			if time.time() - msg["time"] >= .02:
-				print("test")
+				print(msg)
 				resend_to_follower(i)
 
 	# if have not received a heart beat... (empty list)
