@@ -88,7 +88,6 @@ def send_to_follower(msg):
 
 
 while True:
-	print("ME: " + my_id + " LEADER: " + current_leader)
 	ready = select.select([sock], [], [], 0.1)[0]
 
 	if votes >= majority and candidate:
@@ -275,6 +274,7 @@ while True:
 
 	# if have not received a heart beat... (empty list)
 	if second_clock - last_other > random.randint(4,8) and not leader:
+		print("election started")
 		# if no heartbeats received.. then begin election timeout
 		if len(past_beats) == 0:
 			election_timeout = True
