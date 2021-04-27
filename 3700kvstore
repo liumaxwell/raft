@@ -217,6 +217,7 @@ while True:
 			match_index[msg['src']] = next_index[msg['src']] - 1
 
 		if msg['type'] == "append_fail":
+			print("TEST APPEND FAIL")
 			next_index[msg['src']] -= 1
 			send_to_follower(msg)
 
