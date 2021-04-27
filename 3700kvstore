@@ -132,6 +132,7 @@ while True:
 				sock.send(json.dumps(msg).encode())
 			last = clock
 		if not leader_ready and commit_index >= no_op_index:
+			print("TEST")
 			leader_ready = True
 			for msg in puts_cache:
 				log.append({msg["key"]: msg["value"], "term": current_term,
