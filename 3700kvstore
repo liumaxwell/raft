@@ -202,7 +202,8 @@ while True:
 				# send out append entries
 				send_append_entry(msg)
 
-
+		if msg["type"] == "redirect":
+			print("TEST ------------")
 		# get message from client
 		if msg['type'] == 'get':
 			# if no current leader, make client retry
@@ -263,8 +264,6 @@ while True:
 			print(str(my_id) + " sent heartbeat")
 			sock.send(json.dumps(msg).encode())
 		last = clock
-	if msg["type"] == "redirect":
-		print("TEST ------------")
 
 	# if have not received a heart beat... (empty list)
 	if second_clock - last_other > random.randint(4,8) and not leader:
