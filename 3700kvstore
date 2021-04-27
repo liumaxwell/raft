@@ -223,6 +223,7 @@ while True:
 
 		# append_entry from leader, append to own and send back OK
 		if not leader and msg['type'] == 'append_entry':
+			print(msg)
 			current_term = msg['term']
 			most_recent_leader = msg['leader']
 			candidate = False
