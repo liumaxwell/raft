@@ -28,6 +28,8 @@ r = random.randint(4, 8)
 current_leader = ""
 voting_hist = []
 
+msg_cache = []
+
 log = []
 kvstore = {}
 
@@ -166,6 +168,16 @@ while True:
 
 	ready = select.select([sock], [], [], 0.1)[0]
 	if sock in ready:
+		cache_len = len(msg_cache)
+		if current_leader and cache_len > 0:
+			for i in range(cache_len):
+				msg = msg_cache[i]
+				return_msg = {"src": my_id, "dst": msg['src'],
+					"leader": current_leader, "type": "redirect",
+					"MID": msg['MID']}
+				return_msg_json = json.dumps(return_msg)
+				sock.send(return_msg_json.encode())
+
 		msg_raw = sock.recv(32768)
 		if len(msg_raw) == 0:
 			continue
@@ -232,13 +244,7 @@ while True:
 		elif msg['type'] == 'put':
 			# if there is no current leader, fail and make client retry until leader is found
 			if current_leader == "":
-				ignore = ""
-				# print("FFFF from put")
-				# return_msg = {"src": my_id, "dst": msg['src'],
-				# 			  "leader": "FFFF", "type": "redirect",
-				# 			  "MID": msg['MID']}
-				# return_msg_json = json.dumps(return_msg)
-				# sock.send(return_msg_json.encode())
+				msg_cache.append(msg)
 			# redirect to leader
 			elif not leader:
 				return_msg = {"src": my_id, "dst": msg['src'],
@@ -255,17 +261,11 @@ while True:
 				# send out append entries
 				send_append_entry(msg)
 
-		elif msg["type"] == "redirect":
-			print("REDIRECT ------------")
 		# get message from client
 		elif msg['type'] == 'get':
 			# if no current leader, make client retry
 			if current_leader == "":
-				ignore = ""
-				# print("FFFF from get")
-				# return_msg = {"src": my_id, "dst": msg['src'],
-				# 			  "leader": "FFFF", "type": "redirect",
-				# 			  "MID": msg['MID']}
+				msg_cache.append(msg)
 			# redirect to leader
 			elif not leader:
 				return_msg = {"src": my_id, "dst": msg['src'],
