@@ -215,6 +215,7 @@ while True:
 				print("log index mismatched")
 			elif len(log) - 1 >= int(msg['prev_index']):
 				if log[msg['prev_index']]["term"] != msg['term']:
+					print("TESTTTTTTTT")
 					log = log[0 : msg['prev_index']]
 				log.append({msg['key']: msg['value'], "term": msg['term'], 
 				"client_ID": msg['src'], "MID": msg['MID']})
@@ -228,7 +229,7 @@ while True:
 			votes += 1
 
 		# if you get a put message
-		if msg['type'] == 'put':
+		elif msg['type'] == 'put':
 			# if there is no current leader, fail and make client retry until leader is found
 			if current_leader == "":
 				return_msg = {"src": my_id, "dst": msg['src'],
@@ -252,10 +253,10 @@ while True:
 				# send out append entries
 				send_append_entry(msg)
 
-		if msg["type"] == "redirect":
+		elif msg["type"] == "redirect":
 			print("REDIRECT ------------")
 		# get message from client
-		if msg['type'] == 'get':
+		elif msg['type'] == 'get':
 			# if no current leader, make client retry
 			if current_leader == "":
 				return_msg = {"src": my_id, "dst": msg['src'],
