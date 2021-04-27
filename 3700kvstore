@@ -161,7 +161,7 @@ while True:
 			print(time.time() - msg["time"])
 			if time.time() - msg["time"] >= .02:
 				print("test")
-				send_to_follower(i)
+				resend_to_follower(i)
 
 	# if have not received a heart beat... (empty list)
 	# if not leader and second_clock - last_other > r:
