@@ -150,7 +150,7 @@ while True:
 		for msg in appends:
 			print(time.time() - msg["time"])
 			if time.time() - msg["time"] >= .02:
-			    print("test")
+				print("test")
 				send_to_follower(msg["dst"], msg)
 
 	# if have not received a heart beat... (empty list)
