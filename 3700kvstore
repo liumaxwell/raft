@@ -85,7 +85,7 @@ def send_to_follower(msg):
 		if key != 'term' and key != 'client_ID' and key != 'MID':
 			the_key = key
 
-	msg = {"src": my_id, "dst": msg["dst"],
+	msg = {"src": my_id, "dst": msg["src"],
 		   "leader": my_id, "type": "append_entry",
 		   "key": the_key, "value": log[index][the_key],
 		   "term": current_term, "prev_index": index - 1,
