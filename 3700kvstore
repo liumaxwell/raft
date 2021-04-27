@@ -182,7 +182,7 @@ while True:
 		val = log[applied_index][the_key]
 		kvstore[the_key] = val
 		if leader and log[applied_index]['client_ID'] != "no-op":
-			appends = [x for x in appends if x["prev_index"] + 1 <= applied_index]
+			appends = [x for x in appends if x["prev_index"] + 1 >= applied_index]
 			return_msg = {"src": my_id, "dst": log[applied_index]['client_ID'],
 						"leader": my_id, "type": "ok", "MID": log[applied_index]['MID']}
 			return_msg_json = json.dumps(return_msg)
