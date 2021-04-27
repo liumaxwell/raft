@@ -86,6 +86,20 @@ def send_to_follower(msg):
 	json_msg = json.dumps(msg)
 	sock.send(json_msg.encode())
 
+def reply_false(msg):
+	return_msg = {"src": my_id, "dst": msg['src'],
+				"leader": current_leader, "type": "append_fail",
+				"client_ID": msg['src'], "MID": msg["MID"]}
+	return_msg_json = json.dumps(return_msg)
+	sock.send(return_msg_json.encode())
+
+def reply_true(msg):
+	return_msg = {"src": my_id, "dst": msg['src'],
+			"leader": current_leader, "type": "append_ok",
+			"client_ID": msg['src'], "MID": msg["MID"]}
+	return_msg_json = json.dumps(return_msg)
+	sock.send(return_msg_json.encode())
+
 
 while True:
 	ready = select.select([sock], [], [], 0.1)[0]
@@ -139,40 +153,22 @@ while True:
 				past_beats.append(1)
 				continue
 			if msg['term'] < current_term:
-				# log is mismatched
-				return_msg = {"src": my_id, "dst": msg['src'],
-							  "leader": current_leader, "index": len(log) - 1,
-							  "type": "append_fail", "client_ID": msg['src'], "MID": msg["MID"]}
-				return_msg_json = json.dumps(return_msg)
-				sock.send(return_msg_json.encode())
+				reply_false(msg)
 				print("term mismatched")
-				continue
 			elif msg['prev_index'] == -1:
-				return_msg = {"src": my_id, "dst": msg['src'],
-							  "leader": current_leader, "index": 0,
-							  "type": "append_ok", "client_ID": msg['src'], "MID": msg["MID"]}
-				return_msg_json = json.dumps(return_msg)
-				sock.send(return_msg_json.encode())
+				log.append({msg['key']: msg['value'], "term": msg['term'],
+				"client_ID": msg['src'], "MID": msg['MID']})
+				reply_true(msg)
 			elif len(log) - 1 < msg['prev_index'] or \
 					log[int(msg["prev_index"])]["term"] != msg['prev_term']:
-				# log is mismatched
-				return_msg = {"src": my_id, "dst": msg['src'],
-							  "leader": current_leader, "index": len(log) - 1,
-							  "type": "append_fail", "client_ID": msg['src'], "MID": msg["MID"]}
-				return_msg_json = json.dumps(return_msg)
-				sock.send(return_msg_json.encode())
+				reply_false()
 				print("log index mismatched")
-				continue
-			elif len(log) - 1 >= int(msg['prev_index']) + 1:
-				if log[msg['prev_index'] + 1]["term"] != msg['term']:
-					log = log[0 : msg['prev_index'] + 1]
-			log.append({msg['key']: msg['value'], "term": msg['term'],
-						"client_ID": msg['src'], "MID": msg['MID']})
-			return_msg = {"src": my_id, "dst": msg['src'],
-						  "leader": current_leader, "index": len(log),
-						  "type": "append_ok", "client_ID": msg['src'], "MID": msg["MID"]}
-			return_msg_json = json.dumps(return_msg)
-			sock.send(return_msg_json.encode())
+			elif len(log) - 1 >= int(msg['prev_index']):
+				if log[msg['prev_index']]["term"] != msg['term']:
+					log = log[0 : msg['prev_index']]
+				log.append({msg['key']: msg['value'], "term": msg['term'], 
+				"client_ID": msg['src'], "MID": msg['MID']})
+				reply_true(msg)
 
 			if msg['lead_commit_index'] > commit_index:
 				commit_index = min(msg['lead_commit_index'], len(log) - 1)
@@ -235,7 +231,6 @@ while True:
 				the_key = key
 		val = log[applied_index][the_key]
 		kvstore[the_key] = val
-		# client ID, MID
 		return_msg = {"src": my_id, "dst": log[applied_index]['client_ID'],
 					  "leader": current_leader, "type": "ok", "MID": log[applied_index]['MID']}
 		return_msg_json = json.dumps(return_msg)
