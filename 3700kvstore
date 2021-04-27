@@ -159,6 +159,7 @@ while True:
 	if candidate and votes >= majority:
 		print(str(my_id) + " got enough votes")
 		current_leader = my_id
+		most_recent_leader = my_id
 		leader = True
 		candidate = False
 		for the_id in replica_ids:
