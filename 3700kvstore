@@ -45,9 +45,9 @@ for id in replica_ids:
 	match_index[id] = 0
 
 def up_to_date(log):
-	if log['prev']['term'] > current_term:
+	if log['term'] > current_term:
 		return True
-	elif log['prev']['term'] == current_term:
+	elif log['term'] == current_term:
 		return log['index'] >= len(log) - 1
 	else:
 		return False
@@ -260,10 +260,15 @@ while True:
 		votes = 1
 
 		# request votes from others
+		if len(log) == 0:
+			term = 1
+		else:
+			term = log[-1]['term']
+
 		msg = {'src': my_id, 'dst': "FFFF", 'leader': "FFFF",
 			   'type': 'RequestVote', "term": current_term,
 			   "index": len(log) - 1,
-					   "prev": log[-1:]}
+					   "prev_term": term}
 		sock.send(json.dumps(msg).encode())
 		print("requesting votes")
 		election_timeout = False
