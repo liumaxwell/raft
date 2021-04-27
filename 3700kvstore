@@ -191,6 +191,7 @@ while True:
 			"term": current_term, "prev_index": log_len - 1,
 			"prev_term": prev_term, "lead_commit_index": commit_index,
 			"client_ID": "no-op", "MID": "no-op"}
+		sock.send(json.dumps(msg))
 		log.append({"no-op": "", "term": current_term, "client_ID": "no-op", "MID": "no-op"})
 
 	ready = select.select([sock], [], [], 0.1)[0]
