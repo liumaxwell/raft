@@ -232,6 +232,7 @@ while True:
 		elif msg['type'] == 'put':
 			# if there is no current leader, fail and make client retry until leader is found
 			if current_leader == "":
+				ignore = ""
 				# print("FFFF from put")
 				# return_msg = {"src": my_id, "dst": msg['src'],
 				# 			  "leader": "FFFF", "type": "redirect",
@@ -260,6 +261,7 @@ while True:
 		elif msg['type'] == 'get':
 			# if no current leader, make client retry
 			if current_leader == "":
+				ignore = ""
 				# print("FFFF from get")
 				# return_msg = {"src": my_id, "dst": msg['src'],
 				# 			  "leader": "FFFF", "type": "redirect",
