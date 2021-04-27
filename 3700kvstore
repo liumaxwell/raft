@@ -177,6 +177,7 @@ while True:
 					"MID": msg['MID']}
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
+			msg_cache = []
 
 		msg_raw = sock.recv(32768)
 		if len(msg_raw) == 0:
