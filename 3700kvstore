@@ -132,7 +132,6 @@ while True:
 				sock.send(json.dumps(msg).encode())
 			last = clock
 		if not leader_ready and commit_index >= no_op_index:
-			print("TEST")
 			leader_ready = True
 			for msg in puts_cache:
 				log.append({msg["key"]: msg["value"], "term": current_term,
@@ -213,18 +212,15 @@ while True:
 
 		# follower committed
 		if msg['type'] == 'append_ok':
-			print("TEST APPEND OK")
 			next_index[msg['src']] += 1
 			match_index[msg['src']] = next_index[msg['src']] - 1
 
 		if msg['type'] == "append_fail":
-			print("TEST APPEND FAIL")
 			next_index[msg['src']] -= 1
 			send_to_follower(msg)
 
 		# append_entry from leader, append to own and send back OK
 		if not leader and msg['type'] == 'append_entry':
-			print(msg)
 			current_term = msg['term']
 			most_recent_leader = msg['leader']
 			candidate = False
