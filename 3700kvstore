@@ -65,8 +65,7 @@ def send_append_entry(msg):
 			term = 1
 		else:
 			term = log[rep_next_index - 1]["term"]
-		
-	    print("SENDING TO %d: %s  at %f" % (the_id, msg["MID"], time.time()))
+		print("SENDING TO %d: %s  at %f" % (the_id, msg["MID"], time.time()))
 		msg = {"src": my_id, "dst": the_id,
 			"leader": my_id, "type": "append_entry",
 			"key": msg['key'], "value": msg['value'],
