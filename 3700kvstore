@@ -126,7 +126,8 @@ while True:
 	clock = time.time()
 	second_clock = time.time()
 	if leader:
-		resend_unacked()
+		if leader_ready:
+			resend_unacked()
 		for N in range(commit_index + 1, len(log)):
 			num_matched = 0
 			for the_id in replica_ids:
