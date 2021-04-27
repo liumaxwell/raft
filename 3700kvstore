@@ -36,10 +36,12 @@ applied_index = 0
 next_index = {}
 match_index = {}
 
+puts = []
+oks = []
 
-for id in replica_ids:
-	next_index[id] = 0
-	match_index[id] = 0
+for the_id in replica_ids:
+	next_index[the_id] = 0
+	match_index[the_id] = 0
 
 def up_to_date(msg):
 	if msg['term'] > current_term:
@@ -50,13 +52,13 @@ def up_to_date(msg):
 		return False
 
 def send_append_entry(msg):
-	for id in replica_ids:
-		rep_next_index = next_index[id]
+	for the_id in replica_ids:
+		rep_next_index = next_index[the_id]
 		if len(log) == 0:
 			term = 1
 		else:
 			term = log[rep_next_index - 1]["term"]
-		msg = {"src": my_id, "dst": id,
+		msg = {"src": my_id, "dst": the_id,
 			   "leader": my_id, "type": "append_entry",
 			   "key": msg['key'], "value": msg['value'],
 			   "term": current_term, "prev_index": rep_next_index - 1,
@@ -77,7 +79,7 @@ def send_to_follower(msg):
 		if key != 'term' and key != 'client_ID' and key != 'MID':
 			the_key = key
 
-	msg = {"src": my_id, "dst": id,
+	msg = {"src": my_id, "dst": the_id,
 		   "leader": my_id, "type": "append_entry",
 		   "key": the_key, "value": log[index][the_key],
 		   "term": log[index]['term'], "prev_index": index - 1,
@@ -100,6 +102,12 @@ def reply_true(msg):
 	return_msg_json = json.dumps(return_msg)
 	sock.send(return_msg_json.encode())
 
+def check_puts():
+	out = []
+	for the_id in puts:
+		if the_id not in oks:
+			out.append(the_id)
+	print(out)
 
 while True:
 	ready = select.select([sock], [], [], 0.1)[0]
@@ -109,10 +117,10 @@ while True:
 		current_leader = my_id
 		leader = True
 		candidate = False
-		for id in replica_ids:
-			next_index[id] = len(log)
-			match_index[id] = 0
-			msg = {"src": my_id, "dst": id,
+		for the_id in replica_ids:
+			next_index[the_id] = len(log)
+			match_index[the_id] = 0
+			msg = {"src": my_id, "dst": the_id,
 			   "leader": my_id, "type": "append_entry",
 			   "key": "", "value": "",
 			   "term": current_term, "prev_index": len(log) - 1,
@@ -124,6 +132,7 @@ while True:
 
 		if len(msg_raw) == 0: continue
 		msg = json.loads(msg_raw)
+		check_puts()
 
 		# if you get a request vote, vote for them if you have not yet voted in this term
 		if msg['type'] == "RequestVote":
@@ -195,6 +204,7 @@ while True:
 				sock.send(return_msg_json.encode())
 			# you are leader, append to own log and send out to replicas
 			else:
+				puts.append(msg["MID"])
 				# put into own log
 				log.append({msg["key"]: msg["value"], "term": current_term,
 							"client_ID": msg['src'], "MID": msg['MID']})
@@ -227,8 +237,8 @@ while True:
 	elif leader:
 		for N in range(commit_index + 1, len(log)):
 			num_matched = 0
-			for id in replica_ids:
-				if match_index[id] >= N and log[N]["term"] == current_term:
+			for the_id in replica_ids:
+				if match_index[the_id] >= N and log[N]["term"] == current_term:
 					commit_index = N
 	
 
@@ -242,6 +252,7 @@ while True:
 		kvstore[the_key] = val
 		return_msg = {"src": my_id, "dst": log[applied_index]['client_ID'],
 					  "leader": current_leader, "type": "ok", "MID": log[applied_index]['MID']}
+		oks.append(log[applied_index]["MID"])
 		return_msg_json = json.dumps(return_msg)
 		sock.send(return_msg_json.encode())
 
@@ -251,13 +262,13 @@ while True:
 	# code runs every 2 seconds
 	if clock - last > 2 and leader:
 		# send heartbeat
-		for id in replica_ids:
-			rep_next_index = next_index[id]
+		for the_id in replica_ids:
+			rep_next_index = next_index[the_id]
 			if len(log) == 0:
 				term = 1
 			else:
 				term = log[rep_next_index - 1]["term"]
-			msg = {"src": my_id, "dst": id,
+			msg = {"src": my_id, "dst": the_id,
 				   "leader": my_id, "type": "append_entry",
 				   "key": "", "value": "",
 				   "term": current_term, "prev_index": rep_next_index - 1,
