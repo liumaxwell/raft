@@ -55,7 +55,7 @@ def send_append_entry(msg):
 		if len(log) == 0:
 			term = 1
 		else:
-			term = log[rep_next_index]["term"]
+			term = log[rep_next_index - 1]["term"]
 		msg = {"src": my_id, "dst": id,
 			   "leader": my_id, "type": "append_entry",
 			   "key": msg['key'], "value": msg['value'],
