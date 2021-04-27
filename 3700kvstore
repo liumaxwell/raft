@@ -25,7 +25,7 @@ leader = False
 candidate = False
 votes = 0
 majority = math.ceil(num_total / 2) + 1
-r = random.randint(4, 8)
+# r = random.randint(4, 8)
 
 most_recent_leader = ""
 voting_hist = []
@@ -139,7 +139,8 @@ while True:
 			last = clock
 
 	# if have not received a heart beat... (empty list)
-	if not leader and second_clock - last_other > r:
+	# if not leader and second_clock - last_other > r:
+	if not leader and second_clock - last_other > random.randint(4, 8):
 		# if no heartbeats received.. then begin election timeout
 		if len(past_beats) == 0:
 			election_timeout = True
