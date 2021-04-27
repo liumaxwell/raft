@@ -209,7 +209,7 @@ while True:
 				log.append({msg['key']: msg['value'], "term": msg['term'],
 				"client_ID": msg['src'], "MID": msg['MID']})
 				reply_true(msg)
-			elif len(log) - 1 < msg['prev_index'] #or \
+			elif len(log) - 1 < msg['prev_index'] #or
 					#log[int(msg["prev_index"])]["term"] != msg['prev_term']:
 				reply_false(msg)
 				print("log index mismatched")
