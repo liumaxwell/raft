@@ -113,10 +113,19 @@ def reply_true(msg):
 	return_msg_json = json.dumps(return_msg)
 	sock.send(return_msg_json.encode())
 
+def resend_unacked():
+	for the_id in replica_ids:
+		keys = [x for x in messages if x[16:18] == "AE" + str(the_id) and messages[x]["time"] - time.time() > 1]
+		for key in keys:
+			messages["key"]["time"] = time.time()
+			msg = messages["key"]
+			sock.send(json.dumps(msg).encode())
+
 while True:
 	clock = time.time()
 	second_clock = time.time()
 	if leader:
+		resend_unacked()
 		for N in range(commit_index + 1, len(log)):
 			num_matched = 0
 			for the_id in replica_ids:
@@ -204,6 +213,7 @@ while True:
 				"prev_term": prev_term, "lead_commit_index": commit_index,
 				"client_ID": "no-op", "MID": "no-op", "time": time.time()}
 			sock.send(json.dumps(msg))
+			messages[msg["MID"] + "AE" + str(the_id)] = msg
 		log.append({"no-op": "", "term": current_term, "client_ID": "no-op", "MID": "no-op"})
 
 	ready = select.select([sock], [], [], 0.1)[0]
@@ -227,6 +237,7 @@ while True:
 		if msg['type'] == 'append_ok':
 			next_index[msg['src']] += 1
 			match_index[msg['src']] = next_index[msg['src']] - 1
+			messages.pop(msg["MID"] + "AE" + str(msg["src"]))
 
 		if msg['type'] == "append_fail":
 			next_index[msg['src']] -= 1
