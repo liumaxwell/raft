@@ -117,13 +117,17 @@ def reply_true(msg):
 	sock.send(return_msg_json.encode())
 
 def resend_unacked():
+	entries = []
 	for the_id in replica_ids:
 		keys = [x for x in messages if x[16:22] == "AE" + str(the_id) and time.time() - messages[x]["time"] > 1]
 		for key in keys:
 			messages[key]["time"] = time.time()
 			msg = messages[key]
-			print("resending " + msg["MID"])
-			sock.send(json.dumps(msg).encode())
+			entries.append(entry)
+		msg["entries"] = entries
+		msg["type"] = "bulk_append"
+		sock.send(json.dumps(msg).encode())
+		entries = []
 
 while True:
 	clock = time.time()
@@ -284,7 +288,38 @@ while True:
 
 			if msg['lead_commit_index'] > commit_index:
 				commit_index = min(msg['lead_commit_index'], len(log) - 1)
+		if not leader and msg['type'] == 'bulk_append':
+			current_term = msg['term']
+			most_recent_leader = msg['leader']
+			candidate = False
+			log_idx = len(log) - 1
+			if msg['term'] < current_term:
+				reply_false(msg)
+				print("term mismatched")
+			elif msg['prev_index'] == -1:
+				for entry in msg["entries"]:
+					log.append({entry['key']: entry['value'], "term": entry['term'],
+					"client_ID": entry['client_ID'], "MID": entry['MID']})
+				reply_true(msg)
+			elif log_idx < msg['prev_index'] or \
+					log[int(msg["prev_index"])]["term"] != msg['prev_term']:
+				reply_false(msg)
+				print("log index mismatched")
+			elif log_idx == msg["prev_index"]:
+				for entry in msg["entries"]:
+					log.append({entry['key']: entry['value'], "term": entry['term'], 
+					"client_ID": entry['client_ID'], "MID": entry['MID']})
+				reply_true(msg)
+			elif log_idx > msg['prev_index']:
+				if log[msg['prev_index'] + 1]["term"] != msg['term']:
+					log = log[0 : msg['prev_index']]
+				for entry in msg["entries"]:
+					log.append({entry['key']: entry['value'], "term": entry['term'], 
+					"client_ID": entry['client_ID'], "MID": entry['MID']})
+				reply_true(msg)
 
+			if msg['lead_commit_index'] > commit_index:
+				commit_index = min(msg['lead_commit_index'], len(log) - 1)
 		# if you get a vote, keep track
 		if msg['type'] == "vote" and candidate:
 			votes += 1
