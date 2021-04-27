@@ -216,7 +216,7 @@ while True:
 			elif msg['prev_index'] == -1:
 				log.append({msg['key']: msg['value'], "term": msg['term'],
 				"client_ID": msg['src'], "MID": msg['MID']})
-				reply_true(msg, -1)
+				reply_true(msg, 0)
 			elif log_idx < msg['prev_index'] or \
 					log[int(msg["prev_index"])]["term"] != msg['prev_term']:
 				reply_false(msg)
@@ -224,7 +224,7 @@ while True:
 			elif log_idx == msg["prev_index"]:
 				log.append({msg['key']: msg['value'], "term": msg['term'], 
 				"client_ID": msg['src'], "MID": msg['MID']})
-				reply_true(msg, log_idx)
+				reply_true(msg, log_idx + 1)
 			elif log_idx > msg['prev_index']:
 				if log[msg['prev_index'] + 1]["term"] != msg['term']:
 					log = log[0 : msg['prev_index']]
