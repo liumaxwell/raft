@@ -31,6 +31,8 @@ puts_cache = []
 gets_cache = []
 # r = random.randint(4, 8)
 
+appends = []
+
 most_recent_leader = ""
 voting_hist = []
 
@@ -67,7 +69,8 @@ def send_append_entry(msg):
 			   "key": msg['key'], "value": msg['value'],
 			   "term": current_term, "prev_index": rep_next_index - 1,
 			   "prev_term": term, "lead_commit_index": commit_index,
-			   "client_ID": msg['src'], "MID": msg["MID"]}
+			   "client_ID": msg['src'], "MID": msg["MID"], "time": time.time()}
+		appends.append(msg)
 		sock.send(json.dumps(msg).encode())
 
 def send_to_follower(msg):
@@ -85,9 +88,10 @@ def send_to_follower(msg):
 	msg = {"src": my_id, "dst": the_id,
 		   "leader": my_id, "type": "append_entry",
 		   "key": the_key, "value": log[index][the_key],
-		   "term": log[index]['term'], "prev_index": index - 1,
+		   "term": current_term, "prev_index": index - 1,
 		   "prev_term": prev_term, "lead_commit_index": commit_index,
-		   "client_ID": msg['src'], "MID": msg["MID"]}
+		   "client_ID": msg['src'], "MID": msg["MID"], "time": time.time()}
+	appends.append(msg)
 	json_msg = json.dumps(msg)
 	sock.send(json_msg.encode())
 
@@ -184,13 +188,16 @@ while True:
 			prev_term = 1
 		else:
 			prev_term = log[log_len - 1]['term']
-		msg = {"src": my_id, "dst": "FFFF",
-			"leader": my_id, "type": "append_entry",
-			"key": "no-op", "value": "",
-			"term": current_term, "prev_index": log_len - 1,
-			"prev_term": prev_term, "lead_commit_index": commit_index,
-			"client_ID": "no-op", "MID": "no-op"}
-		sock.send(json.dumps(msg))
+		for the_id in replica_ids:
+			if the_id != my_id:
+			msg = {"src": my_id, "dst": the_id,
+				"leader": my_id, "type": "append_entry",
+				"key": "no-op", "value": "",
+				"term": current_term, "prev_index": log_len - 1,
+				"prev_term": prev_term, "lead_commit_index": commit_index,
+				"client_ID": "no-op", "MID": "no-op", "time": time.time()}
+			appends.append(msg)
+			sock.send(json.dumps(msg))
 		log.append({"no-op": "", "term": current_term, "client_ID": "no-op", "MID": "no-op"})
 
 	ready = select.select([sock], [], [], 0.1)[0]
