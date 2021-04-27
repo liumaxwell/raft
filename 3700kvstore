@@ -64,7 +64,8 @@ def send_append_entry(msg):
 			   "leader": my_id, "type": "append_entry",
 			   "key": msg['key'], "value": msg['value'],
 			   "term": current_term, "prev_index": rep_next_index - 1,
-			   "prev_term": term, "lead_commit_index": commit_index}
+			   "prev_term": term, "lead_commit_index": commit_index,
+			   "client_ID": msg['src'], "MID": msg["MID"]}
 		sock.send(json.dumps(msg).encode())
 
 
@@ -161,7 +162,8 @@ while True:
 			elif len(log) - 1 >= int(msg['prev_index']) + 1:
 				if log[msg['prev_index'] + 1]["term"] != msg['term']:
 					log = log[0 : msg['prev_index'] + 1]
-			log.append({msg['key']: msg['value'], "term": msg['term']})
+			log.append({msg['key']: msg['value'], "term": msg['term'],
+						"client_ID": msg['src'], "MID": msg['MID']})
 			return_msg = {"src": my_id, "dst": msg['src'],
 						  "leader": current_leader, "index": len(log) - 1,
 						  "type": "append_ok"}
