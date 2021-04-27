@@ -157,14 +157,13 @@ while True:
 				log.append({msg["key"]: msg["value"], "term": current_term,
 							"client_ID": msg['src'], "MID": msg['MID']})
 				send_append_entry(msg)
-				#messages[msg["MID"] + "PT"] = return_msg
 			for msg in gets_cache:
 				value = kvstore.get(msg['key'], "")
 				return_msg = {"src": my_id, "dst": msg['src'],
 				"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
-				#messages[msg["MID"] + "GT"] = return_msg
+				messages[msg["MID"] + "GT"] = return_msg
 
 	# if have not received a heart beat... (empty list)
 	# if not leader and second_clock - last_other > r:
@@ -190,7 +189,7 @@ while True:
 						"leader": my_id, "type": "ok", "MID": log[applied_index]['MID']}
 			return_msg_json = json.dumps(return_msg)
 			sock.send(return_msg_json.encode())
-			#messages[log[applied_index]["MID"] + "PT"] = return_msg
+			messages[log[applied_index]["MID"] + "PT"] = return_msg
 
 	if candidate and votes >= majority:
 		print(str(my_id) + " got enough votes")
@@ -297,7 +296,7 @@ while True:
 			# you are leader, append to own log and send out to replicas
 			else:
 				if msg["MID"] + "PT" in messages:
-					#sock.send(json.dumps(messages[msg["MID"] + "PT"]).encode())
+					sock.send(json.dumps(messages[msg["MID"] + "PT"]).encode())
 					continue
 				if not leader_ready:
 					puts_cache.append(msg)
@@ -320,7 +319,7 @@ while True:
 			# if leader, get the value and send back
 			else:
 				if msg["MID"] + "GT" in messages:
-					#sock.send(json.dumps(messages[msg["MID"] + "GT"]).encode())
+					sock.send(json.dumps(messages[msg["MID"] + "GT"]).encode())
 					continue
 				value = kvstore.get(msg['key'], "")
 				if not leader_ready:
