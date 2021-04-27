@@ -161,12 +161,12 @@ while True:
 		for the_id in replica_ids:
 			next_index[the_id] = len(log)
 			match_index[the_id] = -1
-			msg = {"src": my_id, "dst": the_id,
-			   "leader": my_id, "type": "append_entry",
-			   "key": "", "value": "",
-			   "term": current_term, "prev_index": len(log) - 1,
-			   "prev_term": current_term, "lead_commit_index": commit_index}
-			sock.send(json.dumps(msg).encode())
+			# msg = {"src": my_id, "dst": the_id,
+			#    "leader": my_id, "type": "append_entry",
+			#    "key": "", "value": "",
+			#    "term": current_term, "prev_index": len(log) - 1,
+			#    "prev_term": current_term, "lead_commit_index": commit_index}
+			# sock.send(json.dumps(msg).encode())
 
 	ready = select.select([sock], [], [], 0.1)[0]
 	if sock in ready:
