@@ -281,7 +281,7 @@ while True:
 		else:
 			term = log[-1]['term']
 
-		msg = {'src': my_id, 'dst': "FFFF",
+		msg = {'src': my_id, 'dst': "FFFF", 'leader': "FFFF",
 			   'type': 'RequestVote', "term": current_term,
 			   "index": len(log) - 1,
 					   "prev_term": term}
