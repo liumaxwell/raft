@@ -176,7 +176,7 @@ while True:
 			# if you haven't voted yet this term and they have greater or equal term
 			if msg['term'] not in voting_hist and up_to_date(msg):
 				return_msg = {"src": my_id, "dst": msg['src'],
-							  "leader": "FFFF", "type": "vote"}
+							  "leader": "FFFR", "type": "vote"}
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
 				voting_hist.append(msg['term'])
@@ -233,7 +233,7 @@ while True:
 			# if there is no current leader, fail and make client retry until leader is found
 			if current_leader == "":
 				return_msg = {"src": my_id, "dst": msg['src'],
-							  "leader": "FFFF", "type": "fail",
+							  "leader": "FFFP", "type": "fail",
 							  "MID": msg['MID']}
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
@@ -260,7 +260,7 @@ while True:
 			# if no current leader, make client retry
 			if current_leader == "":
 				return_msg = {"src": my_id, "dst": msg['src'],
-							  "leader": "FFFA", "type": "fail",
+							  "leader": "FFFG", "type": "fail",
 							  "MID": msg['MID']}
 			# redirect to leader
 			elif not leader:
@@ -288,7 +288,7 @@ while True:
 		else:
 			term = log[-1]['term']
 
-		msg = {'src': my_id, 'dst': "FFFF", 'leader': "FFFF",
+		msg = {'src': my_id, 'dst': "FFFF", 'leader': "FFFE",
 			   'type': 'RequestVote', "term": current_term,
 			   "index": len(log) - 1,
 					   "prev_term": term}
