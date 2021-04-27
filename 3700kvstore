@@ -35,7 +35,7 @@ applied_index = 0
 
 next_index = {}
 match_index = {}
-appended = {}
+
 
 for id in replica_ids:
 	next_index[id] = 0
@@ -93,6 +93,9 @@ while True:
 		current_leader = my_id
 		leader = True
 		candidate = False
+		for id in replica_ids:
+			next_index[id] = len(log)
+			match_index[id] = 0
 
 	if sock in ready:
 		msg_raw = sock.recv(32768)
@@ -256,7 +259,6 @@ while True:
 			if len(log) == 0:
 				term = 1
 			else:
-				print(rep_next_index)
 				term = log[rep_next_index]["term"]
 			msg = {"src": my_id, "dst": id,
 				   "leader": my_id, "type": "append_entry",
@@ -288,7 +290,6 @@ while True:
 
 		# vote for yourself
 		votes = 1
-		print(log)
 		# request votes from others
 		if len(log) == 0:
 			term = 1
