@@ -268,6 +268,7 @@ while True:
 		# if no heartbeats received.. then begin election timeout
 		if len(past_beats) == 0:
 			election_timeout = True
+			current_leader = ""
 		else:
 			past_beats = []
 		last_other = second_clock
