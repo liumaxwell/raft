@@ -195,6 +195,14 @@ while True:
 				# send out append entries
 				send_append_entry(msg)
 
+				return_msg = {"src": my_id, "dst": msg['src'],
+							  "leader": my_id, "type": "ok",
+							  "MID": msg['MID']}
+
+			return_msg_json = json.dumps(return_msg)
+			sock.send(return_msg_json.encode())
+
+
 		# get message from client
 		if msg['type'] == 'get':
 			# if no current leader, make client retry
