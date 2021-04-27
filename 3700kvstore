@@ -65,8 +65,8 @@ def send_append_entry(msg):
 		sock.send(json.dumps(msg).encode())
 
 
-def send_to_follower(id):
-	index = next_index[id]
+def send_to_follower(msg):
+	index = next_index[msg['src']]
 	the_key = ""
 	for key in list(log[applied_index].keys()):
 		if key != 'term' and key != 'client_ID' and key != 'MID':
@@ -79,8 +79,9 @@ def send_to_follower(id):
 	msg = {"src": my_id, "dst": id,
 		   "leader": my_id, "type": "append_entry",
 		   "key": the_key, "value": log[index][the_key],
-		   "term": log[index]['term'], "prev_index": 0 if index == 0 else index - 1,
-			"prev_term": prev_term, "lead_commit_index": commit_index}
+		   "term": log[index]['term'], "prev_index": index - 1,
+			"prev_term": prev_term, "lead_commit_index": commit_index,
+		   "client_ID": msg['src'], "MID": msg["MID"]}
 	json_msg = json.dumps(msg)
 	sock.send(json_msg.encode())
 
@@ -127,7 +128,7 @@ while True:
 
 		if msg['type'] == "append_fail":
 			next_index[msg['src']] -= 1
-			send_to_follower(msg['src'])
+			send_to_follower(msg)
 
 		# append_entry from leader, append to own and send back OK
 		if msg['type'] == 'append_entry':
