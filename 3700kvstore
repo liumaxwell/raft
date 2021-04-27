@@ -123,7 +123,7 @@ def resend_unacked():
 			print(time.time() - first_append_entry)
 			messages[key]["time"] = time.time()
 			msg = messages[key]
-			print("resending a " + msg["type"])
+			print("resending " + msg["MID"])
 			sock.send(json.dumps(msg).encode())
 
 while True:
