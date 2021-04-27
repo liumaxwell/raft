@@ -158,7 +158,7 @@ while True:
 				sock.send(return_msg_json.encode())
 		for i in range(len(appends) - 1, -1, -1):
 			msg = appends[i]
-			if time.time() - msg["time"] >= .1:
+			if time.time() - msg["time"] >= 1:
 				print(msg)
 				resend_to_follower(i)
 
