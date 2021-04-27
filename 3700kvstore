@@ -59,24 +59,23 @@ def up_to_date(msg):
 
 def send_append_entry(msg):
 	for the_id in replica_ids:
-		if the_id != my_id:
-			rep_next_index = next_index[the_id]
-			if len(log) == 0:
-				term = 1
-			else:
-				term = log[rep_next_index - 1]["term"]
-			msg = {"src": my_id, "dst": the_id,
-				"leader": my_id, "type": "append_entry",
-				"key": msg['key'], "value": msg['value'],
-				"term": current_term, "prev_index": rep_next_index - 1,
-				"prev_term": term, "lead_commit_index": commit_index,
-				"client_ID": msg['src'], "MID": msg["MID"], "time": time.time()}
-			appends.append(msg)
-			sock.send(json.dumps(msg).encode())
+		rep_next_index = next_index[the_id]
+		if len(log) == 0:
+			term = 1
+		else:
+			term = log[rep_next_index - 1]["term"]
+		msg = {"src": my_id, "dst": the_id,
+			"leader": my_id, "type": "append_entry",
+			"key": msg['key'], "value": msg['value'],
+			"term": current_term, "prev_index": rep_next_index - 1,
+			"prev_term": term, "lead_commit_index": commit_index,
+			"client_ID": msg['src'], "MID": msg["MID"], "time": time.time()}
+		appends.append(msg)
+		sock.send(json.dumps(msg).encode())
 
-def send_to_follower(msg):
+def send_to_follower(src, dst, msg):
 	print(next_index)
-	index = next_index[msg['src']]
+	index = next_index[src]
 	the_key = ""
 	if index == 0:
 		prev_term = 1
@@ -87,7 +86,7 @@ def send_to_follower(msg):
 		if key != 'term' and key != 'client_ID' and key != 'MID':
 			the_key = key
 
-	msg = {"src": my_id, "dst": msg['dst'],
+	msg = {"src": my_id, "dst": dst,
 		   "leader": my_id, "type": "append_entry",
 		   "key": the_key, "value": log[index][the_key],
 		   "term": current_term, "prev_index": index - 1,
@@ -124,19 +123,18 @@ while True:
 		if clock - last > 2:
 			# send heartbeat
 			for the_id in replica_ids:
-				if the_id != my_id:
-					rep_next_index = next_index[the_id]
-					if len(log) == 0:
-						term = 1
-					else:
-						term = log[rep_next_index - 1]["term"]
-					msg = {"src": my_id, "dst": the_id,
-						"leader": my_id, "type": "append_entry",
-						"key": "", "value": "",
-						"term": current_term, "prev_index": rep_next_index - 1,
-						"prev_term": term, "lead_commit_index": commit_index, "time": ""}
-					print(str(my_id) + " sent heartbeat")
-					sock.send(json.dumps(msg).encode())
+				rep_next_index = next_index[the_id]
+				if len(log) == 0:
+					term = 1
+				else:
+					term = log[rep_next_index - 1]["term"]
+				msg = {"src": my_id, "dst": the_id,
+					"leader": my_id, "type": "append_entry",
+					"key": "", "value": "",
+					"term": current_term, "prev_index": rep_next_index - 1,
+					"prev_term": term, "lead_commit_index": commit_index, "time": ""}
+				print(str(my_id) + " sent heartbeat")
+				sock.send(json.dumps(msg).encode())
 			last = clock
 		if not leader_ready and commit_index >= no_op_index:
 			leader_ready = True
@@ -153,7 +151,7 @@ while True:
 		for msg in appends:
 			print(time.time() - msg["time"])
 			if time.time() - msg["time"] >= .01:
-				send_to_follower(msg)
+				send_to_follower(msg["dst"], msg["src"], msg)
 
 	# if have not received a heart beat... (empty list)
 	# if not leader and second_clock - last_other > r:
@@ -196,15 +194,14 @@ while True:
 		else:
 			prev_term = log[log_len - 1]['term']
 		for the_id in replica_ids:
-			if the_id != my_id:
-				msg = {"src": my_id, "dst": the_id,
-					"leader": my_id, "type": "append_entry",
-					"key": "no-op", "value": "",
-					"term": current_term, "prev_index": log_len - 1,
-					"prev_term": prev_term, "lead_commit_index": commit_index,
-					"client_ID": "no-op", "MID": "no-op", "time": time.time()}
-				appends.append(msg)
-				sock.send(json.dumps(msg))
+			msg = {"src": my_id, "dst": the_id,
+				"leader": my_id, "type": "append_entry",
+				"key": "no-op", "value": "",
+				"term": current_term, "prev_index": log_len - 1,
+				"prev_term": prev_term, "lead_commit_index": commit_index,
+				"client_ID": "no-op", "MID": "no-op", "time": time.time()}
+			appends.append(msg)
+			sock.send(json.dumps(msg))
 		log.append({"no-op": "", "term": current_term, "client_ID": "no-op", "MID": "no-op"})
 
 	ready = select.select([sock], [], [], 0.1)[0]
@@ -231,7 +228,7 @@ while True:
 
 		if msg['type'] == "append_fail":
 			next_index[msg['src']] -= 1
-			send_to_follower(msg)
+			send_to_follower(msg["src"], msg["dst"], msg)
 
 		# append_entry from leader, append to own and send back OK
 		if not leader and msg['type'] == 'append_entry':
