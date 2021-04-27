@@ -29,6 +29,9 @@ current_leader = ""
 most_recent_leader = ""
 voting_hist = []
 
+puts = 0
+oks = 0
+
 log = []
 kvstore = {}
 
@@ -64,7 +67,6 @@ def send_append_entry(msg):
 			   "prev_term": term, "lead_commit_index": commit_index,
 			   "client_ID": msg['src'], "MID": msg["MID"]}
 		sock.send(json.dumps(msg).encode())
-
 
 def send_to_follower(msg):
 	index = next_index[msg['src']]
@@ -151,6 +153,7 @@ while True:
 		val = log[applied_index][the_key]
 		kvstore[the_key] = val
 		if leader:
+			oks += 1
 			return_msg = {"src": my_id, "dst": log[applied_index]['client_ID'],
 						"leader": current_leader, "type": "ok", "MID": log[applied_index]['MID']}
 			return_msg_json = json.dumps(return_msg)
@@ -171,6 +174,7 @@ while True:
 		msg_raw = sock.recv(32768)
 		if len(msg_raw) == 0:
 			continue
+		print(puts - oks)
 		msg = json.loads(msg_raw)
 
 		# if you get a request vote, vote for them if you have not yet voted in this term
@@ -247,6 +251,7 @@ while True:
 				sock.send(return_msg_json.encode())
 			# you are leader, append to own log and send out to replicas
 			else:
+				puts += 1
 				# put into own log
 				log.append({msg["key"]: msg["value"], "term": current_term,
 							"client_ID": msg['src'], "MID": msg['MID']})
