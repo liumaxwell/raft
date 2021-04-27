@@ -38,7 +38,7 @@ match_index = {}
 
 for the_id in replica_ids:
 	next_index[the_id] = 0
-	match_index[the_id] = 0
+	match_index[the_id] = -1
 
 def up_to_date(msg):
 	if msg['term'] > current_term:
@@ -67,10 +67,10 @@ def send_append_entry(msg):
 def send_to_follower(msg):
 	index = next_index[msg['src']]
 	the_key = ""
-	if index == 0:
+	if index == -1:
 		prev_term = 1
 	else:
-		prev_term = log[index-1]['term']
+		prev_term = log[index]['term']
 
 	for key in list(log[index].keys()):
 		if key != 'term' and key != 'client_ID' and key != 'MID':
@@ -109,7 +109,7 @@ while True:
 		candidate = False
 		for the_id in replica_ids:
 			next_index[the_id] = len(log)
-			match_index[the_id] = 0
+			match_index[the_id] = -1
 			msg = {"src": my_id, "dst": the_id,
 			   "leader": my_id, "type": "append_entry",
 			   "key": "", "value": "",
