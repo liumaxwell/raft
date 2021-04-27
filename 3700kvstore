@@ -258,9 +258,9 @@ while True:
 			print("REDIRECT ------------")
 		# get message from client
 		elif msg['type'] == 'get':
-			print("FFFF from get")
 			# if no current leader, make client retry
 			if current_leader == "":
+				print("FFFF from get")
 				return_msg = {"src": my_id, "dst": msg['src'],
 							  "leader": "FFFF", "type": "fail",
 							  "MID": msg['MID']}
