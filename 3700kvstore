@@ -209,7 +209,8 @@ while True:
 			continue
 		msg = json.loads(msg_raw)
 
-		messages[msg["MID"]] = msg
+		if "MID" in msg:
+			messages[msg["MID"]] = msg
 
 		# if you get a request vote, vote for them if you have not yet voted in this term
 		if msg['type'] == "RequestVote":
