@@ -192,6 +192,7 @@ while True:
 			#messages[log[applied_index]["MID"] + "PT"] = return_msg
 
 	if candidate and votes >= majority:
+		print(messages)
 		print(str(my_id) + " got enough votes")
 		most_recent_leader = my_id
 		leader = True
