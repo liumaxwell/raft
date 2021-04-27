@@ -215,6 +215,7 @@ while True:
 				reply_false(msg)
 				print("log index mismatched")
 			elif log_idx == msg["prev_index"]:
+				print("EQUAL")
 				log.append({msg['key']: msg['value'], "term": msg['term'], 
 				"client_ID": msg['src'], "MID": msg['MID']})
 				reply_true(msg)
