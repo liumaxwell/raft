@@ -65,6 +65,8 @@ def send_append_entry(msg):
 			term = 1
 		else:
 			term = log[rep_next_index - 1]["term"]
+		
+	    print("SENDING TO %d: %s  at %f" % (the_id, msg["MID"], time.time()))
 		msg = {"src": my_id, "dst": the_id,
 			"leader": my_id, "type": "append_entry",
 			"key": msg['key'], "value": msg['value'],
@@ -160,7 +162,6 @@ while True:
 			for msg in puts_cache:
 				log.append({msg["key"]: msg["value"], "term": current_term,
 							"client_ID": msg['src'], "MID": msg['MID']})
-				print("APPENDING: " + msg["MID"])
 				send_append_entry(msg)
 			for msg in gets_cache:
 				value = kvstore.get(msg['key'], "")
@@ -241,7 +242,7 @@ while True:
 
 		# follower committed
 		if msg['type'] == 'append_ok':
-			print("GOT OK: " + msg["MID"])
+			print("GOT OK FROM %d: %s   at %f" % (msg["src"], msg["MID"], time.time()))
 			next_index[msg['src']] += 1
 			match_index[msg['src']] = next_index[msg['src']] - 1
 			messages.pop(msg["MID"] + "AE" + str(msg["src"]), "")
