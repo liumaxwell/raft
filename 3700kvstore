@@ -41,12 +41,11 @@ for id in replica_ids:
 	next_index[id] = 0
 	match_index[id] = 0
 
-def up_to_date(log):
-	if log['term'] > current_term:
+def up_to_date(msg):
+	if msg['term'] > current_term:
 		return True
-	elif log['term'] == current_term:
-		print(log['term'])
-		return log['index'] >= len(log) - 1
+	elif msg['term'] == current_term:
+		return msg['index'] >= len(log) - 1
 	else:
 		return False
 
@@ -164,7 +163,7 @@ while True:
 			log.append({msg['key']: msg['value'], "term": msg['term'],
 						"client_ID": msg['src'], "MID": msg['MID']})
 			return_msg = {"src": my_id, "dst": msg['src'],
-						  "leader": current_leader, "index": len(log) - 1,
+						  "leader": current_leader, "index": len(log),
 						  "type": "append_ok", "client_ID": msg['src'], "MID": msg["MID"]}
 			return_msg_json = json.dumps(return_msg)
 			sock.send(return_msg_json.encode())
