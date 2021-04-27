@@ -1,10 +1,10 @@
 {
-    "lifetime": 5,
+    "lifetime": 10,
     "replicas": 5,
     "requests": 10,
     "mix" : 0,
-    "events" : [{"type": "kill_leader", "time": 2},
-	        {"type": "kill_leader", "time": 4}],
+    "events" : [{"type": "kill_leader", "time": 3},
+	        {"type": "kill_leader", "time": 5}],
     "tests" : {
         "benchmarks" : {
             "total_msgs"     : [1800, 4000, 5000],
