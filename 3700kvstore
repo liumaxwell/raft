@@ -29,6 +29,9 @@ current_leader = ""
 most_recent_leader = ""
 voting_hist = []
 
+puts = []
+oks = []
+
 log = []
 kvstore = {}
 
@@ -100,6 +103,13 @@ def reply_true(msg):
 	return_msg_json = json.dumps(return_msg)
 	sock.send(return_msg_json.encode())
 
+def print_diff():
+	out = []
+	for put in puts:
+		if put not in oks:
+			out.append(puts)
+	print(out)
+
 while True:
 	clock = time.time()
 	second_clock = time.time()
@@ -107,11 +117,11 @@ while True:
 		for N in range(commit_index + 1, len(log)):
 			num_matched = 0
 			for the_id in replica_ids:
-				if match_index[the_id] >= N and log[N]["term"] == current_term:
+				if match_index[the_id] >= N:
 					num_matched += 1
-			if num_matched >= majority:
+			if num_matched >= majority and log[N]["term"] == current_term:
 				commit_index = N
-			# code runs every 2 seconds
+		# code runs every 2 seconds
 		if clock - last > 2:
 			# send heartbeat
 			for the_id in replica_ids:
@@ -140,7 +150,7 @@ while True:
 		last_other = second_clock
 		r = random.randint(4, 8)
 
-	if commit_index > applied_index:
+	while commit_index > applied_index:
 		applied_index += 1
 		the_key = ""
 		for key in list(log[applied_index].keys()):
@@ -149,6 +159,7 @@ while True:
 		val = log[applied_index][the_key]
 		kvstore[the_key] = val
 		if leader:
+			oks.append(log[applied_index]['MID'])
 			return_msg = {"src": my_id, "dst": log[applied_index]['client_ID'],
 						"leader": current_leader, "type": "ok", "MID": log[applied_index]['MID']}
 			return_msg_json = json.dumps(return_msg)
@@ -245,6 +256,7 @@ while True:
 				sock.send(return_msg_json.encode())
 			# you are leader, append to own log and send out to replicas
 			else:
+				puts.append(msg["MID"])
 				# put into own log
 				log.append({msg["key"]: msg["value"], "term": current_term,
 							"client_ID": msg['src'], "MID": msg['MID']})
