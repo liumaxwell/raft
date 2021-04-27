@@ -130,7 +130,8 @@ while True:
 			if (msg['term'] > current_term):
 				current_term = msg['term']
 				current_leader = msg['src']
-			#current_leader = msg['leader']
+			else:
+				current_leader = msg['leader']
 			candidate = False
 			if msg['key'] == "":
 				past_beats.append(1)
