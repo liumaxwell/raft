@@ -154,7 +154,6 @@ while True:
 			sock.send(return_msg_json.encode())
 
 	if candidate and votes >= majority:
-		#print("LEADER_LEN: " + str(len(log)))
 		print(str(my_id) + " got enough votes")
 		current_leader = my_id
 		leader = True
@@ -166,12 +165,9 @@ while True:
 	ready = select.select([sock], [], [], 0.1)[0]
 	if sock in ready:
 		msg_raw = sock.recv(32768)
-		print(len(msg_raw))
 		if len(msg_raw) == 0:
-			print("TEST")
 			continue
 		msg = json.loads(msg_raw)
-		# print(str(my_id) + " LEN: " + str(len(log)))
 
 		# if you get a request vote, vote for them if you have not yet voted in this term
 		if msg['type'] == "RequestVote":
@@ -217,7 +213,7 @@ while True:
 				"client_ID": msg['src'], "MID": msg['MID']})
 				reply_true(msg)
 			elif log_idx > msg['prev_index']:
-				if log[msg['prev_index']]["term"] != msg['term']:
+				if log[msg['prev_index'] + 1]["term"] != msg['term']:
 					log = log[0 : msg['prev_index']]
 				log.append({msg['key']: msg['value'], "term": msg['term'], 
 				"client_ID": msg['src'], "MID": msg['MID']})
