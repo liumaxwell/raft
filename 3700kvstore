@@ -30,7 +30,7 @@ print("majority" + str(majority))
 current_leader = ""
 voting_hist = []
 
-log = [{}]
+log = []
 kvstore = {}
 
 commit_index = 0
