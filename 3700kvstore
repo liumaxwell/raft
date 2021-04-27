@@ -194,6 +194,7 @@ while True:
 		if not leader and msg['type'] == 'append_entry':
 			current_term = msg['term']
 			current_leader = msg['leader']
+			print(msg["leader"])
 			candidate = False
 			log_idx = len(log) - 1
 			if msg['key'] == "":
