@@ -142,7 +142,7 @@ while True:
 				# log is mismatched
 				return_msg = {"src": my_id, "dst": msg['src'],
 							  "leader": current_leader, "index": len(log) - 1,
-							  "type": "append_fail"}
+							  "type": "append_fail", "client_ID": msg['src'], "MID": msg["MID"]}
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
 				print("term mismatched")
@@ -150,7 +150,7 @@ while True:
 			elif msg['prev_index'] == -1:
 				return_msg = {"src": my_id, "dst": msg['src'],
 							  "leader": current_leader, "index": 0,
-							  "type": "append_ok"}
+							  "type": "append_ok", "client_ID": msg['src'], "MID": msg["MID"]}
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
 			elif len(log) - 1 < msg['prev_index'] or \
@@ -158,7 +158,7 @@ while True:
 				# log is mismatched
 				return_msg = {"src": my_id, "dst": msg['src'],
 							  "leader": current_leader, "index": len(log) - 1,
-							  "type": "append_fail"}
+							  "type": "append_fail", "client_ID": msg['src'], "MID": msg["MID"]}
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
 				print("log index mismatched")
@@ -170,7 +170,7 @@ while True:
 						"client_ID": msg['src'], "MID": msg['MID']})
 			return_msg = {"src": my_id, "dst": msg['src'],
 						  "leader": current_leader, "index": len(log) - 1,
-						  "type": "append_ok"}
+						  "type": "append_ok", "client_ID": msg['src'], "MID": msg["MID"]}
 			return_msg_json = json.dumps(return_msg)
 			sock.send(return_msg_json.encode())
 
