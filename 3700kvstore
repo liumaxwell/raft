@@ -278,12 +278,7 @@ while True:
 			append_oks += 1
 			next_index[msg['src']] += 1
 			match_index[msg['src']] = next_index[msg['src']] - 1
-			try:
-				messages["appends"][msg["src"]] = [x for x in messages["appends"][msg["src"]] if x["MID"] == msg["MID"]]
-			except:
-				print(msg)
-				print(messages["appends"][msg["src"]])
-				ignore = ""
+			messages["appends"][msg["src"]] = [x for x in messages["appends"][msg["src"]] if x["MID"] != msg["MID"]]
 
 		if msg['type'] == "append_fail":
 			print("GOT APPEND FAIL")
