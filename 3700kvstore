@@ -54,7 +54,7 @@ append_oks = 0
 
 def print_log(typ):
 	i = 0
-	if typ = "LEADER": print("APPEND OKS: " + str(append_oks))
+	if typ == "LEADER": print("APPEND OKS: " + str(append_oks))
 	print("START %s %s LOG ----------" % (typ, my_id))
 	for entry in log:
 		the_key = ""
