@@ -66,6 +66,7 @@ def send_append_entry(msg):
 			term = 1
 		else:
 			term = log[rep_next_index - 1]["term"]
+		print(msg["src"])
 		# print("SENDING TO %s: %s  at %f" % (the_id, msg["MID"], time.time()))
 		msg = {"src": my_id, "dst": the_id,
 			"leader": my_id, "type": "append_entry",
@@ -73,7 +74,6 @@ def send_append_entry(msg):
 			"term": current_term, "prev_index": rep_next_index - 1,
 			"prev_term": term, "lead_commit_index": commit_index,
 			"client_ID": msg['src'], "MID": msg["MID"], "time": time.time()}
-		print(msg["src"])
 		sock.send(json.dumps(msg).encode())
 		messages["appends"][str(the_id)].append(msg)
 		# messages[msg["MID"] + "AE" + str(the_id)] = msg
