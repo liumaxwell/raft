@@ -331,8 +331,10 @@ while True:
 				acc = 0
 				for i in range(msg[prev_index] + 1, log_idx):
 					if log[msg[i]["term"] != msg['entries'][acc]['term']:
-						log = log[0 : msg['prev_index'] + i]
+						log = log[0 : msg['prev_index'] + acc]
 						break
+					else:
+						acc += 1
 				for entry in msg["entries"]:
 					log.append({entry['key']: entry['value'], "term": entry['term'], 
 					"client_ID": entry['client_ID'], "MID": entry['MID']})
