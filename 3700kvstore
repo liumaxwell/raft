@@ -151,7 +151,7 @@ def resend_unacked():
 			appends = messages["appends"][the_id]
 			appends = [x for x in appends if time.time() - x["time"] > 1]
 			for append in appends:
-				print_log("LEADER")
+				# print_log("LEADER")
 				append["time"] = time.time()
 				entries.append(append)
 			if entries:
@@ -281,6 +281,8 @@ while True:
 			try:
 				messages["appends"][msg["src"]] = [x for x in messages["appends"][msg["src"]] if x["MID"] == msg["MID"]]
 			except:
+				print(msg)
+				print(messages["appends"][msg["src"]])
 				ignore = ""
 
 		if msg['type'] == "append_fail":
@@ -295,8 +297,8 @@ while True:
 			candidate = False
 			entries = [msg]
 			if msg["type"] == "bulk_append":
-				time.sleep(0.5)
-				print_log("FOLLWER")
+				# time.sleep(0.5)
+				# print_log("FOLLWER")
 				entries = msg["entries"]
 			for entry in entries:
 				log_idx = len(log) - 1
@@ -330,40 +332,6 @@ while True:
 			if msg['lead_commit_index'] > commit_index:
 				commit_index = min(msg['lead_commit_index'], len(log) - 1)
 
-		# if not leader and msg['type'] == 'bulk_append':
-		# 	current_term = msg['term']
-		# 	most_recent_leader = msg['leader']
-		# 	candidate = False
-		# 	log_idx = len(log) - 1
-		# 	if msg['term'] < current_term:
-		# 		reply_false(msg)
-		# 		print("term mismatched")
-		# 	elif msg['prev_index'] == -1:
-		# 		for entry in msg["entries"]:
-		# 			log.append({entry['key']: entry['value'], "term": entry['term'],
-		# 			"client_ID": entry['client_ID'], "MID": entry['MID']})
-		# 			reply_true(entry)
-		# 	elif log_idx < msg['prev_index'] or \
-		# 			log[int(msg["prev_index"])]["term"] != msg['prev_term']:
-		# 		reply_false(entries[0])
-		# 		print("log index mismatched")
-		# 	elif log_idx == msg["prev_index"]:
-		# 		for entry in msg["entries"]:
-		# 			log.append({entry['key']: entry['value'], "term": entry['term'], 
-		# 			"client_ID": entry['client_ID'], "MID": entry['MID']})
-		# 			reply_true(entry)
-		# 	elif log_idx > msg['prev_index']:
-		# 		for i in range(1, len(msg[entries])):
-		# 			if log[msg["prev_index"] + i]["term"] != msg['entries'][i - 1]['term']:
-		# 				log = log[0:msg['prev_index'] + i]
-		# 				break
-		# 		for entry in msg["entries"]:
-		# 			log.append({entry['key']: entry['value'], "term": entry['term'], 
-		# 			"client_ID": entry['client_ID'], "MID": entry['MID']})
-		# 			reply_true(entry)
-
-		# 	if msg['lead_commit_index'] > commit_index:
-		# 		commit_index = min(msg['lead_commit_index'], len(log) - 1)
 		# if you get a vote, keep track
 		if msg['type'] == "vote" and candidate:
 			votes += 1
@@ -389,7 +357,6 @@ while True:
 					log.append({msg["key"]: msg["value"], "term": current_term,
 								"client_ID": msg['src'], "MID": msg['MID']})
 					# send out append entries
-					print("from put")
 					send_append_entry(msg)
 
 		# get message from client
