@@ -263,6 +263,9 @@ while True:
 			continue
 		msg = json.loads(msg_raw)
 
+		if leader and msg['type'] == 'append_entry' or msg['type'] == 'bulk_append' and msg['term'] >= current_term:
+			leader = False
+
 		# if you get a request vote, vote for them if you have not yet voted in this term
 		if msg['type'] == "RequestVote":
 			# if you haven't voted yet this term and they have greater or equal term
