@@ -135,7 +135,7 @@ def resend_unacked():
 			"prev_term": term, "lead_commit_index": commit_index,
 			"client_ID": "bulk", "MID": "aaaaaaaaaaaaaaaa", "time": time.time()}
 			appends = messages["appends"][the_id]
-			appends = [x for x in appends if time.time() - x["time"] > 2]
+			appends = [x for x in appends if time.time() - x["time"] > 5]
 			for append in appends:
 				append["time"] = time.time()
 				entries.append(append)
