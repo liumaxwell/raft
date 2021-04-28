@@ -159,7 +159,13 @@ def resend_unacked():
 			for append in appends:
 				# print_log("LEADER")
 				append["time"] = time.time()
-				entries.append(append)
+				if len(entries) >= 50:
+					msg["entries"] = entries
+					msg["type"] = "bulk_append"
+					sock.send(json.dumps(msg).encode())
+					entries = []
+				else:
+					entries.append(append)
 			if entries:
 				msg["entries"] = entries
 				msg["type"] = "bulk_append"
