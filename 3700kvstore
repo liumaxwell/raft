@@ -59,6 +59,7 @@ def print_log():
 			if key != 'term' and key != 'client_ID' and key != 'MID':
 				the_key = key
 		print("%d. TERM: %d, KEY: %s, VALUE: %s, MID: %s" % (i, entry["term"], the_key, entry[the_key], entry["MID"]))
+		i += 1
 
 def up_to_date(msg):
 	if msg['term'] > current_term:
