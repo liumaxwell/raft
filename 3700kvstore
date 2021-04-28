@@ -147,7 +147,7 @@ def resend_unacked():
 			"prev_term": term, "lead_commit_index": commit_index,
 			"client_ID": "bulk", "MID": "aaaaaaaaaaaaaaaa", "time": time.time()}
 			appends = messages["appends"][the_id]
-			appends = [x for x in appends if time.time() - x["time"] > 1]
+			appends = [x for x in appends if time.time() - x["time"] > .05]
 			for append in appends:
 				# print_log("LEADER")
 				append["time"] = time.time()
@@ -194,6 +194,7 @@ while True:
 				log.append({msg["key"]: msg["value"], "term": current_term,
 							"client_ID": msg['src'], "MID": msg['MID']})
 				#print("from puts cache")
+				msg["time"] = time.time()
 				send_append_entry(msg)
 			for msg in gets_cache:
 				value = kvstore.get(msg['key'], "")
