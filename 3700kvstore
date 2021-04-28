@@ -52,6 +52,14 @@ for the_id in replica_ids:
 	messages["appends"][the_id] = []
 append_oks = 0
 
+def make_follower():
+	puts_cache = []
+	gets_cache = []
+	votes = 0
+	leader_ready = False
+	leader = False
+	candidate = False
+
 def print_log(typ):
 	i = 0
 	#print("START %s %s LOG ----------" % (typ, my_id))
@@ -261,8 +269,8 @@ while True:
 			continue
 		msg = json.loads(msg_raw)
 
-		if leader and msg['type'] == 'append_entry' or msg['type'] == 'bulk_append' and msg['term'] >= current_term:
-			leader = False
+		if leader and msg['type'] == 'append_entry' or msg['type'] == 'bulk_append' and up_to_date(msg):
+			make_follower()
 
 		# if you get a request vote, vote for them if you have not yet voted in this term
 		if msg['type'] == "RequestVote":
