@@ -235,10 +235,10 @@ while True:
 				the_key = key
 		val = log[applied_index][the_key]
 		kvstore[the_key] = val
+		return_msg = {"src": my_id, "dst": log[applied_index]['client_ID'],
+					"leader": my_id, "type": "ok", "MID": log[applied_index]['MID']}
 		if leader and log[applied_index]['client_ID'] != "no-op":
 			if msg["MID"] not in messages["puts"]:
-				return_msg = {"src": my_id, "dst": log[applied_index]['client_ID'],
-							"leader": my_id, "type": "ok", "MID": log[applied_index]['MID']}
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
 		messages["puts"][msg["MID"]] = return_msg
