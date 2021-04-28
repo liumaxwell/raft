@@ -329,7 +329,7 @@ while True:
 					reply_true(entry)
 			elif log_idx > msg['prev_index']:
 				for i in range(1, len(msg[entries])):
-					if log[msg[i]["term"] != msg['entries'][i]['term']:
+					if log[msg["prev_index"] + i]["term"] != msg['entries'][i - 1]['term']:
 						log = log[0:msg['prev_index'] + i]
 						break
 				for entry in msg["entries"]:
