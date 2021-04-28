@@ -116,35 +116,35 @@ def reply_true(msg):
 	return_msg_json = json.dumps(return_msg)
 	sock.send(return_msg_json.encode())
 
-def resend_unacked():
-	entries = []
-	for the_id in replica_ids:
-		rep_next_index = next_index[the_id]
-		if len(log) == 0:
-			term = 1
-		else:
-			term = log[rep_next_index - 1]["term"]
-		msg = {"src": my_id, "dst": the_id,
-		   "leader": my_id, "type": "bulk_append",
-		   "key": "bulk", "value": "bulk",
-		   "term": current_term, "prev_index": rep_next_index - 1,
-		   "prev_term": term, "lead_commit_index": commit_index,
-		   "client_ID": "bulk", "MID": "aaaaaaaaaaaaaaaa", "time": time.time()}
-		keys = [x for x in messages if x[16:22] == "AE" + str(the_id) and time.time() - messages[x]["time"] > 1]
-		for key in keys:
-			messages[key]["time"] = time.time()
-			msg = messages[key]
-			entries.append(msg)
-		msg["entries"] = entries
-		msg["type"] = "bulk_append"
-		sock.send(json.dumps(msg).encode())
-		entries = []
+# def resend_unacked():
+# 	entries = []
+# 	for the_id in replica_ids:
+# 		rep_next_index = next_index[the_id]
+# 		if len(log) == 0:
+# 			term = 1
+# 		else:
+# 			term = log[rep_next_index - 1]["term"]
+# 		msg = {"src": my_id, "dst": the_id,
+# 		   "leader": my_id, "type": "bulk_append",
+# 		   "key": "bulk", "value": "bulk",
+# 		   "term": current_term, "prev_index": rep_next_index - 1,
+# 		   "prev_term": term, "lead_commit_index": commit_index,
+# 		   "client_ID": "bulk", "MID": "aaaaaaaaaaaaaaaa", "time": time.time()}
+# 		keys = [x for x in messages if x[16:22] == "AE" + str(the_id) and time.time() - messages[x]["time"] > 1]
+# 		for key in keys:
+# 			messages[key]["time"] = time.time()
+# 			msg = messages[key]
+# 			entries.append(msg)
+# 		msg["entries"] = entries
+# 		msg["type"] = "bulk_append"
+# 		sock.send(json.dumps(msg).encode())
+# 		entries = []
 
 while True:
 	clock = time.time()
 	second_clock = time.time()
 	if leader:
-		resend_unacked()
+		# resend_unacked()
 		for N in range(commit_index + 1, len(log)):
 			num_matched = 0
 			for the_id in replica_ids:
