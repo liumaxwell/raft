@@ -122,27 +122,28 @@ def reply_true(msg):
 def resend_unacked():
 	entries = []
 	for the_id in replica_ids:
-		rep_next_index = next_index[the_id]
-		if len(log) == 0:
-			term = 1
-		else:
-			term = log[rep_next_index - 1]["term"]
-		msg = {"src": my_id, "dst": the_id,
-		   "leader": my_id, "type": "bulk_append",
-		   "key": "bulk", "value": "bulk",
-		   "term": current_term, "prev_index": rep_next_index - 1,
-		   "prev_term": term, "lead_commit_index": commit_index,
-		   "client_ID": "bulk", "MID": "aaaaaaaaaaaaaaaa", "time": time.time()}
-		appends = messages["appends"][the_id]
-		appends = [x for x in appends if time.time() - x["time"] > 1]
-		for append in appends:
-			append["time"] = time.time()
-			entries.append(append)
-		if entries:
-			msg["entries"] = entries
-			msg["type"] = "bulk_append"
-			sock.send(json.dumps(msg).encode())
-			entries = []
+		if messages["appends"][the_id]:
+			rep_next_index = next_index[the_id]
+			if len(log) == 0:
+				term = 1
+			else:
+				term = log[rep_next_index - 1]["term"]
+			msg = {"src": my_id, "dst": the_id,
+			"leader": my_id, "type": "bulk_append",
+			"key": "bulk", "value": "bulk",
+			"term": current_term, "prev_index": rep_next_index - 1,
+			"prev_term": term, "lead_commit_index": commit_index,
+			"client_ID": "bulk", "MID": "aaaaaaaaaaaaaaaa", "time": time.time()}
+			appends = messages["appends"][the_id]
+			appends = [x for x in appends if time.time() - x["time"] > 1]
+			for append in appends:
+				append["time"] = time.time()
+				entries.append(append)
+			if entries:
+				msg["entries"] = entries
+				msg["type"] = "bulk_append"
+				sock.send(json.dumps(msg).encode())
+				entries = []
 
 while True:
 	clock = time.time()
