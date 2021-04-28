@@ -207,7 +207,6 @@ while True:
 			for msg in puts_cache:
 				log.append({msg["key"]: msg["value"], "term": current_term,
 							"client_ID": msg['src'], "MID": msg['MID']})
-				print("from puts cache")
 				send_append_entry(msg)
 			for msg in gets_cache:
 				value = kvstore.get(msg['key'], "")
@@ -357,7 +356,7 @@ while True:
 			# you are leader, append to own log and send out to replicas
 			else:
 				if msg["MID"] in messages["puts"]:
-					#sock.send(json.dumps(messages["puts"][msg["MID"]]).encode())
+					sock.send(json.dumps(messages["puts"][msg["MID"]]).encode())
 					continue
 				if not leader_ready:
 					puts_cache.append(msg)
@@ -380,7 +379,7 @@ while True:
 			# if leader, get the value and send back
 			else:
 				if msg["MID"] in messages["gets"]:
-					#sock.send(json.dumps(messages["gets"][msg["MID"]]).encode())
+					sock.send(json.dumps(messages["gets"][msg["MID"]]).encode())
 					continue
 				value = kvstore.get(msg['key'], "")
 				if not leader_ready:
