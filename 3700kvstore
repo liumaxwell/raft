@@ -51,6 +51,15 @@ for the_id in replica_ids:
 	match_index[the_id] = -1
 	messages["appends"][the_id] = []
 
+def print_log():
+	i = 0
+	for entry in log:
+		the_key = ""
+		for key in list(log[index].keys()):
+			if key != 'term' and key != 'client_ID' and key != 'MID':
+				the_key = key
+		print("%d. TERM: %d, KEY: %s, VALUE: %s, MID: %s" % (i, entry["term"], the_key, entry[the_key], entry["MID"]))
+
 def up_to_date(msg):
 	if msg['term'] > current_term:
 		return True
@@ -120,6 +129,7 @@ def reply_true(msg):
 	sock.send(return_msg_json.encode())
 
 def resend_unacked():
+	print_log()
 	entries = []
 	for the_id in replica_ids:
 		if messages["appends"][the_id]:
