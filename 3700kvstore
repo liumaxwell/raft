@@ -386,6 +386,10 @@ while True:
 					gets_cache.append(msg)
 				else:
 					value = kvstore.get(msg['key'], "")
+					if not value:
+						return_msg = {"src": my_id, "dst": msg['src'],
+								"leader": my_id, "type": "fail", "MID": msg['MID'], "value": value}
+						continue
 					return_msg = {"src": my_id, "dst": msg['src'],
 								"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
 					return_msg_json = json.dumps(return_msg)
