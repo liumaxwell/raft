@@ -66,16 +66,15 @@ def send_append_entry(msg):
 			term = 1
 		else:
 			term = log[rep_next_index - 1]["term"]
-		print(msg["src"])
 		# print("SENDING TO %s: %s  at %f" % (the_id, msg["MID"], time.time()))
-		msg = {"src": my_id, "dst": the_id,
+		new_msg = {"src": my_id, "dst": the_id,
 			"leader": my_id, "type": "append_entry",
 			"key": msg['key'], "value": msg['value'],
 			"term": current_term, "prev_index": rep_next_index - 1,
 			"prev_term": term, "lead_commit_index": commit_index,
 			"client_ID": msg['src'], "MID": msg["MID"], "time": time.time()}
-		sock.send(json.dumps(msg).encode())
-		messages["appends"][str(the_id)].append(msg)
+		sock.send(json.dumps(new_msg).encode())
+		messages["appends"][str(the_id)].append(new_msg)
 		# messages[msg["MID"] + "AE" + str(the_id)] = msg
 
 # def resend_to_follower(i):
@@ -97,15 +96,15 @@ def send_to_follower(dst, msg):
 		if key != 'term' and key != 'client_ID' and key != 'MID':
 			the_key = key
 
-	msg = {"src": my_id, "dst": dst,
+	new_msg = {"src": my_id, "dst": dst,
 		   "leader": my_id, "type": "append_entry",
 		   "key": the_key, "value": log[index][the_key],
 		   "term": current_term, "prev_index": index - 1,
 		   "prev_term": prev_term, "lead_commit_index": commit_index,
 		   "client_ID": msg['client_ID'], "MID": msg["MID"], "time": time.time()}
-	json_msg = json.dumps(msg)
+	json_msg = json.dumps(new_msg)
 	sock.send(json_msg.encode())
-	messages["appends"][str(dest)].append(message)
+	messages["appends"][str(dest)].append(new_msg)
 	# messages[msg["MID"] + "AE" + str(dst)] = msg
 
 def reply_false(msg):
