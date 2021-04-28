@@ -54,16 +54,16 @@ append_oks = 0
 
 def print_log(typ):
 	i = 0
-	if typ == "LEADER": print("APPEND OKS: " + str(append_oks))
-	print("START %s %s LOG ----------" % (typ, my_id))
+	if typ == "LEADER": #print("APPEND OKS: " + str(append_oks))
+	#print("START %s %s LOG ----------" % (typ, my_id))
 	for entry in log:
 		the_key = ""
 		for key in list(entry.keys()):
 			if key != 'term' and key != 'client_ID' and key != 'MID':
 				the_key = key
-		print("%d. TERM: %d, KEY: %s, VALUE: %s, MID: %s" % (i, entry["term"], the_key, entry[the_key], entry["MID"]))
+		#print("%d. TERM: %d, KEY: %s, VALUE: %s, MID: %s" % (i, entry["term"], the_key, entry[the_key], entry["MID"]))
 		i += 1
-	print("END %s %s LOG ----------" % (typ, my_id))
+	#print("END %s %s LOG ----------" % (typ, my_id))
 
 def up_to_date(msg):
 	if msg['term'] > current_term:
@@ -80,7 +80,6 @@ def send_append_entry(msg):
 			term = 1
 		else:
 			term = log[rep_next_index - 1]["term"]
-		# print("SENDING TO %s: %s  at %f" % (the_id, msg["MID"], time.time()))
 		new_msg = {"src": my_id, "dst": the_id,
 			"leader": my_id, "type": "append_entry",
 			"key": msg['key'], "value": msg['value'],
@@ -186,7 +185,7 @@ while True:
 					"key": "", "value": "",
 					"term": current_term, "prev_index": rep_next_index - 1,
 					"prev_term": term, "lead_commit_index": commit_index, "time": ""}
-				print(str(my_id) + " sent heartbeat")
+				#print(str(my_id) + " sent heartbeat")
 				sock.send(json.dumps(msg).encode())
 			last = clock
 		if not leader_ready and commit_index >= no_op_index:
@@ -195,7 +194,7 @@ while True:
 			for msg in puts_cache:
 				log.append({msg["key"]: msg["value"], "term": current_term,
 							"client_ID": msg['src'], "MID": msg['MID']})
-				print("from puts cache")
+				#print("from puts cache")
 				send_append_entry(msg)
 			for msg in gets_cache:
 				value = kvstore.get(msg['key'], "")
@@ -232,7 +231,7 @@ while True:
 			messages["puts"][msg["MID"]] = return_msg
 
 	if candidate and votes >= majority:
-		print(str(my_id) + " got enough votes")
+		#print(str(my_id) + " got enough votes")
 		most_recent_leader = my_id
 		leader = True
 		candidate = False
@@ -284,7 +283,6 @@ while True:
 			messages["appends"][msg["src"]] = [x for x in messages["appends"][msg["src"]] if x["MID"] != msg["MID"]]
 
 		if msg['type'] == "append_fail":
-			print("GOT APPEND FAIL")
 			next_index[msg['src']] -= 1
 			send_to_follower(msg["src"], msg)
 
@@ -307,7 +305,7 @@ while True:
 					continue
 				if entry['term'] < current_term:
 					reply_false(entry)
-					print("term mismatched")
+					#print("term mismatched")
 				elif entry['prev_index'] == -1:
 					log.append({entry['key']: entry['value'], "term": entry['term'],
 					"client_ID": entry['client_ID'], "MID": entry['MID']})
@@ -315,7 +313,7 @@ while True:
 				elif log_idx < entry['prev_index'] or \
 						log[int(entry["prev_index"])]["term"] != entry['prev_term']:
 					reply_false(entry)
-					print("log index mismatched")
+					#print("log index mismatched")
 				elif log_idx == entry["prev_index"]:
 					log.append({entry['key']: entry['value'], "term": entry['term'], 
 					"client_ID": entry['client_ID'], "MID": entry['MID']})
@@ -400,5 +398,5 @@ while True:
 			   "index": len(log) - 1,
 					   "prev_term": term}
 		sock.send(json.dumps(msg).encode())
-		print("requesting votes")
+		#print("requesting votes")
 		election_timeout = False
