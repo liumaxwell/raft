@@ -129,7 +129,6 @@ def reply_true(msg):
 	sock.send(return_msg_json.encode())
 
 def resend_unacked():
-	print_log()
 	entries = []
 	for the_id in replica_ids:
 		if messages["appends"][the_id]:
@@ -147,7 +146,7 @@ def resend_unacked():
 			appends = messages["appends"][the_id]
 			appends = [x for x in appends if time.time() - x["time"] > 1]
 			for append in appends:
-				print(append)
+				print_log()
 				append["time"] = time.time()
 				entries.append(append)
 			if entries:
