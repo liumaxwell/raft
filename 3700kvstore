@@ -240,7 +240,7 @@ while True:
 						"leader": my_id, "type": "ok", "MID": log[applied_index]['MID']}
 			return_msg_json = json.dumps(return_msg)
 			sock.send(return_msg_json.encode())
-			messages["puts"][msg["MID"]] = return_msg
+		messages["puts"][msg["MID"]] = return_msg
 
 	if candidate and votes >= majority:
 		#print(str(my_id) + " got enough votes")
