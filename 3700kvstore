@@ -119,11 +119,22 @@ def reply_true(msg):
 def resend_unacked():
 	entries = []
 	for the_id in replica_ids:
+		rep_next_index = next_index[the_id]
+		if len(log) == 0:
+			term = 1
+		else:
+			term = log[rep_next_index - 1]["term"]
+		msg = {"src": my_id, "dst": the_id,
+		   "leader": my_id, "type": "bulk_append",
+		   "key": "bulk", "value": "bulk",
+		   "term": current_term, "prev_index": rep_next_index - 1,
+		   "prev_term": term, "lead_commit_index": commit_index,
+		   "client_ID": "bulk", "MID": "aaaaaaaaaaaaaaaa", "time": time.time()}
 		keys = [x for x in messages if x[16:22] == "AE" + str(the_id) and time.time() - messages[x]["time"] > 1]
 		for key in keys:
 			messages[key]["time"] = time.time()
 			msg = messages[key]
-			entries.append(entry)
+			entries.append(msg)
 		msg["entries"] = entries
 		msg["type"] = "bulk_append"
 		sock.send(json.dumps(msg).encode())
@@ -281,45 +292,47 @@ while True:
 				reply_true(msg)
 			elif log_idx > msg['prev_index']:
 				if log[msg['prev_index'] + 1]["term"] != msg['term']:
-					log = log[0 : msg['prev_index']]
+					log = log[0 : msg['prev_index'] + 1]
 				log.append({msg['key']: msg['value'], "term": msg['term'], 
 				"client_ID": msg['client_ID'], "MID": msg['MID']})
 				reply_true(msg)
 
 			if msg['lead_commit_index'] > commit_index:
 				commit_index = min(msg['lead_commit_index'], len(log) - 1)
-		if not leader and msg['type'] == 'bulk_append':
-			current_term = msg['term']
-			most_recent_leader = msg['leader']
-			candidate = False
-			log_idx = len(log) - 1
-			if msg['term'] < current_term:
-				reply_false(msg)
-				print("term mismatched")
-			elif msg['prev_index'] == -1:
-				for entry in msg["entries"]:
-					log.append({entry['key']: entry['value'], "term": entry['term'],
-					"client_ID": entry['client_ID'], "MID": entry['MID']})
-				reply_true(msg)
-			elif log_idx < msg['prev_index'] or \
-					log[int(msg["prev_index"])]["term"] != msg['prev_term']:
-				reply_false(msg)
-				print("log index mismatched")
-			elif log_idx == msg["prev_index"]:
-				for entry in msg["entries"]:
-					log.append({entry['key']: entry['value'], "term": entry['term'], 
-					"client_ID": entry['client_ID'], "MID": entry['MID']})
-				reply_true(msg)
-			elif log_idx > msg['prev_index']:
-				if log[msg['prev_index'] + 1]["term"] != msg['term']:
-					log = log[0 : msg['prev_index']]
-				for entry in msg["entries"]:
-					log.append({entry['key']: entry['value'], "term": entry['term'], 
-					"client_ID": entry['client_ID'], "MID": entry['MID']})
-				reply_true(msg)
+		# if not leader and msg['type'] == 'bulk_append':
+		# 	current_term = msg['term']
+		# 	most_recent_leader = msg['leader']
+		# 	candidate = False
+		# 	log_idx = len(log) - 1
+		# 	if msg['term'] < current_term:
+		# 		reply_false(msg)
+		# 		print("term mismatched")
+		# 	elif msg['prev_index'] == -1:
+		# 		for entry in msg["entries"]:
+		# 			log.append({entry['key']: entry['value'], "term": entry['term'],
+		# 			"client_ID": entry['client_ID'], "MID": entry['MID']})
+		# 			reply_true(entry)
+		# 	elif log_idx < msg['prev_index'] or \
+		# 			log[int(msg["prev_index"])]["term"] != msg['prev_term']:
+		# 		reply_false(entries[0])
+		# 		print("log index mismatched")
+		# 	elif log_idx == msg["prev_index"]:
+		# 		for entry in msg["entries"]:
+		# 			log.append({entry['key']: entry['value'], "term": entry['term'], 
+		# 			"client_ID": entry['client_ID'], "MID": entry['MID']})
+		# 			reply_true(entry)
+		# 	elif log_idx > msg['prev_index']:
+		# 		acc = 0
+		# 		for i in range(msg[prev_index] + 1, log_idx):
+		# 			if log[msg[i]["term"] != msg['entries'][acc]['term']:
+		# 				log = log[0 : msg['prev_index'] + i]
+		# 		for entry in msg["entries"]:
+		# 			log.append({entry['key']: entry['value'], "term": entry['term'], 
+		# 			"client_ID": entry['client_ID'], "MID": entry['MID']})
+		# 			reply_true(entry)
 
-			if msg['lead_commit_index'] > commit_index:
-				commit_index = min(msg['lead_commit_index'], len(log) - 1)
+		# 	if msg['lead_commit_index'] > commit_index:
+		# 		commit_index = min(msg['lead_commit_index'], len(log) - 1)
 		# if you get a vote, keep track
 		if msg['type'] == "vote" and candidate:
 			votes += 1
