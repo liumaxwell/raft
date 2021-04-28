@@ -55,7 +55,7 @@ def print_log():
 	i = 0
 	for entry in log:
 		the_key = ""
-		for key in list(log[index].keys()):
+		for key in list(entry.keys()):
 			if key != 'term' and key != 'client_ID' and key != 'MID':
 				the_key = key
 		print("%d. TERM: %d, KEY: %s, VALUE: %s, MID: %s" % (i, entry["term"], the_key, entry[the_key], entry["MID"]))
