@@ -297,7 +297,7 @@ while True:
 				reply_true(msg)
 			elif log_idx > msg['prev_index']:
 				if log[msg['prev_index'] + 1]["term"] != msg['term']:
-					log = log[0 : msg['prev_index'] + 1]
+					log = log[0 : msg['prev_index']]
 				log.append({msg['key']: msg['value'], "term": msg['term'], 
 				"client_ID": msg['client_ID'], "MID": msg['MID']})
 				reply_true(msg)
