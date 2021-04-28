@@ -193,8 +193,7 @@ while True:
 			for msg in puts_cache:
 				log.append({msg["key"]: msg["value"], "term": current_term,
 							"client_ID": msg['src'], "MID": msg['MID']})
-				#print("from puts cache")
-				msg["time"] = time.time()
+				print("from puts cache")
 				send_append_entry(msg)
 			for msg in gets_cache:
 				value = kvstore.get(msg['key'], "")
