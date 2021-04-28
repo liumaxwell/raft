@@ -138,10 +138,11 @@ def resend_unacked():
 		for append in appends:
 			append["time"] = time.time()
 			entries.append(append)
-		# msg["entries"] = entries
-		# msg["type"] = "bulk_append"
-		# sock.send(json.dumps(msg).encode())
-		# entries = []
+		if entries:
+			msg["entries"] = entries
+			msg["type"] = "bulk_append"
+			sock.send(json.dumps(msg).encode())
+			entries = []
 
 while True:
 	clock = time.time()
