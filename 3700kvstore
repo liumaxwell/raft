@@ -50,9 +50,11 @@ for the_id in replica_ids:
 	next_index[the_id] = 0
 	match_index[the_id] = -1
 	messages["appends"][the_id] = []
+append_oks = 0
 
 def print_log(typ):
 	i = 0
+	if typ = "LEADER": print("APPEND OKS: " + str(append_oks))
 	print("START %s %s LOG ----------" % (typ, my_id))
 	for entry in log:
 		the_key = ""
@@ -273,6 +275,7 @@ while True:
 
 		# follower committed
 		if msg['type'] == 'append_ok':
+			append_oks += 1
 			next_index[msg['src']] += 1
 			match_index[msg['src']] = next_index[msg['src']] - 1
 			try:
@@ -281,6 +284,7 @@ while True:
 				ignore = ""
 
 		if msg['type'] == "append_fail":
+			print("GOT APPEND FAIL")
 			next_index[msg['src']] -= 1
 			send_to_follower(msg["src"], msg)
 
