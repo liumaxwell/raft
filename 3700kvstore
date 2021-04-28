@@ -277,6 +277,7 @@ while True:
 			candidate = False
 			entries = [msg]
 			if msg["type"] == "bulk_append":
+				print("TEST")
 				entries = msg["entries"]
 			for entry in entries:
 				log_idx = len(log) - 1
