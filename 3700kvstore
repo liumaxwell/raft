@@ -239,6 +239,7 @@ while True:
 		"leader": my_id, "type": "ok", "MID": log[applied_index]['MID']}
 		if leader and log[applied_index]['client_ID'] != "no-op":
 			if log[applied_index]["MID"] not in messages["puts"]:
+				print("LEADER %s RESPONDING TO: %s" % (my_id, log[applied_index]["MID"]))
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
 		messages["puts"][log[applied_index]["MID"]] = return_msg
