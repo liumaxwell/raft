@@ -330,6 +330,7 @@ while True:
 					reply_false(entry)
 					#print("log index mismatched")
 				elif log_idx == entry["prev_index"]:
+					print("test")
 					log.append({entry['key']: entry['value'], "term": entry['term'], 
 					"client_ID": entry['client_ID'], "MID": entry['MID']})
 					reply_true(entry)
