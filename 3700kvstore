@@ -155,7 +155,7 @@ def resend_unacked():
 			"prev_term": term, "lead_commit_index": commit_index,
 			"client_ID": "bulk", "MID": "aaaaaaaaaaaaaaaa", "time": time.time()}
 			appends = messages["appends"][the_id]
-			appends = [x for x in appends if time.time() - x["time"] > .1]
+			appends = [x for x in appends if time.time() - x["time"] > .03]
 			for append in appends:
 				# print_log("LEADER")
 				append["time"] = time.time()
@@ -334,11 +334,12 @@ while True:
 					"client_ID": entry['client_ID'], "MID": entry['MID']})
 					reply_true(entry)
 				elif log_idx > entry['prev_index']:
-					print("test")
 					if log[entry['prev_index'] + 1]["term"] != entry['term']:
 						log = log[0 : entry['prev_index'] + 1]
 						log.append({entry['key']: entry['value'], "term": entry['term'], 
 						"client_ID": entry['client_ID'], "MID": entry['MID']})
+						reply_true(entry)
+					else:
 						reply_true(entry)
 
 			if msg['lead_commit_index'] > commit_index:
