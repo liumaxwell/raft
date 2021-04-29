@@ -110,7 +110,7 @@ def send_to_follower(dst, msg):
 	if index == 0:
 		prev_term = 1
 	else:
-		prev_term = log[index]['term']
+		prev_term = log[index - 1]['term']
 
 	for key in list(log[index].keys()):
 		if key != 'term' and key != 'client_ID' and key != 'MID':
