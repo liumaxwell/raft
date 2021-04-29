@@ -195,7 +195,7 @@ while True:
 				sock.send(json.dumps(msg).encode())
 			last = clock
 		if not leader_ready and commit_index >= no_op_index:
-			applied_index += 1
+			#applied_index += 1
 			leader_ready = True
 			first_append_entry = time.time()
 			for pair in cache:
