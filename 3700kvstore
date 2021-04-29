@@ -340,6 +340,8 @@ while True:
 						"client_ID": entry['client_ID'], "MID": entry['MID']})
 						reply_true(entry)
 					else:
+						log.append({entry['key']: entry['value'], "term": entry['term'], 
+						"client_ID": entry['client_ID'], "MID": entry['MID']})
 						reply_true(entry)
 
 			if msg['lead_commit_index'] > commit_index:
