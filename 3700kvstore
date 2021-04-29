@@ -326,15 +326,15 @@ while True:
 					"client_ID": entry['client_ID'], "MID": entry['MID']})
 					reply_true(entry)
 				elif log_idx < entry['prev_index'] or \
-						log[int(entry["prev_index"])]["term"] != entry['prev_term']:
+						log[entry["prev_index"]]["term"] != entry['prev_term']:
 					reply_false(entry)
 					#print("log index mismatched")
 				elif log_idx == entry["prev_index"]:
-					print("test")
 					log.append({entry['key']: entry['value'], "term": entry['term'], 
 					"client_ID": entry['client_ID'], "MID": entry['MID']})
 					reply_true(entry)
 				elif log_idx > entry['prev_index']:
+					print("test")
 					if log[entry['prev_index'] + 1]["term"] != entry['term']:
 						log = log[0 : entry['prev_index'] + 1]
 						log.append({entry['key']: entry['value'], "term": entry['term'], 
