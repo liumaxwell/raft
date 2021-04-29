@@ -50,7 +50,26 @@ for the_id in replica_ids:
 	next_index[the_id] = 0
 	match_index[the_id] = -1
 	messages["appends"][the_id] = []
-append_oks = 0
+
+def heartbeat():
+	global clock
+	global last
+	if clock - last > 2:
+		# send heartbeat
+		for the_id in replica_ids:
+			rep_next_index = next_index[the_id]
+			if len(log) == 0:
+				term = 1
+			else:
+				term = log[rep_next_index - 1]["term"]
+			msg = {"src": my_id, "dst": the_id,
+				"leader": my_id, "type": "append_entry",
+				"key": "", "value": "",
+				"term": current_term, "prev_index": rep_next_index - 1,
+				"prev_term": term, "lead_commit_index": commit_index, "time": ""}
+			#print(str(my_id) + " sent heartbeat")
+			sock.send(json.dumps(msg).encode())
+		last = clock
 
 def make_follower():
 	puts_cache = []
@@ -190,24 +209,10 @@ while True:
 	clock = time.time()
 	second_clock = time.time()
 	if leader:
+		heartbeat()
 		resend_unacked()
 		# code runs every 2 seconds
-		if clock - last > 2:
-			# send heartbeat
-			for the_id in replica_ids:
-				rep_next_index = next_index[the_id]
-				if len(log) == 0:
-					term = 1
-				else:
-					term = log[rep_next_index - 1]["term"]
-				msg = {"src": my_id, "dst": the_id,
-					"leader": my_id, "type": "append_entry",
-					"key": "", "value": "",
-					"term": current_term, "prev_index": rep_next_index - 1,
-					"prev_term": term, "lead_commit_index": commit_index, "time": ""}
-				#print(str(my_id) + " sent heartbeat")
-				sock.send(json.dumps(msg).encode())
-			last = clock
+
 		if not leader_ready and commit_index >= no_op_index:
 			leader_ready = True
 			first_append_entry = time.time()
