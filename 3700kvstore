@@ -181,6 +181,7 @@ while True:
 			for the_id in replica_ids:
 				rep_next_index = next_index[the_id]
 				print(rep_next_index)
+				print(log)
 				if len(log) == 0:
 					term = 1
 				else:
