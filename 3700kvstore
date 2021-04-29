@@ -32,8 +32,6 @@ gets_cache = []
 # r = random.randint(4, 8)
 messages = {"appends": {}, "puts": {}, "gets": {}}
 
-first_append_entry = 0
-
 most_recent_leader = ""
 voting_hist = []
 
@@ -52,8 +50,6 @@ for the_id in replica_ids:
 	messages["appends"][the_id] = []
 
 def heartbeat():
-	global clock
-	global last
 	if clock - last > 2:
 		# send heartbeat
 		for the_id in replica_ids:
@@ -70,6 +66,21 @@ def heartbeat():
 			#print(str(my_id) + " sent heartbeat")
 			sock.send(json.dumps(msg).encode())
 		last = clock
+
+def update_leader_ready():
+	if not leader_ready and commit_index >= no_op_index:
+		leader_ready = True
+		for msg in puts_cache:
+			log.append({msg["key"]: msg["value"], "term": current_term,
+						"client_ID": msg['src'], "MID": msg['MID']})
+			send_append_entry(msg)
+		for msg in gets_cache:
+			value = kvstore.get(msg['key'], "")
+			return_msg = {"src": my_id, "dst": msg['src'],
+			"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
+			return_msg_json = json.dumps(return_msg)
+			sock.send(return_msg_json.encode())
+			messages["gets"][msg["MID"]] = return_msg
 
 def make_follower():
 	puts_cache = []
@@ -211,22 +222,10 @@ while True:
 	if leader:
 		heartbeat()
 		resend_unacked()
+		update_leader_ready()
 		# code runs every 2 seconds
 
-		if not leader_ready and commit_index >= no_op_index:
-			leader_ready = True
-			first_append_entry = time.time()
-			for msg in puts_cache:
-				log.append({msg["key"]: msg["value"], "term": current_term,
-							"client_ID": msg['src'], "MID": msg['MID']})
-				send_append_entry(msg)
-			for msg in gets_cache:
-				value = kvstore.get(msg['key'], "")
-				return_msg = {"src": my_id, "dst": msg['src'],
-				"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
-				return_msg_json = json.dumps(return_msg)
-				sock.send(return_msg_json.encode())
-				messages["gets"][msg["MID"]] = return_msg
+
 
 	# if have not received a heart beat... (empty list)
 	# if not leader and second_clock - last_other > r:
