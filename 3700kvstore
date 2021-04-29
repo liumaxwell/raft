@@ -52,7 +52,7 @@ for the_id in replica_ids:
 append_oks = 0
 
 def make_follower():
-	cache = []
+	#cache = []
 	votes = 0
 	leader_ready = False
 	leader = False
