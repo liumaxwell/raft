@@ -193,6 +193,7 @@ while True:
 				sock.send(json.dumps(msg).encode())
 			last = clock
 		if not leader_ready and commit_index >= no_op_index:
+			applied_index += 1
 			leader_ready = True
 			first_append_entry = time.time()
 			for pair in cache:
@@ -277,8 +278,8 @@ while True:
 			continue
 		msg = json.loads(msg_raw)
 
-		if leader:
-			print_log("LEADER")
+		# if leader:
+		# 	print_log("LEADER")
 
 		if leader and (msg['type'] == 'append_entry' or msg['type'] == 'bulk_append') and msg["term"] >= current_term:
 			make_follower()
@@ -403,7 +404,7 @@ while True:
 					messages["gets"][msg["MID"]] = return_msg
 
 	if election_timeout:
-		print_log("CANDIDATE")
+		#print_log("CANDIDATE")
 		# transition to candidate
 		candidate = True
 		# increment the current term
