@@ -301,7 +301,8 @@ while True:
 			messages["appends"][msg["src"]] = [x for x in messages["appends"][msg["src"]] if x["MID"] != msg["MID"]]
 
 		if msg['type'] == "append_fail":
-			next_index[msg['src']] -= 1
+			if next_index[msg["src"]] > 0:
+				next_index[msg['src']] -= 1
 			send_to_follower(msg["src"], msg)
 
 		# append_entry from leader, append to own and send back OK
