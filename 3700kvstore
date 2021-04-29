@@ -110,7 +110,7 @@ def send_append_entry(msg):
 def send_to_follower(dst, msg):
 	index = next_index[dst]
 	the_key = ""
-	if index == 0 or len(log) == 0:
+	if index == 0:
 		prev_term = 1
 	else:
 		try:
