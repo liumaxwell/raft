@@ -213,7 +213,10 @@ while True:
 				if len(log) == 0:
 					term = 1
 				else:
-					term = log[rep_next_index - 1]["term"]
+					try:
+						term = log[rep_next_index - 1]["term"]
+					except:
+						term = current_term
 				msg = {"src": my_id, "dst": the_id,
 					"leader": my_id, "type": "append_entry",
 					"key": "", "value": "",
