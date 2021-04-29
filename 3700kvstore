@@ -171,6 +171,10 @@ def resend_unacked():
 
 while True:
 
+	if leader:
+		print("LEADER: " + str(len(log)))
+	else:
+		print("LEADER: " + str(len(log)))
 	while commit_index > applied_index:
 		applied_index += 1
 		if log[applied_index]['client_ID'] != "no-op" and log[applied_index]["MID"] not in messages["puts"]:
