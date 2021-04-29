@@ -18,6 +18,7 @@ time.sleep(1)
 num_total = len(replica_ids) + 1
 last = 0
 clock = 0
+second_clock = 0
 last_other = 0
 past_beats = []
 election_timeout = False
@@ -112,6 +113,7 @@ def check_heartbeat():
 	global last_other
 	global past_beats
 	global election_timeout
+	global second_clock
 	# if have not received a heart beat... (empty list)
 	# if not leader and second_clock - last_other > r:
 	if not leader and second_clock - last_other > random.randint(4, 8):
@@ -240,7 +242,6 @@ while True:
 		heartbeat()
 		resend_unacked()
 		update_leader_ready()
-		# code runs every 2 seconds
 
 	check_heartbeat()
 	
