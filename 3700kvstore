@@ -118,9 +118,12 @@ def send_to_follower(dst, msg):
 		except:
 			term = current_term
 
-	for key in list(log[index].keys()):
-		if key != 'term' and key != 'client_ID' and key != 'MID':
-			the_key = key
+	try:
+		for key in list(log[index].keys()):
+			if key != 'term' and key != 'client_ID' and key != 'MID':
+				the_key = key
+	except:
+		return
 
 	new_msg = {"src": my_id, "dst": dst,
 		   "leader": my_id, "type": "append_entry",
