@@ -279,12 +279,13 @@ while True:
 
 		acc += 1
 		if acc % 10 == 0:
-			if leader:
-				print("LEADER %s: %d, %d" % (my_id, commit_index, applied_index))
-			elif candidate:
-				print("CANDIDATE %s: %d, %d" % (my_id, commit_index, applied_index))
-			else:
-				print("FOLLOWER %s: %d, %d" % (my_id, commit_index, applied_index))
+			print(msg_raw)
+			# if leader:
+			# 	print("LEADER %s: %d, %d" % (my_id, commit_index, applied_index))
+			# elif candidate:
+			# 	print("CANDIDATE %s: %d, %d" % (my_id, commit_index, applied_index))
+			# else:
+			# 	print("FOLLOWER %s: %d, %d" % (my_id, commit_index, applied_index))
 
 		if leader and (msg['type'] == 'append_entry' or msg['type'] == 'bulk_append') and msg["term"] >= current_term:
 			make_follower()
