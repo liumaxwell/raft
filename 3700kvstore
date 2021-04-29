@@ -232,7 +232,7 @@ while True:
 			return_msg = {"src": my_id, "dst": log[applied_index]['client_ID'],
 			"leader": my_id, "type": "ok", "MID": log[applied_index]['MID']}
 			if leader:
-				print("LEADER %s RESPONDING TO: %s" % (my_id, log[applied_index]["MID"]))
+				# print("LEADER %s RESPONDING TO: %s" % (my_id, log[applied_index]["MID"]))
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
 			messages["puts"][log[applied_index]["MID"]] = return_msg
@@ -276,6 +276,13 @@ while True:
 		if len(msg_raw) == 0:
 			continue
 		msg = json.loads(msg_raw)
+
+		if leader:
+			print("LEADER %s: %d, %d" % (my_id, commit_index, applied_index))
+		elif candidate:
+			print("CANDIDATE %s: %d, %d" % (my_id, commit_index, applied_index))
+		else:
+			print("FOLLOWER %s: %d, %d" % (my_id, commit_index, applied_index))
 
 		if leader and (msg['type'] == 'append_entry' or msg['type'] == 'bulk_append') and msg["term"] >= current_term:
 			make_follower()
