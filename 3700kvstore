@@ -109,6 +109,7 @@ def update_indices():
 			messages["puts"][log[applied_index]["MID"]] = return_msg
 
 def check_heartbeat():
+	global last_other
 	# if have not received a heart beat... (empty list)
 	# if not leader and second_clock - last_other > r:
 	if not leader and second_clock - last_other > random.randint(4, 8):
