@@ -287,7 +287,7 @@ while True:
 		msg = json.loads(msg_raw)
 
 		if leader:
-			print(my_id + " " + time.time())
+			print(my_id + " " + str(time.time()))
 
 		if leader and (msg['type'] == 'append_entry' or msg['type'] == 'bulk_append') and msg["term"] >= current_term:
 			current_term = msg["term"]
