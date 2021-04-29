@@ -170,6 +170,14 @@ def resend_unacked():
 				entries = []
 
 while True:
+	for N in range(commit_index + 1, len(log)):
+		num_matched = 0
+		for the_id in replica_ids:
+			if match_index[the_id] >= N:
+				num_matched += 1
+		if num_matched >= majority - 1 and log[N]["term"] == current_term:
+			commit_index = N
+
 	while commit_index > applied_index:
 		applied_index += 1
 		if log[applied_index]['client_ID'] != "no-op" and log[applied_index]["MID"] not in messages["puts"]:
@@ -233,14 +241,6 @@ while True:
 			past_beats = []
 		last_other = second_clock
 		r = random.randint(4, 8)
-	
-	for N in range(commit_index + 1, len(log)):
-		num_matched = 0
-		for the_id in replica_ids:
-			if match_index[the_id] >= N:
-				num_matched += 1
-		if num_matched >= majority - 1 and log[N]["term"] == current_term:
-			commit_index = N
 
 	if candidate and votes >= majority:
 		#print(str(my_id) + " got enough votes")
