@@ -92,7 +92,6 @@ def update_indices():
 	global commit_index
 	global applied_index
 	while commit_index > applied_index:
-		applied_index += 1
 		if log[applied_index]['client_ID'] != "no-op" and log[applied_index]["MID"] not in messages["puts"]:
 			the_key = ""
 			for key in list(log[applied_index].keys()):
@@ -106,7 +105,20 @@ def update_indices():
 				# print("LEADER %s RESPONDING TO: %s" % (my_id, log[applied_index]["MID"]))
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
+			applied_index += 1
 			messages["puts"][log[applied_index]["MID"]] = return_msg
+
+def check_heartbeat():
+	# if have not received a heart beat... (empty list)
+	# if not leader and second_clock - last_other > r:
+	if not leader and second_clock - last_other > random.randint(4, 8):
+		# if no heartbeats received.. then begin election timeout
+		if len(past_beats) == 0:
+			election_timeout = True
+		else:
+			past_beats = []
+		last_other = second_clock
+		r = random.randint(4, 8)
 
 def make_follower():
 	puts_cache = []
@@ -151,14 +163,6 @@ def send_append_entry(msg):
 			"client_ID": msg['src'], "MID": msg["MID"], "time": time.time()}
 		sock.send(json.dumps(new_msg).encode())
 		messages["appends"][str(the_id)].append(new_msg)
-		# messages[msg["MID"] + "AE" + str(the_id)] = msg
-
-# def resend_to_follower(i):
-# 	msg = appends.pop(i)
-# 	msg["time"] = time.time()
-# 	appends.insert(0, msg)
-# 	json_msg = json.dumps(msg)
-# 	sock.send(json_msg.encode())
 
 def send_to_follower(dst, msg):
 	index = next_index[dst]
@@ -235,18 +239,7 @@ while True:
 		update_leader_ready()
 		# code runs every 2 seconds
 
-
-
-	# if have not received a heart beat... (empty list)
-	# if not leader and second_clock - last_other > r:
-	if not leader and second_clock - last_other > random.randint(4, 8):
-		# if no heartbeats received.. then begin election timeout
-		if len(past_beats) == 0:
-			election_timeout = True
-		else:
-			past_beats = []
-		last_other = second_clock
-		r = random.randint(4, 8)
+	check_heartbeat()
 	
 	for N in range(commit_index + 1, len(log)):
 		num_matched = 0
