@@ -27,8 +27,7 @@ votes = 0
 majority = math.ceil(num_total / 2) + 1
 leader_ready = False
 no_op_index = 0
-puts_cache = []
-gets_cache = []
+cache = []
 # r = random.randint(4, 8)
 messages = {"appends": {}, "puts": {}, "gets": {}}
 
@@ -53,8 +52,7 @@ for the_id in replica_ids:
 append_oks = 0
 
 def make_follower():
-	puts_cache = []
-	gets_cache = []
+	cache = []
 	votes = 0
 	leader_ready = False
 	leader = False
@@ -197,17 +195,19 @@ while True:
 		if not leader_ready and commit_index >= no_op_index:
 			leader_ready = True
 			first_append_entry = time.time()
-			for msg in puts_cache:
-				log.append({msg["key"]: msg["value"], "term": current_term,
-							"client_ID": msg['src'], "MID": msg['MID']})
-				send_append_entry(msg)
-			for msg in gets_cache:
-				value = kvstore.get(msg['key'], "")
-				return_msg = {"src": my_id, "dst": msg['src'],
-				"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
-				return_msg_json = json.dumps(return_msg)
-				sock.send(return_msg_json.encode())
-				messages["gets"][msg["MID"]] = return_msg
+			for pair in cache:
+				msg = pair[1]
+				if pair[0] == "put":
+					log.append({msg["key"]: msg["value"], "term": current_term,
+								"client_ID": msg['src'], "MID": msg['MID']})
+					send_append_entry(msg)
+				else:
+					value = kvstore.get(msg['key'], "")
+					return_msg = {"src": my_id, "dst": msg['src'],
+					"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
+					return_msg_json = json.dumps(return_msg)
+					sock.send(return_msg_json.encode())
+					messages["gets"][msg["MID"]] = return_msg
 
 	# if have not received a heart beat... (empty list)
 	# if not leader and second_clock - last_other > r:
@@ -362,7 +362,7 @@ while True:
 					sock.send(json.dumps(messages["puts"][msg["MID"]]).encode())
 					continue
 				if not leader_ready:
-					puts_cache.append(msg)
+					cache.append(("put", msg))
 				else:
 					# put into own log
 					log.append({msg["key"]: msg["value"], "term": current_term,
@@ -386,7 +386,7 @@ while True:
 					continue
 				value = kvstore.get(msg['key'], "")
 				if not leader_ready:
-					gets_cache.append(msg)
+					cache.append(("get", msg))
 				else:
 					value = kvstore.get(msg['key'], "")
 					if not value:
