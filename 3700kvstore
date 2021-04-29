@@ -133,7 +133,7 @@ def reply_false(msg):
 
 def reply_true(msg):
 	return_msg = {"src": my_id, "dst": msg['src'], "leader": msg['src'],
-	"type": "append_ok", "client_ID": msg['src'], "MID": msg["MID"]}
+	"type": "append_ok", "client_ID": msg['src'], "MID": msg["MID"], "index": msg["prev_index"] + 2}
 	return_msg_json = json.dumps(return_msg)
 	sock.send(return_msg_json.encode())
 
@@ -297,7 +297,7 @@ while True:
 		# follower committed
 		if msg['type'] == 'append_ok':
 			append_oks += 1
-			next_index[msg['src']] += 1
+			next_index[msg['src']] += msg["index"]
 			match_index[msg['src']] = next_index[msg['src']] - 1
 			messages["appends"][msg["src"]] = [x for x in messages["appends"][msg["src"]] if x["MID"] != msg["MID"]]
 
