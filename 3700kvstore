@@ -88,6 +88,26 @@ def update_leader_ready():
 			sock.send(return_msg_json.encode())
 			messages["gets"][msg["MID"]] = return_msg
 
+def update_indices():
+	global commit_index
+	global applied_index
+	while commit_index > applied_index:
+		applied_index += 1
+		if log[applied_index]['client_ID'] != "no-op" and log[applied_index]["MID"] not in messages["puts"]:
+			the_key = ""
+			for key in list(log[applied_index].keys()):
+				if key != 'term' and key != 'client_ID' and key != 'MID':
+					the_key = key
+			val = log[applied_index][the_key]
+			kvstore[the_key] = val
+			return_msg = {"src": my_id, "dst": log[applied_index]['client_ID'],
+			"leader": my_id, "type": "ok", "MID": log[applied_index]['MID']}
+			if leader:
+				# print("LEADER %s RESPONDING TO: %s" % (my_id, log[applied_index]["MID"]))
+				return_msg_json = json.dumps(return_msg)
+				sock.send(return_msg_json.encode())
+			messages["puts"][log[applied_index]["MID"]] = return_msg
+
 def make_follower():
 	puts_cache = []
 	gets_cache = []
@@ -206,23 +226,7 @@ def resend_unacked():
 				entries = []
 
 while True:
-	while commit_index > applied_index:
-		applied_index += 1
-		if log[applied_index]['client_ID'] != "no-op" and log[applied_index]["MID"] not in messages["puts"]:
-			the_key = ""
-			for key in list(log[applied_index].keys()):
-				if key != 'term' and key != 'client_ID' and key != 'MID':
-					the_key = key
-			val = log[applied_index][the_key]
-			kvstore[the_key] = val
-			return_msg = {"src": my_id, "dst": log[applied_index]['client_ID'],
-			"leader": my_id, "type": "ok", "MID": log[applied_index]['MID']}
-			if leader:
-				# print("LEADER %s RESPONDING TO: %s" % (my_id, log[applied_index]["MID"]))
-				return_msg_json = json.dumps(return_msg)
-				sock.send(return_msg_json.encode())
-			messages["puts"][log[applied_index]["MID"]] = return_msg
-
+	update_indices()
 	clock = time.time()
 	second_clock = time.time()
 	if leader:
