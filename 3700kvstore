@@ -275,6 +275,7 @@ while True:
 		msg = json.loads(msg_raw)
 
 		if leader and (msg['type'] == 'append_entry' or msg['type'] == 'bulk_append') and msg["term"] >= current_term:
+			current_term = msg["term"]
 			make_follower()
 
 		# if you get a request vote, vote for them if you have not yet voted in this term
