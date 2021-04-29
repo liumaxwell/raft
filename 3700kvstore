@@ -144,10 +144,7 @@ def resend_unacked():
 	for the_id in replica_ids:
 		if messages["appends"][the_id]:
 			rep_next_index = next_index[the_id]
-			if len(log) == 0:
-				term = 1
-			else:
-				term = log[rep_next_index - 1]["term"]
+			term = 0
 			msg = {"src": my_id, "dst": the_id,
 			"leader": my_id, "type": "bulk_append",
 			"key": "bulk", "value": "bulk",
