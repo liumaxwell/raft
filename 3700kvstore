@@ -324,7 +324,7 @@ while True:
 				if entry['term'] < current_term:
 					reply_false(entry)
 					#print("term mismatched")
-				elif entry['prev_index'] == -1:
+				elif entry['prev_index'] < 0:
 					log.append({entry['key']: entry['value'], "term": entry['term'],
 					"client_ID": entry['client_ID'], "MID": entry['MID']})
 					reply_true(entry)
