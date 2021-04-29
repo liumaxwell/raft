@@ -71,6 +71,9 @@ def heartbeat():
 		last = clock
 
 def update_leader_ready():
+	global leader_ready
+	global commit_index
+	global no_op_index
 	if not leader_ready and commit_index >= no_op_index:
 		leader_ready = True
 		for msg in puts_cache:
