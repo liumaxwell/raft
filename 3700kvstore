@@ -188,9 +188,9 @@ while True:
 			# send heartbeat
 			send_heartbeat()
 			last = clock
-		if clock - append_clock > .02:
-			send_append_entry("")
-			append_clock = time.time()
+		# if clock - append_clock > .02:
+		# 	send_append_entry("")
+		# 	append_clock = time.time()
 		if not leader_ready and commit_index >= no_op_index:
 			leader_ready = True
 			first_append_entry = time.time()
