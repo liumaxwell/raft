@@ -422,7 +422,7 @@ while True:
 					sock.send(return_msg_json.encode())
 					messages["gets"][msg["MID"]] = return_msg
 
-	if candidate and time.time() - election_time > .01:
+	if candidate and time.time() - election_time > .05:
 		print(my_id + " sending more votes")
 		msg = {'src': my_id, 'dst': "FFFF", 'leader': "FFFF",
 		'type': 'RequestVote', "term": current_term,
