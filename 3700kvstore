@@ -290,7 +290,7 @@ while True:
 		if time.time() - print_timer > 0.1:
 			if leader:
 				print("LEADER " + my_id+ ": " + str(commit_index) + ", " + str(len(log)))
-				# print(next_index)
+				print(match_index)
 			else:
 				print("FOLLOWER " + my_id+ ": " + str(commit_index) + ", " + str(len(log)))
 			print_timer = time.time()
