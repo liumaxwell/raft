@@ -33,7 +33,7 @@ cache = []
 catchup_state = False
 get_index = 0
 # r = random.randint(4, 8)
-messages = {"puts": {}, "gets": {}}
+messages = {"puts": [], "gets": []}
 voted = False
 
 first_append_entry = 0
