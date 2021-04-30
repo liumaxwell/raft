@@ -284,6 +284,7 @@ while True:
 
 		# follower committed
 		if msg['type'] == 'append_ok':
+			print("OK")
 			next_index[msg['src']] += 1
 			match_index[msg['src']] = next_index[msg['src']] - 1
 			# messages["appends"][msg["src"]] = [x for x in messages["appends"][msg["src"]] if x["MID"] != msg["MID"]]
