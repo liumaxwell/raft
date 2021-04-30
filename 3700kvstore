@@ -348,7 +348,7 @@ while True:
 			if msg['term'] < current_term:
 				reply_false(msg)
 				break
-		    current_term = msg["term"]
+			current_term = msg["term"]
 			for entry in entries:
 				log_idx = len(log) - 1
 				if entry['prev_index'] == -1:
