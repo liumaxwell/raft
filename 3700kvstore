@@ -413,6 +413,7 @@ while True:
 					messages["gets"][msg["MID"]] = return_msg
 
 	if election_timeout:
+		print(my_id + " starting election")
 		# transition to candidate
 		candidate = True
 		# increment the current term
