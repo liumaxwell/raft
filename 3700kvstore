@@ -87,7 +87,7 @@ def up_to_date(msg):
 def send_append_entry():
 	for the_id in replica_ids:
 		rep_next_index = next_index[the_id]
-		if len(log) == 0 or rep_next_index = 0:
+		if len(log) == 0 or rep_next_index == 0:
 			term = 1
 		else:
 			term = log[rep_next_index - 1]["term"]
