@@ -218,12 +218,13 @@ while True:
 						puts = True
 						log.append({msg["key"]: msg["value"], "term": current_term,
 									"client_ID": msg['src'], "MID": msg['MID']})
-						messages["puts"][msg["MID"]] = msg
+						messages["puts"].append(msg["MID"])
 				else:
 					if msg["MID"] not in messages["gets"]:
 						if puts:
 							send_append_entry("")
 							cache.insert(0, entry)
+							messages["gets"].append(msg["MID"])
 							break
 						else:
 							value = kvstore.get(msg['key'], "")
@@ -231,7 +232,7 @@ while True:
 							"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
 							return_msg_json = json.dumps(return_msg)
 							sock.send(return_msg_json.encode())
-						messages["gets"][msg["MID"]] = msg
+						messages["gets"].append(msg["MID"])
 			if not cache:
 				send_append_entry("")
 				leader_ready = True
@@ -405,7 +406,7 @@ while True:
 									"client_ID": msg['src'], "MID": msg['MID']})
 						# send out append entries
 						send_append_entry("")
-						messages["puts"][msg["MID"]] = msg
+						messages["puts"].append(msg["MID"])
 
 		# get message from client
 		elif msg['type'] == 'get':
@@ -434,7 +435,7 @@ while True:
 									"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
 						return_msg_json = json.dumps(return_msg)
 						sock.send(return_msg_json.encode())
-						messages["gets"][msg["MID"]] = return_msg
+						messages["gets"].append(msg["MID"])
 
 	if candidate and time.time() - election_time > .5:
 		print(my_id + " sending more votes")
