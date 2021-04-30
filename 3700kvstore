@@ -335,6 +335,7 @@ while True:
 						commit_index = min(entry['lead_commit_index'], len(log) - 1)
 					continue
 				if entry['term'] < current_term:
+					print("PROBLEM")
 					reply_false(entry)
 					#print("term mismatched")
 				elif entry['prev_index'] < 0:
