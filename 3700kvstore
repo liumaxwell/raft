@@ -392,7 +392,7 @@ while True:
 					sock.send(json.dumps(messages["puts"][msg["MID"]]).encode())
 					continue
 				if not leader_ready:
-		    		cache.append(("put", msg))
+					cache.append(("put", msg))
 				else:
 					# put into own log
 					log.append({msg["key"]: msg["value"], "term": current_term,
