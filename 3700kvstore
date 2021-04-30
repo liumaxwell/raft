@@ -110,6 +110,7 @@ def send_append_entry(dst):
 			new_entry = {"key": the_key, "value": entry[the_key],
 			"prev_index": rep_next_index + i - 1, "prev_term": term,
 			"client_ID": entry['client_ID'], "MID": entry["MID"]}
+			entries.append(entry)
 		msg = {"src": my_id, "dst": the_id, "leader": my_id, "term": current_term,
 		"type": "append_entry", "entries": entries, "lead_commit_index": commit_index}
 		sock.send(json.dumps(msg).encode())
@@ -316,7 +317,6 @@ while True:
 				reply_false(msg)
 				break
 			for entry in entries:
-				print("IN ENTRIES")
 				log_idx = len(log) - 1
 					#print("term mismatched")
 				if entry['prev_index'] == -1:
