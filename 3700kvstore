@@ -140,13 +140,13 @@ def send_append_entry(dst):
 
 def reply_false(msg):
 	return_msg = {"src": my_id, "dst": msg['src'], "leader": msg["src"],
-	"type": "append_fail", "client_ID": msg['src'], "MID": msg["MID"]}
+	"type": "append_fail", "term": current_term}
 	return_msg_json = json.dumps(return_msg)
 	sock.send(return_msg_json.encode())
 
 def reply_true(msg):
 	return_msg = {"src": my_id, "dst": msg['src'], "leader": msg['src'],
-	"type": "append_ok", "client_ID": msg['src'], "MID": msg["MID"]}
+	"type": "append_ok", "term": current_term}
 	return_msg_json = json.dumps(return_msg)
 	sock.send(return_msg_json.encode())
 
@@ -290,9 +290,13 @@ while True:
 
 		if msg['type'] == "append_fail":
 			print("FAIL")
+			if msg["term"] > current_term:
+				make_follower()
+				continue
 			if next_index[msg["src"]] > 0:
 				next_index[msg['src']] -= 1
-				match_index[msg["src"]] = -1
+			match_index[msg["src"]] = -1
+			
 			#send_to_follower(msg["src"], msg)
 
 		# append_entry from leader, append to own and send back OK
@@ -302,15 +306,17 @@ while True:
 			most_recent_leader = msg['leader']
 			candidate = False
 			entries = msg["entries"]
-			for entry in entries:
-				log_idx = len(log) - 1
-				if entry['key'] == "":
-					past_beats.append(1)
-					if entry['lead_commit_index'] > commit_index:
-						commit_index = min(entry['lead_commit_index'], len(log) - 1)
+			if not entries:
+				past_beats.append(1)
+				if msg['lead_commit_index'] > commit_index:
+					commit_index = min(msg['lead_commit_index'], len(log) - 1)
 					continue
+				
 				if msg['term'] < current_term:
 					reply_false(entry)
+					break
+			for entry in entries:
+				log_idx = len(log) - 1
 					#print("term mismatched")
 				elif entry['prev_index'] == -1:
 					if log_idx == -1:
