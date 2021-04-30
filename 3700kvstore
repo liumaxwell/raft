@@ -316,6 +316,7 @@ while True:
 				reply_false(msg)
 				break
 			for entry in entries:
+				print("IN ENTRIES")
 				log_idx = len(log) - 1
 					#print("term mismatched")
 				if entry['prev_index'] == -1:
