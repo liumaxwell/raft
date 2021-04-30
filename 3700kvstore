@@ -30,6 +30,8 @@ leader_ready = False
 no_op_index = 0
 append_clock = 0
 cache = []
+catchup_state = False
+get_index = 0
 # r = random.randint(4, 8)
 # messages = {"appends": {}, "puts": {}, "gets": {}}
 voted = False
@@ -192,22 +194,40 @@ while True:
 		if clock - append_clock > 1:
 			send_append_entry("")
 			append_clock = time.time()
-		if not leader_ready and commit_index >= no_op_index:
-			leader_ready = True
+		if catchup_state:
+			if applied_index >= get_index:
+				if cache[get_index][0] != "get":
+					print("PANIC")
+				msg = cache[get_index][1]
+				value = kvstore.get(msg['key'], "")
+				return_msg = {"src": my_id, "dst": msg['src'],
+				"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
+				return_msg_json = json.dumps(return_msg)
+				sock.send(return_msg_json.encode())
+		if not catchup_state and not leader_ready and commit_index >= no_op_index:
+			catchup_state = True
 			first_append_entry = time.time()
-			for entry in cache:
-				msg = entry[1]
+			cache_len = len(cache)
+			for i in range(cache_len):
+				msg = cache.pop(0)
 				if entry[0] == "put":
+					puts = True
 					log.append({msg["key"]: msg["value"], "term": current_term,
 								"client_ID": msg['src'], "MID": msg['MID']})
 					send_append_entry("")
 				else:
-					value = kvstore.get(msg['key'], "")
-					return_msg = {"src": my_id, "dst": msg['src'],
-					"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
-					return_msg_json = json.dumps(return_msg)
-					sock.send(return_msg_json.encode())
-					# messages["gets"][msg["MID"]] = return_msg
+					if puts:
+						get_index = i
+						break
+					else:
+						value = kvstore.get(msg['key'], "")
+						return_msg = {"src": my_id, "dst": msg['src'],
+						"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
+						return_msg_json = json.dumps(return_msg)
+						sock.send(return_msg_json.encode())
+			if not cache:
+				leader_ready = True
+				catchup_state = False
 
 	# if have not received a heart beat... (empty list)
 	# if not leader and second_clock - last_other > r:
