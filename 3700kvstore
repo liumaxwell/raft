@@ -100,7 +100,7 @@ def send_append_entry(dst):
 		ids = replica_ids
 	for the_id in ids:
 		rep_next_index = next_index[the_id]
-		num_entries = min(50, len(log) - rep_next_index)
+		num_entries = min(20, len(log) - rep_next_index)
 		entries = []
 		for i in range(num_entries):
 			if rep_next_index + i - 1 == -1:
