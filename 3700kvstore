@@ -253,8 +253,8 @@ while True:
 			continue
 		msg = json.loads(msg_raw)
 
-		if leader:
-			print(next_index)
+		# if leader:
+		# 	print(next_index)
 
 		if leader and (msg['type'] == 'append_entry' or msg['type'] == 'bulk_append') and msg["term"] >= current_term:
 			current_term = msg["term"]
@@ -285,13 +285,11 @@ while True:
 
 		# follower committed
 		if msg['type'] == 'append_ok':
-			print("OK")
 			next_index[msg['src']] += 1
 			match_index[msg['src']] = next_index[msg['src']] - 1
 			# messages["appends"][msg["src"]] = [x for x in messages["appends"][msg["src"]] if x["MID"] != msg["MID"]]
 
 		if msg['type'] == "append_fail":
-			print("FAIL")
 			if msg["term"] > current_term:
 				make_follower()
 				continue
@@ -318,7 +316,6 @@ while True:
 				break
 			for entry in entries:
 				log_idx = len(log) - 1
-				print(entry)
 				if entry['prev_index'] == -1:
 					if log_idx == -1:
 						log.append({entry['key']: entry['value'], "term": entry['term'],
@@ -331,7 +328,6 @@ while True:
 						break
 				elif log_idx < entry['prev_index'] or \
 						log[entry["prev_index"]]["term"] != entry['prev_term']:
-					print(my_id + " FAILED: " + str(entry["prev_index"]) + ", " + str(log_idx))
 					reply_false(msg)
 					break
 					#print("log index mismatched")
