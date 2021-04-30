@@ -35,6 +35,7 @@ get_index = 0
 # r = random.randint(4, 8)
 messages = {"puts": [], "gets": []}
 voted = False
+last_catchup = False
 
 first_append_entry = 0
 
@@ -203,8 +204,11 @@ while True:
 				"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
+				if last_catchup:
+					catchup_state = False
 		if not leader_ready and commit_index >= no_op_index:
 			catchup_state = True
+			last_catchup = False
 			first_append_entry = time.time()
 			cache_len = len(cache)
 			puts = False
@@ -234,7 +238,7 @@ while True:
 			if not cache:
 				send_append_entry("")
 				leader_ready = True
-				catchup_state = False
+				last_catchup = True
 
 	# if have not received a heart beat... (empty list)
 	# if not leader and second_clock - last_other > r:
