@@ -404,7 +404,7 @@ while True:
 									"client_ID": msg['src'], "MID": msg['MID']})
 						# send out append entries
 						send_append_entry("")
-						messages["puts"][msg["MID"]] = return_msg
+						messages["puts"][msg["MID"]] = msg
 
 		# get message from client
 		elif msg['type'] == 'get':
