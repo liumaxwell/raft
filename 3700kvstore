@@ -233,7 +233,7 @@ while True:
 			leader_ready = True
 			first_append_entry = time.time()
 			for msg in cache:
-				if msg[0] == "put"
+				if msg[0] == "put":
 					log.append({msg["key"]: msg["value"], "term": current_term,
 								"client_ID": msg['src'], "MID": msg['MID']})
 					send_append_entry()
