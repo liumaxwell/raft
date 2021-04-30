@@ -84,14 +84,43 @@ def up_to_date(msg):
 	else:
 		return False
 
+def send_heartbeat():
+	msg = {"src": my_id, "dst": "FFFF", "leader": my_id,
+	"type": "append_entry", "entries": [], "lead_commit_index": commit_index}
+	sock.send(json.dumps(new_msg).encode())
+
 def send_append_entry():
 	for the_id in replica_ids:
 		rep_next_index = next_index[the_id]
+		num_entries = min(50, len(log) - rep_next_index)
+		entries = []
+		for i in range(num_entries):
+			if rep_next_index + i - 1 == -1:
+				term = 1
+			else:
+				term = log[rep_next_index + i - 1]["term"]
+			entry = log[rep_next_index + i]
+			for key in list(entry.keys()):
+				if key != 'term' and key != 'client_ID' and key != 'MID':
+					the_key = key
+			new_entry = {"key": the_key, "value": entry[the_key],
+			"prev_index": rep_next_index + i - 1, "prev_term": term,
+			"client_ID": entry['client_ID'], "MID": entry["MID"]}
+		msg = {"src": my_id, "dst": the_id, "leader": my_id, "term": current_term,
+		"type": "append_entry", "entries": entries, "lead_commit_index": commit_index}
+		sock.send(json.dumps(new_msg).encode())
+		messages["appends"][str(the_id)].append(new_msg)
+
+def send_bulk_entry():
+	for the_id in replica_ids:
+		rep_next_index = next_index[the_id]
+		num_entries = min(50, len(log) - rep_next_index)
 		if len(log) == 0 or rep_next_index == 0:
 			term = 1
 		else:
 			term = log[rep_next_index - 1]["term"]
 			term = current_term
+		for i in range(num_entries)
 		entry = log[rep_next_index]
 		for key in list(entry.keys()):
 			if key != 'term' and key != 'client_ID' and key != 'MID':
@@ -173,22 +202,7 @@ while True:
 		# code runs every 2 seconds
 		if clock - last > 2:
 			# send heartbeat
-			for the_id in replica_ids:
-				rep_next_index = next_index[the_id]
-				if len(log) == 0:
-					term = 1
-				else:
-					try:
-						term = log[rep_next_index - 1]["term"]
-					except:
-						term = current_term
-				msg = {"src": my_id, "dst": the_id,
-					"leader": my_id, "type": "append_entry",
-					"key": "", "value": "",
-					"term": current_term, "prev_index": rep_next_index - 1,
-					"prev_term": term, "lead_commit_index": commit_index, "time": ""}
-				#print(str(my_id) + " sent heartbeat")
-				sock.send(json.dumps(msg).encode())
+			send_heartbeat()
 			last = clock
 		if not leader_ready and commit_index >= no_op_index:
 			leader_ready = True
