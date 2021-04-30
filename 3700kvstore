@@ -302,7 +302,7 @@ while True:
 			print(my_id + " DEPOSED " + str(leader))
 
 		# if you get a request vote, vote for them if you have not yet voted in this term
-		if msg['type'] == "RequestVote":
+		if msg['type'] == "RequestVote" and not candidate:
 			# if you haven't voted yet this term and they have greater or equal term
 			if str(msg['term']) not in voting_hist and up_to_date(msg):
 				print(my_id + "voted for " + msg["src"])
