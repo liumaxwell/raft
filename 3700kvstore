@@ -287,7 +287,7 @@ while True:
 		msg = json.loads(msg_raw)
 
 		if leader:
-			print(my_id + ": " + str(commit_index) + "  " + str(time.time()))
+			print(match_index)
 
 		if leader and (msg['type'] == 'append_entry' or msg['type'] == 'bulk_append') and msg["term"] >= current_term:
 			print("DEPOSED")
