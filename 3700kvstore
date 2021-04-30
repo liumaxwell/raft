@@ -219,6 +219,7 @@ while True:
 					send_append_entry("")
 				else:
 					if puts:
+						cache.insert(0, entry)
 						get_index = i
 						break
 					else:
