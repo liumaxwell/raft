@@ -24,6 +24,7 @@ current_term = 0
 leader = False
 candidate = False
 votes = 0
+election_time = 0
 majority = math.ceil(num_total / 2) + 1
 leader_ready = False
 no_op_index = 0
@@ -416,7 +417,7 @@ while True:
 					sock.send(return_msg_json.encode())
 					messages["gets"][msg["MID"]] = return_msg
 
-	if candidate:
+	if candidate and time.time() - election_time > .01:
 		print(my_id + " sending more votes")
 		msg = {'src': my_id, 'dst': "FFFF", 'leader': "FFFF",
 		'type': 'RequestVote', "term": current_term,
@@ -432,6 +433,7 @@ while True:
 		# vote for yourself
 		votes = 1
 		# request votes from others
+		election_time = time.time()
 		if len(log) == 0:
 			term = 1
 		else:
