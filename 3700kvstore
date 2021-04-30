@@ -212,6 +212,7 @@ while True:
 		if clock - last > 2:
 			if num_heartbeats_unacked >= 12:
 				make_follower()
+				continue
 			# send heartbeat
 			for the_id in replica_ids:
 				rep_next_index = next_index[the_id]
