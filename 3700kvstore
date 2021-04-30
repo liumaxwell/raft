@@ -302,6 +302,7 @@ while True:
 							  "leader": "FFFF", "type": "vote"}
 				candidate = False
 				election_timeout = False
+				make_follower()
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
 				voting_hist.append(msg['term'])
