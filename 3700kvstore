@@ -291,9 +291,9 @@ while True:
 			print(match_index)
 
 		if leader and (msg['type'] == 'append_entry' or msg['type'] == 'bulk_append') and msg["term"] >= current_term:
-			print(my_id + " DEPOSED")
 			current_term = msg["term"]
 			make_follower()
+			print(my_id + " DEPOSED " + str(leader))
 
 		# if you get a request vote, vote for them if you have not yet voted in this term
 		if msg['type'] == "RequestVote":
