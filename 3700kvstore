@@ -287,7 +287,7 @@ while True:
 		msg = json.loads(msg_raw)
 
 		if leader:
-			print("LEADER: " + str(commit_index) + ", " + str(len(log)))
+			print("LEADER " + my_id+ ": " + str(commit_index) + ", " + str(len(log)))
 		# else:
 		# 	print("FOLLOWER: " + str(applied_index))
 
