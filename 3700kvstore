@@ -288,8 +288,7 @@ while True:
 
 		if leader:
 			print("LEADER: " + str(len(log) + ", " + str(commit_index))
-		# else:
-		# 	print("FOLLOWER: " + str(applied_index))
+
 
 		# if leader:
 		# 	print(next_index)
