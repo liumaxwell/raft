@@ -290,6 +290,7 @@ while True:
 			print(my_id + ": " + str(applied_index) + "  " + str(time.time()))
 
 		if leader and (msg['type'] == 'append_entry' or msg['type'] == 'bulk_append') and msg["term"] >= current_term:
+			print("DEPOSED")
 			current_term = msg["term"]
 			make_follower()
 
