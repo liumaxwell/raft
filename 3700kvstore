@@ -196,8 +196,7 @@ while True:
 		if clock - append_clock > 1:
 			send_append_entry("")
 			append_clock = time.time()
-		if catchup_state or last_catchup:
-
+		if catchup_state:
 			if applied_index >= get_index:
 				msg = cache[0][1]
 				value = kvstore.get(msg['key'], "")
@@ -239,7 +238,6 @@ while True:
 				send_append_entry("")
 				leader_ready = True
 				catchup_state = False
-				last_catchup = True
 
 	# if have not received a heart beat... (empty list)
 	# if not leader and second_clock - last_other > r:
