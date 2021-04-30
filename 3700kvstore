@@ -210,7 +210,7 @@ while True:
 			cache_len = len(cache)
 			for i in range(cache_len):
 				msg = cache.pop(0)
-				if entry[0] == "put":
+				if msg[0] == "put":
 					puts = True
 					log.append({msg["key"]: msg["value"], "term": current_term,
 								"client_ID": msg['src'], "MID": msg['MID']})
