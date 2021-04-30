@@ -208,9 +208,11 @@ while True:
 			catchup_state = True
 			first_append_entry = time.time()
 			cache_len = len(cache)
+			puts = False
 			for i in range(cache_len):
-				msg = cache.pop(0)
-				if msg[0] == "put":
+				entry = cache.pop(0)
+				msg = entry[1]
+				if entry[0] == "put":
 					puts = True
 					log.append({msg["key"]: msg["value"], "term": current_term,
 								"client_ID": msg['src'], "MID": msg['MID']})
