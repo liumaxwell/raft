@@ -114,7 +114,8 @@ def send_append_entry(dst):
 			entries.append(new_entry)
 		msg = {"src": my_id, "dst": the_id, "leader": my_id, "term": current_term,
 		"type": "append_entry", "entries": entries, "lead_commit_index": commit_index}
-		sock.send(json.dumps(msg).encode())
+		if entries:
+			sock.send(json.dumps(msg).encode())
 		# messages["appends"][str(the_id)].append(new_msg)
 
 # def send_to_follower(dst, msg):
