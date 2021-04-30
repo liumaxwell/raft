@@ -322,6 +322,7 @@ while True:
 					elif log[0]["term"] == entry["prev_term"]:
 						reply_true(entry)
 					else:
+						print("FAIL FROM HERE")
 						reply_false(entry)
 						break
 				elif log_idx < entry['prev_index'] or \
