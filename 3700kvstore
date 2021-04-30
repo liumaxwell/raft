@@ -318,7 +318,7 @@ while True:
 			for entry in entries:
 				log_idx = len(log) - 1
 					#print("term mismatched")
-				elif entry['prev_index'] == -1:
+				if entry['prev_index'] == -1:
 					if log_idx == -1:
 						log.append({entry['key']: entry['value'], "term": entry['term'],
 						"client_ID": entry['client_ID'], "MID": entry['MID']})
