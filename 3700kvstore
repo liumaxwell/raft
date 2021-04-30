@@ -340,6 +340,7 @@ while True:
 					"client_ID": entry['client_ID'], "MID": entry['MID']})
 					reply_true(msg)
 				elif log_idx > entry['prev_index']:
+					print("TEST")
 					if log[entry['prev_index'] + 1]["term"] != entry['term']:
 						log = log[0 : entry['prev_index'] + 1]
 						log.append({entry['key']: entry['value'], "term": entry['term'], 
