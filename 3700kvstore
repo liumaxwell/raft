@@ -30,7 +30,7 @@ leader_ready = False
 no_op_index = 0
 cache = []
 # r = random.randint(4, 8)
-messages = {"appends": {}, "puts": {}, "gets": {}}
+# messages = {"appends": {}, "puts": {}, "gets": {}}
 voted = False
 
 first_append_entry = 0
@@ -50,7 +50,7 @@ match_index = {}
 for the_id in replica_ids:
 	next_index[the_id] = 0
 	match_index[the_id] = -1
-	messages["appends"][the_id] = []
+	# messages["appends"][the_id] = []
 append_oks = 0
 
 def make_follower():
@@ -113,7 +113,7 @@ def send_append_entry(dst):
 		msg = {"src": my_id, "dst": the_id, "leader": my_id, "term": current_term,
 		"type": "append_entry", "entries": entries, "lead_commit_index": commit_index}
 		sock.send(json.dumps(msg).encode())
-		messages["appends"][str(the_id)].append(new_msg)
+		# messages["appends"][str(the_id)].append(new_msg)
 
 # def send_to_follower(dst, msg):
 # 	index = next_index[dst]
@@ -176,7 +176,7 @@ while True:
 				# print("LEADER %s RESPONDING TO: %s" % (my_id, log[applied_index]["MID"]))
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
-			messages["puts"][log[applied_index]["MID"]] = return_msg
+			# messages["puts"][log[applied_index]["MID"]] = return_msg
 
 	clock = time.time()
 	second_clock = time.time()
@@ -201,7 +201,7 @@ while True:
 					"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
 					return_msg_json = json.dumps(return_msg)
 					sock.send(return_msg_json.encode())
-					messages["gets"][msg["MID"]] = return_msg
+					# messages["gets"][msg["MID"]] = return_msg
 
 	# if have not received a heart beat... (empty list)
 	# if not leader and second_clock - last_other > r:
@@ -286,7 +286,7 @@ while True:
 		if msg['type'] == 'append_ok':
 			next_index[msg['src']] += 1
 			match_index[msg['src']] = next_index[msg['src']] - 1
-			messages["appends"][msg["src"]] = [x for x in messages["appends"][msg["src"]] if x["MID"] != msg["MID"]]
+			# messages["appends"][msg["src"]] = [x for x in messages["appends"][msg["src"]] if x["MID"] != msg["MID"]]
 
 		if msg['type'] == "append_fail":
 			print("FAIL")
@@ -357,9 +357,9 @@ while True:
 				sock.send(return_msg_json.encode())
 			# you are leader, append to own log and send out to replicas
 			else:
-				if msg["MID"] in messages["puts"]:
-					sock.send(json.dumps(messages["puts"][msg["MID"]]).encode())
-					continue
+				# if msg["MID"] in messages["puts"]:
+				# 	sock.send(json.dumps(messages["puts"][msg["MID"]]).encode())
+				# 	continue
 				if not leader_ready:
 					cache.append(("put", msg))
 				else:
@@ -380,10 +380,9 @@ while True:
 				sock.send(return_msg_json.encode())
 			# if leader, get the value and send back
 			else:
-				if msg["MID"] in messages["gets"]:
-					sock.send(json.dumps(messages["gets"][msg["MID"]]).encode())
-					continue
-				value = kvstore.get(msg['key'], "")
+				# if msg["MID"] in messages["gets"]:
+				# 	sock.send(json.dumps(messages["gets"][msg["MID"]]).encode())
+				# 	continue
 				if not leader_ready:
 					cache.append(("get", msg))
 				else:
@@ -396,7 +395,7 @@ while True:
 								"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
 					return_msg_json = json.dumps(return_msg)
 					sock.send(return_msg_json.encode())
-					messages["gets"][msg["MID"]] = return_msg
+					# messages["gets"][msg["MID"]] = return_msg
 
 	if candidate and time.time() - election_time > .05:
 		print(my_id + " sending more votes")
