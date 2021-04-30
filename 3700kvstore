@@ -162,7 +162,7 @@ while True:
 
 	while commit_index > applied_index:
 		applied_index += 1
-		if log[applied_index]['client_ID'] != "no-op" and log[applied_index]["MID"] not in messages["puts"]:
+		if log[applied_index]['client_ID'] != "no-op" and log[applied_index]["MID"]:
 			the_key = ""
 			for key in list(log[applied_index].keys()):
 				if key != 'term' and key != 'client_ID' and key != 'MID':
