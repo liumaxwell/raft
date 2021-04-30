@@ -303,7 +303,7 @@ while True:
 		# if you get a request vote, vote for them if you have not yet voted in this term
 		if msg['type'] == "RequestVote":
 			# if you haven't voted yet this term and they have greater or equal term
-			if msg['term'] not in voting_hist and up_to_date(msg):
+			if str(msg['term']) not in voting_hist and up_to_date(msg):
 				print(my_id + "voted for " + msg["src"])
 				return_msg = {"src": my_id, "dst": msg['src'],
 							  "leader": "FFFF", "type": "vote"}
@@ -312,7 +312,15 @@ while True:
 				make_follower()
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
-				voting_hist.append(msg['term'])
+				voting_hist[str(msg['term'])] = msg["src"]
+			elif str(msg["term"]) in voting_hist and voting_hist[str(msg['term'])] == msg["src"]:
+				return_msg = {"src": my_id, "dst": msg['src'],
+				"leader": "FFFF", "type": "vote"}
+				candidate = False
+				election_timeout = False
+				make_follower()
+				return_msg_json = json.dumps(return_msg)
+				sock.send(return_msg_json.encode())
 
 		# follower committed
 		if msg['type'] == 'append_ok':
