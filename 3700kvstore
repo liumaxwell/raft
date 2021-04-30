@@ -196,7 +196,8 @@ while True:
 		if clock - append_clock > 1:
 			send_append_entry("")
 			append_clock = time.time()
-		if catchup_state:
+		if catchup_state or last_catchup:
+
 			if applied_index >= get_index:
 				msg = cache[0][1]
 				value = kvstore.get(msg['key'], "")
@@ -204,8 +205,7 @@ while True:
 				"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
-				if last_catchup:
-					catchup_state = False
+				last_catchup = False
 		if not leader_ready and commit_index >= no_op_index:
 			catchup_state = True
 			last_catchup = False
@@ -238,6 +238,7 @@ while True:
 			if not cache:
 				send_append_entry("")
 				leader_ready = True
+				catchup_state = False
 				last_catchup = True
 
 	# if have not received a heart beat... (empty list)
