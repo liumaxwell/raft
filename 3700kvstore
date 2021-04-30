@@ -216,9 +216,9 @@ while True:
 					puts = True
 					log.append({msg["key"]: msg["value"], "term": current_term,
 								"client_ID": msg['src'], "MID": msg['MID']})
-					send_append_entry("")
 				else:
 					if puts:
+					    send_append_entry("")
 						cache.insert(0, entry)
 						break
 					else:
@@ -228,6 +228,7 @@ while True:
 						return_msg_json = json.dumps(return_msg)
 						sock.send(return_msg_json.encode())
 			if not cache:
+				send_append_entry("")
 				leader_ready = True
 				catchup_state = False
 
