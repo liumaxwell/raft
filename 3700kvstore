@@ -293,7 +293,6 @@ while True:
 			current_term = msg['term']
 			most_recent_leader = msg['leader']
 			candidate = False
-			entries = [msg]
 			entries = msg["entries"]
 			for entry in entries:
 				log_idx = len(log) - 1
