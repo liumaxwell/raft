@@ -33,7 +33,7 @@ cache = []
 catchup_state = False
 get_index = 0
 # r = random.randint(4, 8)
-# messages = {"appends": {}, "puts": {}, "gets": {}}
+messages = {"puts": {}, "gets": {}}
 voted = False
 
 first_append_entry = 0
@@ -213,20 +213,24 @@ while True:
 				entry = cache.pop(0)
 				msg = entry[1]
 				if entry[0] == "put":
-					puts = True
-					log.append({msg["key"]: msg["value"], "term": current_term,
-								"client_ID": msg['src'], "MID": msg['MID']})
+					if msg["MID"] not in messages["puts"]:
+						puts = True
+						log.append({msg["key"]: msg["value"], "term": current_term,
+									"client_ID": msg['src'], "MID": msg['MID']})
+						messages["puts"][msg["MID"]] = msg
 				else:
-					if puts:
-						send_append_entry("")
-						cache.insert(0, entry)
-						break
-					else:
-						value = kvstore.get(msg['key'], "")
-						return_msg = {"src": my_id, "dst": msg['src'],
-						"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
-						return_msg_json = json.dumps(return_msg)
-						sock.send(return_msg_json.encode())
+					if msg["MID"] not in messages["gets"]:
+						if puts:
+							send_append_entry("")
+							cache.insert(0, entry)
+							break
+						else:
+							value = kvstore.get(msg['key'], "")
+							return_msg = {"src": my_id, "dst": msg['src'],
+							"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
+							return_msg_json = json.dumps(return_msg)
+							sock.send(return_msg_json.encode())
+						messages["gets"][msg["MID"]] = msg
 			if not cache:
 				send_append_entry("")
 				leader_ready = True
@@ -394,11 +398,13 @@ while True:
 				if not leader_ready:
 					cache.append(("put", msg))
 				else:
-					# put into own log
-					log.append({msg["key"]: msg["value"], "term": current_term,
-								"client_ID": msg['src'], "MID": msg['MID']})
-					# send out append entries
-					send_append_entry("")
+					if msg["MID"] not in messages["puts"]:
+						# put into own log
+						log.append({msg["key"]: msg["value"], "term": current_term,
+									"client_ID": msg['src'], "MID": msg['MID']})
+						# send out append entries
+						send_append_entry("")
+						messages["puts"][msg["MID"]] = return_msg
 
 		# get message from client
 		elif msg['type'] == 'get':
@@ -417,16 +423,17 @@ while True:
 				if not leader_ready:
 					cache.append(("get", msg))
 				else:
-					value = kvstore.get(msg['key'], "")
-					if not value:
+					if msg["MID"] not in messages["gets"]:
+						value = kvstore.get(msg['key'], "")
+						if not value:
+							return_msg = {"src": my_id, "dst": msg['src'],
+									"leader": my_id, "type": "fail", "MID": msg['MID'], "value": value}
+							continue
 						return_msg = {"src": my_id, "dst": msg['src'],
-								"leader": my_id, "type": "fail", "MID": msg['MID'], "value": value}
-						continue
-					return_msg = {"src": my_id, "dst": msg['src'],
-								"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
-					return_msg_json = json.dumps(return_msg)
-					sock.send(return_msg_json.encode())
-					# messages["gets"][msg["MID"]] = return_msg
+									"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
+						return_msg_json = json.dumps(return_msg)
+						sock.send(return_msg_json.encode())
+						messages["gets"][msg["MID"]] = return_msg
 
 	if candidate and time.time() - election_time > .5:
 		print(my_id + " sending more votes")
