@@ -301,6 +301,7 @@ while True:
 				return_msg = {"src": my_id, "dst": msg['src'],
 							  "leader": "FFFF", "type": "vote"}
 				candidate = False
+				election_timeout = False
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
 				voting_hist.append(msg['term'])
