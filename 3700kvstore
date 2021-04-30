@@ -54,6 +54,11 @@ for the_id in replica_ids:
 append_oks = 0
 
 def make_follower():
+	global leader_ready
+	global leader
+	global candidate
+	global puts_cache
+	global gets_cache
 	puts_cache = []
 	gets_cache = []
 	votes = 0
