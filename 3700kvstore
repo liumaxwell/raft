@@ -184,7 +184,7 @@ while True:
 		for the_id in replica_ids:
 			if match_index[the_id] >= N:
 				num_matched += 1
-		if num_matched >= majority - 1:
+		if num_matched >= majority - 1 and log[N]["term"] == current_term:
 			commit_index = N
 
 	while commit_index > applied_index:
@@ -287,7 +287,7 @@ while True:
 		msg = json.loads(msg_raw)
 
 		if leader:
-			print(my_id + ": " + str(applied_index) + "  " + str(time.time()))
+			print(my_id + ": " + str(commit_index) + "  " + str(time.time()))
 
 		if leader and (msg['type'] == 'append_entry' or msg['type'] == 'bulk_append') and msg["term"] >= current_term:
 			print("DEPOSED")
