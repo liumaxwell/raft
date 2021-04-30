@@ -257,7 +257,7 @@ while True:
 		no_op_index = len(log)
 		leader_ready = False
 		for the_id in replica_ids:
-			next_index[the_id] = log_len
+			next_index[the_id] = no_op_index
 			match_index[the_id] = -1
 		# if log_len == 0:
 		# 	prev_term = 1
