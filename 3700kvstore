@@ -156,6 +156,7 @@ def reply_true(msg):
 	return_msg_json = json.dumps(return_msg)
 	sock.send(return_msg_json.encode())
 
+print_timer = 0
 while True:
 	for N in range(commit_index + 1, len(log)):
 		num_matched = 0
@@ -286,8 +287,12 @@ while True:
 			continue
 		msg = json.loads(msg_raw)
 
-		if leader:
-			print("LEADER " + my_id+ ": " + str(commit_index) + ", " + str(len(log)))
+		if time.time() - print_timer > 0.5:
+			if leader:
+				print("LEADER " + my_id+ ": " + str(commit_index) + ", " + str(len(log)))
+			else:
+				print("LEADER " + my_id+ ": " + str(commit_index) + ", " + str(len(log)))
+			print_timer = time.time()
 		# else:
 		# 	print("FOLLOWER: " + str(applied_index))
 
