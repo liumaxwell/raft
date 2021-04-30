@@ -300,6 +300,7 @@ while True:
 			if msg['term'] not in voting_hist and up_to_date(msg):
 				return_msg = {"src": my_id, "dst": msg['src'],
 							  "leader": "FFFF", "type": "vote"}
+				candidate = False
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
 				voting_hist.append(msg['term'])
