@@ -46,8 +46,6 @@ applied_index = -1
 next_index = {}
 match_index = {}
 
-num_heartbeats_unacked = 0
-
 for the_id in replica_ids:
 	next_index[the_id] = 0
 	match_index[the_id] = -1
@@ -102,6 +100,13 @@ def send_append_entry(msg):
 		messages["appends"][str(the_id)].append(new_msg)
 		# messages[msg["MID"] + "AE" + str(the_id)] = msg
 
+# def resend_to_follower(i):
+# 	msg = appends.pop(i)
+# 	msg["time"] = time.time()
+# 	appends.insert(0, msg)
+# 	json_msg = json.dumps(msg)
+# 	sock.send(json_msg.encode())
+
 def send_to_follower(dst, msg):
 	index = next_index[dst]
 	the_key = ""
@@ -129,6 +134,7 @@ def send_to_follower(dst, msg):
 	json_msg = json.dumps(new_msg)
 	sock.send(json_msg.encode())
 	messages["appends"][str(dst)].append(new_msg)
+	# messages[msg["MID"] + "AE" + str(dst)] = msg
 
 def reply_false(msg):
 	return_msg = {"src": my_id, "dst": msg['src'], "leader": msg["src"],
@@ -139,12 +145,6 @@ def reply_false(msg):
 def reply_true(msg):
 	return_msg = {"src": my_id, "dst": msg['src'], "leader": msg['src'],
 	"type": "append_ok", "client_ID": msg['src'], "MID": msg["MID"]}
-	return_msg_json = json.dumps(return_msg)
-	sock.send(return_msg_json.encode())
-
-def send_heartbeat_ack(msg):
-	return_msg = {"src": my_id, "dst": msg['src'], "leader": msg['src'],
-	"type": "heartbeat_ack"}
 	return_msg_json = json.dumps(return_msg)
 	sock.send(return_msg_json.encode())
 
@@ -210,9 +210,6 @@ while True:
 		resend_unacked()
 		# code runs every 2 seconds
 		if clock - last > 2:
-			if num_heartbeats_unacked >= 12:
-				make_follower()
-				continue
 			# send heartbeat
 			for the_id in replica_ids:
 				rep_next_index = next_index[the_id]
@@ -228,7 +225,6 @@ while True:
 					"key": "", "value": "",
 					"term": current_term, "prev_index": rep_next_index - 1,
 					"prev_term": term, "lead_commit_index": commit_index, "time": ""}
-				num_heartbeats_unacked += 1
 				#print(str(my_id) + " sent heartbeat")
 				sock.send(json.dumps(msg).encode())
 			last = clock
@@ -297,7 +293,7 @@ while True:
 		# if you get a request vote, vote for them if you have not yet voted in this term
 		if msg['type'] == "RequestVote":
 			# if you haven't voted yet this term and they have greater or equal term
-			if not leader and msg['term'] not in voting_hist and up_to_date(msg):
+			if msg['term'] not in voting_hist and up_to_date(msg):
 				return_msg = {"src": my_id, "dst": msg['src'],
 							  "leader": "FFFF", "type": "vote"}
 				return_msg_json = json.dumps(return_msg)
@@ -329,7 +325,6 @@ while True:
 				log_idx = len(log) - 1
 				if entry['key'] == "":
 					past_beats.append(1)
-					send_heartbeat_ack(entry)
 					if entry['lead_commit_index'] > commit_index:
 						commit_index = min(entry['lead_commit_index'], len(log) - 1)
 					continue
@@ -358,9 +353,6 @@ while True:
 			if msg['lead_commit_index'] > commit_index:
 				commit_index = min(msg['lead_commit_index'], len(log) - 1)
 
-		if leader and msg["type"] == "heartbeat_ack":
-			num_heartbeats_unacked -= 1
-		
 		# if you get a vote, keep track
 		if msg['type'] == "vote" and candidate:
 			votes += 1
