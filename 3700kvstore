@@ -238,7 +238,7 @@ while True:
 			for msg in puts_cache:
 				log.append({msg["key"]: msg["value"], "term": current_term,
 							"client_ID": msg['src'], "MID": msg['MID']})
-				send_append_entry(msg)
+				send_append_entry()
 			for msg in gets_cache:
 				value = kvstore.get(msg['key'], "")
 				return_msg = {"src": my_id, "dst": msg['src'],
@@ -400,7 +400,7 @@ while True:
 					log.append({msg["key"]: msg["value"], "term": current_term,
 								"client_ID": msg['src'], "MID": msg['MID']})
 					# send out append entries
-					send_append_entry(msg)
+					send_append_entry()
 
 		# get message from client
 		elif msg['type'] == 'get':
