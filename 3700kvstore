@@ -89,8 +89,12 @@ def send_heartbeat():
 	"type": "append_entry", "entries": [], "lead_commit_index": commit_index}
 	sock.send(json.dumps(new_msg).encode())
 
-def send_append_entry():
-	for the_id in replica_ids:
+def send_append_entry(dst):
+	if dst:
+		ids = [dst]
+	else:
+		ids = replica_ids
+	for the_id in ids:
 		rep_next_index = next_index[the_id]
 		num_entries = min(50, len(log) - rep_next_index)
 		entries = []
@@ -188,7 +192,7 @@ while True:
 				if entry[0] == "put":
 					log.append({msg["key"]: msg["value"], "term": current_term,
 								"client_ID": msg['src'], "MID": msg['MID']})
-					send_append_entry()
+					send_append_entry("")
 				else:
 					value = kvstore.get(msg['key'], "")
 					return_msg = {"src": my_id, "dst": msg['src'],
@@ -281,7 +285,7 @@ while True:
 			if next_index[msg["src"]] > 0:
 				next_index[msg['src']] -= 1
 				match_index[msg["src"]] = -1
-			send_to_follower(msg["src"], msg)
+			#send_to_follower(msg["src"], msg)
 
 		# append_entry from leader, append to own and send back OK
 		if not leader and msg['type'] == 'append_entry':
@@ -356,7 +360,7 @@ while True:
 					log.append({msg["key"]: msg["value"], "term": current_term,
 								"client_ID": msg['src'], "MID": msg['MID']})
 					# send out append entries
-					send_append_entry()
+					send_append_entry("")
 
 		# get message from client
 		elif msg['type'] == 'get':
