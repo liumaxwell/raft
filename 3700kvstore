@@ -164,8 +164,8 @@ while True:
 				num_matched += 1
 		if num_matched >= majority - 1 and log[N]["term"] == current_term:
 			commit_index = N
-	if applied_index >= no_op_index:
-		leader_ready = True
+	# if applied_index >= no_op_index:
+	# 	leader_ready = True
 
 	while commit_index > applied_index:
 		applied_index += 1
@@ -287,9 +287,9 @@ while True:
 		msg = json.loads(msg_raw)
 
 		if leader:
-			print("LEADER: " + str(applied_index))
-		else:
-			print("FOLLOWER: " + str(applied_index))
+			print("LEADER: " + str(len(log) + ", " + str(commit_index))
+		# else:
+		# 	print("FOLLOWER: " + str(applied_index))
 
 		# if leader:
 		# 	print(next_index)
