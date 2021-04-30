@@ -197,15 +197,13 @@ while True:
 			append_clock = time.time()
 		if catchup_state:
 			if applied_index >= get_index:
-				if cache[0][0] != "get":
-					print("PANIC")
 				msg = cache[0][1]
 				value = kvstore.get(msg['key'], "")
 				return_msg = {"src": my_id, "dst": msg['src'],
 				"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
-		if not catchup_state and not leader_ready and commit_index >= no_op_index:
+		if not leader_ready and commit_index >= no_op_index:
 			catchup_state = True
 			first_append_entry = time.time()
 			cache_len = len(cache)
