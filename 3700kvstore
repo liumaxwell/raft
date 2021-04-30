@@ -360,6 +360,7 @@ while True:
 				elif log_idx < entry['prev_index'] or \
 						log[entry["prev_index"]]["term"] != entry['prev_term']:
 					reply_false(entry)
+					break
 					#print("log index mismatched")
 				elif log_idx == entry["prev_index"]:
 					log.append({entry['key']: entry['value'], "term": entry['term'], 
