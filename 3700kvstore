@@ -325,6 +325,7 @@ while True:
 			messages["appends"][msg["src"]] = [x for x in messages["appends"][msg["src"]] if x["MID"] != msg["MID"]]
 
 		if msg['type'] == "append_fail":
+			print("FAIL")
 			if next_index[msg["src"]] > 0:
 				next_index[msg['src']] -= 1
 				match_index[msg["src"]] = -1
