@@ -111,30 +111,6 @@ def send_append_entry():
 		sock.send(json.dumps(new_msg).encode())
 		messages["appends"][str(the_id)].append(new_msg)
 
-def send_bulk_entry():
-	for the_id in replica_ids:
-		rep_next_index = next_index[the_id]
-		num_entries = min(50, len(log) - rep_next_index)
-		if len(log) == 0 or rep_next_index == 0:
-			term = 1
-		else:
-			term = log[rep_next_index - 1]["term"]
-			term = current_term
-		for i in range(num_entries)
-		entry = log[rep_next_index]
-		for key in list(entry.keys()):
-			if key != 'term' and key != 'client_ID' and key != 'MID':
-				the_key = key
-
-		new_msg = {"src": my_id, "dst": the_id,
-			"leader": my_id, "type": "append_entry",
-			"key": the_key, "value": entry[the_key],
-			"term": current_term, "prev_index": rep_next_index - 1,
-			"prev_term": term, "lead_commit_index": commit_index,
-			"client_ID": entry['client_ID'], "MID": entry["MID"], "time": time.time()}
-		sock.send(json.dumps(new_msg).encode())
-		messages["appends"][str(the_id)].append(new_msg)
-
 def send_to_follower(dst, msg):
 	index = next_index[dst]
 	the_key = ""
@@ -308,16 +284,13 @@ while True:
 			send_to_follower(msg["src"], msg)
 
 		# append_entry from leader, append to own and send back OK
-		if not leader and msg['type'] == 'append_entry' or msg["type"] == "bulk_append":
+		if not leader and msg['type'] == 'append_entry':
 			voted = False
 			current_term = msg['term']
 			most_recent_leader = msg['leader']
 			candidate = False
 			entries = [msg]
-			if msg["type"] == "bulk_append":
-				# time.sleep(0.5)
-				# print_log("FOLLWER")
-				entries = msg["entries"]
+			entries = msg["entries"]
 			for entry in entries:
 				log_idx = len(log) - 1
 				if entry['key'] == "":
