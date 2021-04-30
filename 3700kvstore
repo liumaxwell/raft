@@ -105,14 +105,6 @@ def send_append_entry():
 			"client_ID": entry['client_ID'], "MID": entry["MID"], "time": time.time()}
 		sock.send(json.dumps(new_msg).encode())
 		messages["appends"][str(the_id)].append(new_msg)
-		# messages[msg["MID"] + "AE" + str(the_id)] = msg
-
-# def resend_to_follower(i):
-# 	msg = appends.pop(i)
-# 	msg["time"] = time.time()
-# 	appends.insert(0, msg)
-# 	json_msg = json.dumps(msg)
-# 	sock.send(json_msg.encode())
 
 def send_to_follower(dst, msg):
 	index = next_index[dst]
@@ -353,10 +345,16 @@ while True:
 				if msg['term'] < current_term:
 					reply_false(entry)
 					#print("term mismatched")
-				elif entry['prev_index'] < 0:
-					log.append({entry['key']: entry['value'], "term": entry['term'],
-					"client_ID": entry['client_ID'], "MID": entry['MID']})
-					reply_true(entry)
+				elif entry['prev_index'] == -1:
+					if log_idx == -1:
+						log.append({entry['key']: entry['value'], "term": entry['term'],
+						"client_ID": entry['client_ID'], "MID": entry['MID']})
+						reply_true(entry)
+					elif log[0]["term"] == entry["prev_term"]:
+						reply_true(entry)
+					else:
+						reply_false(entry)
+						break
 				elif log_idx < entry['prev_index'] or \
 						log[entry["prev_index"]]["term"] != entry['prev_term']:
 					reply_false(entry)
@@ -369,8 +367,8 @@ while True:
 				elif log_idx > entry['prev_index']:
 					if log[entry['prev_index'] + 1]["term"] != entry['term']:
 						log = log[0 : entry['prev_index'] + 1]
-					log.append({entry['key']: entry['value'], "term": entry['term'], 
-					"client_ID": entry['client_ID'], "MID": entry['MID']})
+						log.append({entry['key']: entry['value'], "term": entry['term'], 
+						"client_ID": entry['client_ID'], "MID": entry['MID']})
 					reply_true(entry)
 				else:
 					print("BIG PROBLEMS")
