@@ -290,7 +290,7 @@ while True:
 			print(match_index)
 
 		if leader and (msg['type'] == 'append_entry' or msg['type'] == 'bulk_append') and msg["term"] >= current_term:
-			print("DEPOSED")
+			print(my_id + " DEPOSED")
 			current_term = msg["term"]
 			make_follower()
 
