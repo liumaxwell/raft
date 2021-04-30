@@ -289,7 +289,7 @@ while True:
 		msg = json.loads(msg_raw)
 
 		if leader:
-			print(match_index)
+			print(next_index)
 
 		if leader and (msg['type'] == 'append_entry' or msg['type'] == 'bulk_append') and msg["term"] >= current_term:
 			current_term = msg["term"]
