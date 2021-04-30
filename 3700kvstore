@@ -182,7 +182,6 @@ while True:
 				# print("LEADER %s RESPONDING TO: %s" % (my_id, log[applied_index]["MID"]))
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
-			# messages["puts"][log[applied_index]["MID"]] = return_msg
 
 	clock = time.time()
 	second_clock = time.time()
@@ -288,7 +287,9 @@ while True:
 		msg = json.loads(msg_raw)
 
 		if leader:
-			print(next_index)
+			print("LEADER: " + str(applied_index))
+		else:
+			print("FOLLOWER: " + str(applied_index))
 
 		# if leader:
 		# 	print(next_index)
@@ -432,7 +433,8 @@ while True:
 					value = kvstore.get(msg['key'], "")
 					if not value:
 						return_msg = {"src": my_id, "dst": msg['src'],
-								"leader": my_id, "type": "fail", "MID": msg['MID'], "value": value}
+						"leader": my_id, "type": "fail", "MID": msg['MID'], "value": value}
+						sock.send(return_msg_json.encode())
 						continue
 					return_msg = {"src": my_id, "dst": msg['src'],
 								"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
