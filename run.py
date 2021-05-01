@@ -629,11 +629,13 @@ class Simulation:
                         
         # record the id of the current leader
         if not self.partition or msg['src'] in self.partition:
+            print("IN PARTITION")
             self.stats.add_leader(msg['leader'])
             self.leader = msg['leader']
 
         # is this message to a replica?
         if msg['dst'] in self.replicas:
+            print("IN REPLICAS")
             self.stats.total_msgs += 1
             if self.__check_partition__(msg['src'], msg['dst']) and random.random() >= self.conf.drops:
                 self.__replica_deliver__(self.replicas[msg['dst']], raw_msg)
@@ -641,6 +643,7 @@ class Simulation:
     
         # is this message a broadcast?
         elif msg['dst'] == 'FFFF':
+            print("IN FFFF")
             self.stats.total_msgs += len(self.replicas) - 1
             for rid, r in self.replicas.iteritems():
                 if rid != msg['src']:
@@ -650,10 +653,10 @@ class Simulation:
 
         # is this message to a client?
         elif msg['dst'] in self.clients:
+            print("IN CLIENTS")
             response = self.clients[msg['dst']].deliver(raw_msg, msg)
             if response:
                 self.__replica_deliver__(self.replicas[response['dst']], json.dumps(response))
-        print("AFTER IFS")
         # we have no idea who the destination is
         else:
             fail("*** Simulator Error - Unknown destination: %s" % (raw_msg))
