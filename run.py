@@ -443,7 +443,7 @@ class Simulation:
 
             print("BEFORE")
             ready = select.select(sockets, [], [], 0.1)[0]
-            print("AFTER")
+            print(ready)
             
             for sock in ready:
                 # if this is a listen sock, accept the connection and map it to a replica
