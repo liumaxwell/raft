@@ -448,9 +448,9 @@ class Simulation:
             for sock in ready:
                 # if this is a listen sock, accept the connection and map it to a replica
                 if sock in listen_socks: self.__accept__(sock)
+                print("AFTER FORs")
                 # otherwise, this is a client socket connected to a replica
                 else: self.__route_msgs__(sock)
-            print("AFTER FORs")
             # check the time and fire off events
             clock = time.time()
             while len(self.events) != 0 and self.events[0][0] < clock:
