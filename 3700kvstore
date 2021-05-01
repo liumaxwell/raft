@@ -295,7 +295,9 @@ while True:
 			elif msg['type'] == 'put':
 				# redirect to leader
 				if not leader:
-					print(most_recent_leader)
+					if most_recent_leader != "FFF":
+						msg["dst"] = most_recent_leader
+						sock.send(json.dumps(msg).encode())
 					if msg["MID"] not in messages["puts"]:
 						return_msg = {"src": my_id, "dst": msg['src'],
 									"leader": most_recent_leader, "type": "redirect",
@@ -320,7 +322,10 @@ while True:
 			elif msg['type'] == 'get':
 				# redirect to leader
 				if not leader:
-					if msg["MID"] not in messages["gets"]:
+					if most_recent_leader != "FFF":
+						msg["dst"] = most_recent_leader
+						sock.send(json.dumps(msg).encode())
+					elif msg["MID"] not in messages["gets"]:
 						return_msg = {"src": my_id, "dst": msg['src'],
 									"leader": most_recent_leader, "type": "redirect",
 									"MID": msg['MID']}
