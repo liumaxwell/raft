@@ -413,7 +413,7 @@ while True:
 	# 	sock.send(json.dumps(msg).encode())
 	# 	election_time = time.time()
 
-	if election_timeout and not voted_for:
+	if election_timeout:
 		print(my_id + " starting election")
 		# transition to candidate
 		candidate = True
@@ -435,6 +435,6 @@ while True:
 		sock.send(json.dumps(msg).encode())
 		# print("requesting votes")
 		election_timeout = False
-		voted_for = None
+		voted_for = my_id
 
 print(my_id + " has left the while loop")
