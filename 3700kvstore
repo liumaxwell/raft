@@ -413,28 +413,28 @@ while True:
 	# 	sock.send(json.dumps(msg).encode())
 	# 	election_time = time.time()
 
-	if election_timeout:
-		print(my_id + " starting election")
-		# transition to candidate
-		candidate = True
-		# increment the current term
-		current_term += 1
-		# vote for yourself
-		votes = 1
-		# request votes from others
-		election_time = time.time()
-		if len(log) == 0:
-			term = 1
-		else:
-			term = log[-1]['term']
+		if election_timeout:
+			print(my_id + " starting election")
+			# transition to candidate
+			candidate = True
+			# increment the current term
+			current_term += 1
+			# vote for yourself
+			votes = 1
+			# request votes from others
+			election_time = time.time()
+			if len(log) == 0:
+				term = 1
+			else:
+				term = log[-1]['term']
 
-		msg = {'src': my_id, 'dst': "FFFF", 'leader': "FFFF",
-			   'type': 'RequestVote', "term": current_term,
-			   "index": len(log) - 1,
-					   "prev_term": term}
-		sock.send(json.dumps(msg).encode())
-		print("requesting votes")
-		election_timeout = False
-		voted_for = my_id
+			msg = {'src': my_id, 'dst': "FFFF", 'leader': "FFFF",
+				'type': 'RequestVote', "term": current_term,
+				"index": len(log) - 1,
+						"prev_term": term}
+			sock.send(json.dumps(msg).encode())
+			print("requesting votes")
+			election_timeout = False
+			voted_for = my_id
 
 print(my_id + " has left the while loop")
