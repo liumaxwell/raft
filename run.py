@@ -380,6 +380,7 @@ class Replica:
             except:
                 print '*** Simulator Error - Unable to send to replica'
                 self.shutdown()
+        print("RETURNING FALSE")
         return False
                                 
 #######################################################################################################
