@@ -375,9 +375,12 @@ class Replica:
         print("IN DELIVER")
         if self.alive:
             try:
+                print("IN TRY")
                 self.client_sock.send(raw_msg)
+                print("AFTER TRY")
                 return True
             except:
+                print("IN EXCEPT")
                 print '*** Simulator Error - Unable to send to replica'
                 self.shutdown()
         print("RETURNING FALSE")
