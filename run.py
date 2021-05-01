@@ -653,7 +653,7 @@ class Simulation:
             response = self.clients[msg['dst']].deliver(raw_msg, msg)
             if response:
                 self.__replica_deliver__(self.replicas[response['dst']], json.dumps(response))
-                
+        print("AFTER IFS")
         # we have no idea who the destination is
         else:
             fail("*** Simulator Error - Unknown destination: %s" % (raw_msg))
