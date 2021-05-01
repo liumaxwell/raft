@@ -310,6 +310,7 @@ while True:
 			most_recent_leader = msg['leader']
 			candidate = False
 			entries = msg["entries"]
+			skip = False
 			if not entries:
 				past_beats.append(1)
 				if msg['lead_commit_index'] > commit_index:
