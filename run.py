@@ -638,9 +638,11 @@ class Simulation:
             print("IN REPLICAS")
             self.stats.total_msgs += 1
             if self.__check_partition__(msg['src'], msg['dst']) and random.random() >= self.conf.drops:
+                print("AFTER IN REPLICAS IN IF BEFORE")
                 self.__replica_deliver__(self.replicas[msg['dst']], raw_msg)
-            else: self.stats.total_drops += 1
-            print("AFTER IN REPLICAS")
+                print("AFTER IN REPLICAS IN IF AFTER")
+            else:
+                self.stats.total_drops += 1
     
         # is this message a broadcast?
         elif msg['dst'] == 'FFFF':
