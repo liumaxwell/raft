@@ -122,6 +122,7 @@ def send_append_entry(dst):
 		msg = {"src": my_id, "dst": the_id, "leader": my_id, "term": current_term,
 		"type": "append_entry", "entries": entries, "lead_commit_index": commit_index}
 		if entries:
+			print(the_id)
 			sock.send(json.dumps(msg).encode())
 
 def reply_false(msg):
