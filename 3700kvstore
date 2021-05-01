@@ -299,6 +299,7 @@ while True:
 					# 			"MID": msg['MID']}
 					# return_msg_json = json.dumps(return_msg)
 					# sock.send(return_msg_json.encode())
+					ignore = ""
 				# you are leader, append to own log and send out to replicas
 				else:
 					if msg["MID"] not in messages["puts"]:
