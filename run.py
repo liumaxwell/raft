@@ -582,6 +582,7 @@ class Simulation:
     def __route_msgs__(self, sock):
         try:
             raw_msg = sock.recv(16384)
+            print("RAW")
         except: 
             fail("*** Simulator Error - A replica quit unexpectedly")
             self.__close_replica__(sock)
@@ -623,7 +624,7 @@ class Simulation:
             return
         
 
-        print("RAW")
+        print("AFTER RAW")
                         
         # record the id of the current leader
         if not self.partition or msg['src'] in self.partition:
