@@ -265,6 +265,7 @@ while True:
 				skip = False
 				if redirects_cache:
 					send_redirects()
+					skip = True
 				if not entries:
 					past_beats.append(1)
 					if msg['lead_commit_index'] > commit_index:
