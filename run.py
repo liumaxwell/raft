@@ -376,6 +376,7 @@ class Replica:
         if self.alive:
             try:
                 print("IN TRY")
+                print(self.rid)
                 print(self.client_sock)
                 print(self.listen_sock)
                 print(self.client_sock)
@@ -386,7 +387,6 @@ class Replica:
                 print("IN EXCEPT")
                 print '*** Simulator Error - Unable to send to replica'
                 self.shutdown()
-        print("RETURNING FALSE")
         return False
                                 
 #######################################################################################################
@@ -449,7 +449,6 @@ class Simulation:
                     listen_socks.add(r.listen_sock)
                 if r.client_sock: sockets.append(r.client_sock)
 
-            print("BEFORE")
             ready = select.select(sockets, [], [], 0.1)[0]
             print(ready)
             
@@ -457,10 +456,8 @@ class Simulation:
                 # if this is a listen sock, accept the connection and map it to a replica
                 if sock in listen_socks:
                     self.__accept__(sock)
-                    print("AFTER FORs IF")
                 # otherwise, this is a client socket connected to a replica
                 else:
-                    print("BEFORE ROUTE CALL")
                     self.__route_msgs__(sock)
             # check the time and fire off events
             clock = time.time()
@@ -492,7 +489,6 @@ class Simulation:
 
     def __kill_leader__(self):
         if self.leader != 'FFFF':
-            print("TEST KILLING " + self.leader)
             self.__kill_replica__(self.replicas[self.leader])
             self.leader = 'FFFF'
             for client in self.clients.itervalues(): client.forget()
@@ -550,7 +546,6 @@ class Simulation:
 
     def __replica_deliver__(self, replica, raw_msg):
         if not replica.deliver(raw_msg) and replica.rid in self.living_rids:
-            print("IN ANOTHER IF")
             self.living_rids.remove(replica.rid)
                         
     def __populate_event_queue__(self, clock):
@@ -592,7 +587,6 @@ class Simulation:
     def __route_msgs__(self, sock):
         try:
             raw_msg = sock.recv(16384)
-            print("RAW")
         except: 
             fail("*** Simulator Error - A replica quit unexpectedly")
             self.__close_replica__(sock)
@@ -634,28 +628,22 @@ class Simulation:
             return
         
 
-        print("AFTER RAW")
                         
         # record the id of the current leader
         if not self.partition or msg['src'] in self.partition:
-            print("IN PARTITION")
             self.stats.add_leader(msg['leader'])
             self.leader = msg['leader']
 
         # is this message to a replica?
         if msg['dst'] in self.replicas:
-            print("IN REPLICAS")
             self.stats.total_msgs += 1
             if self.__check_partition__(msg['src'], msg['dst']) and random.random() >= self.conf.drops:
-                print("AFTER IN REPLICAS IN IF BEFORE")
                 self.__replica_deliver__(self.replicas[msg['dst']], raw_msg)
-                print("AFTER IN REPLICAS IN IF AFTER")
             else:
                 self.stats.total_drops += 1
     
         # is this message a broadcast?
         elif msg['dst'] == 'FFFF':
-            print("IN FFFF")
             self.stats.total_msgs += len(self.replicas) - 1
             for rid, r in self.replicas.iteritems():
                 if rid != msg['src']:
@@ -665,7 +653,6 @@ class Simulation:
 
         # is this message to a client?
         elif msg['dst'] in self.clients:
-            print("IN CLIENTS")
             response = self.clients[msg['dst']].deliver(raw_msg, msg)
             if response:
                 self.__replica_deliver__(self.replicas[response['dst']], json.dumps(response))
