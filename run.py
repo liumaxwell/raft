@@ -372,7 +372,7 @@ class Replica:
             except: pass
 
     def deliver(self, raw_msg):
-        print("IN DELIVER")
+        # print("IN DELIVER")
         if self.alive:
             try:
                 # print("IN TRY")
@@ -452,7 +452,7 @@ class Simulation:
                 if r.client_sock: sockets.append(r.client_sock)
 
             ready = select.select(sockets, [], [], 0.1)[0]
-            print(ready)
+            # print(ready)
             
             for sock in ready:
                 # if this is a listen sock, accept the connection and map it to a replica
