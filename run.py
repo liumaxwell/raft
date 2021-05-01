@@ -378,10 +378,11 @@ class Replica:
                 print("IN TRY")
                 print(self.rid)
                 print(self.client_sock.proto)
-                ready, writeable, exception = select.select([self.client_sock], [self.client_sock], [], 0.1)
+                waitable = []
+                while self.client_sock not in writeable:
+                    ready, writeable, exception = select.select([self.client_sock], [self.client_sock], [], 0.1)
                 if self.client_sock in writeable:
-                    print("SOCK READY")
-                self.client_sock.send(raw_msg)
+                    self.client_sock.send(raw_msg)
                 print("AFTER TRY")
                 return True
             except:
