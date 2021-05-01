@@ -38,6 +38,7 @@ messages = {"puts": [], "gets": []}
 voted_for = None
 last_catchup = False
 redirect_count = 0
+follower_messages = {"puts": [], "gets": []}
 
 first_append_entry = 0
 
@@ -58,6 +59,16 @@ for the_id in replica_ids:
 	match_index[the_id] = -1
 	# messages["appends"][the_id] = []
 append_oks = 0
+
+def not_seen_before(msg):
+	if msg["type"] == "put":
+		entries = follower_messages["puts"]
+	else:
+		entries = follower_messages["gets"]
+	for entry in entries:
+		if entry["key"] == msg["key"] and entry["value"] == msg["value"]:
+			return True
+	return False
 
 def make_follower():
 	global leader_ready
@@ -296,20 +307,13 @@ while True:
 			elif msg['type'] == 'put':
 				# redirect to leader
 				if not leader:
-					if most_recent_leader != "FFFF":
-						msg["dst"] = most_recent_leader
-						msg["leader"] = most_recent_leader
-						# print(msg)
-						sock.send(json.dumps(msg).encode())
-					elif msg["MID"] not in messages["puts"]:
-						redirect_count += 1
-						print(redirect_count)
+					if not_seen_before(msg):
 						return_msg = {"src": my_id, "dst": msg['src'],
 									"leader": most_recent_leader, "type": "redirect",
 									"MID": msg['MID']}
 						return_msg_json = json.dumps(return_msg)
 						sock.send(return_msg_json.encode())
-						messages["puts"].append(msg["MID"])
+						follower_messages["puts"].append((msg["key"], msg["value"]))
 					else:
 						print("refused")
 				# you are leader, append to own log and send out to replicas
@@ -327,20 +331,13 @@ while True:
 			elif msg['type'] == 'get':
 				# redirect to leader
 				if not leader:
-					if most_recent_leader != "FFFF":
-						msg["dst"] = most_recent_leader
-						msg["leader"] = most_recent_leader
-						# print(msg)
-						sock.send(json.dumps(msg).encode())
-					elif msg["MID"] not in messages["gets"]:
-						redirect_count += 1
-						print(redirect_count)
+					if not_seen_before(msg):
 						return_msg = {"src": my_id, "dst": msg['src'],
 									"leader": most_recent_leader, "type": "redirect",
 									"MID": msg['MID']}
 						return_msg_json = json.dumps(return_msg)
 						sock.send(return_msg_json.encode())
-						messages["gets"].append(msg["MID"])
+						follower_messages["puts"].append((msg["key"], msg["value"]))
 					else:
 						print("refused")
 				# if leader, get the value and send back
