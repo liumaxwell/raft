@@ -15,7 +15,7 @@ sock.connect(my_id)
 
 time.sleep(random.uniform(.5, 1.5))
 
-sock.settimeout(5)
+sock.settimeout(1)
 
 heartbeats = 0
 num_total = len(replica_ids) + 1
@@ -92,7 +92,7 @@ def up_to_date(msg):
 		return False
 
 def send_heartbeat():
-	print(my_id + " sending heartbeat")
+	# print(my_id + " sending heartbeat")
 	msg = {"src": my_id, "dst": "FFFF", "leader": my_id, "type": "append_entry", 
 	"entries": [], "lead_commit_index": commit_index, "term": current_term}
 	sock.send(json.dumps(msg).encode())
@@ -278,13 +278,13 @@ while True:
 			if leader and (msg['type'] == 'append_entry' or msg['type'] == 'bulk_append') and msg["term"] >= current_term:
 				current_term = msg["term"]
 				make_follower()
-				print(my_id + " DEPOSED " + str(leader))
+				# print(my_id + " DEPOSED " + str(leader))
 
 			# if you get a request vote, vote for them if you have not yet voted in this term
 			if msg['type'] == "RequestVote":
 				# if you haven't voted yet this term and they have greater or equal term
 				if (not voted_for or voted_for == msg["src"]) and up_to_date(msg):
-					print(my_id + "voted for " + msg["src"])
+					# print(my_id + "voted for " + msg["src"])
 					return_msg = {"src": my_id, "dst": msg['src'],
 								"leader": "FFFF", "type": "vote"}
 					election_timeout = False
@@ -406,7 +406,7 @@ while True:
 						messages["gets"].append(msg["MID"])
 
 		if candidate and time.time() - election_time > .5:
-			print(my_id + " sending more votes")
+			# print(my_id + " sending more votes")
 			msg = {'src': my_id, 'dst': "FFFF", 'leader': "FFFF",
 			'type': 'RequestVote', "term": current_term,
 			"index": len(log) - 1, "prev_term": term}
@@ -414,7 +414,7 @@ while True:
 			election_time = time.time()
 
 		if election_timeout:
-			print(my_id + " starting election")
+			# print(my_id + " starting election")
 			# transition to candidate
 			candidate = True
 			# increment the current term
@@ -433,8 +433,8 @@ while True:
 				"index": len(log) - 1,
 						"prev_term": term}
 			sock.send(json.dumps(msg).encode())
-			print("requesting votes")
+			# print("requesting votes")
 			election_timeout = False
 			voted_for = my_id
 
-print(my_id + " has left the while loop")
+# print(my_id + " has left the while loop")

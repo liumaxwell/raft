@@ -379,7 +379,6 @@ class Replica:
             except:
                 print '*** Simulator Error - Unable to send to replica'
                 self.shutdown()
-        print(self.rid + " is dead")
         return False
                                 
 #######################################################################################################
