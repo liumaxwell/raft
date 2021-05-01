@@ -452,6 +452,7 @@ class Simulation:
                     print("AFTER FORs IF")
                 # otherwise, this is a client socket connected to a replica
                 else:
+                    print("BEFORE ROUTE CALL")
                     self.__route_msgs__(sock)
             # check the time and fire off events
             clock = time.time()
