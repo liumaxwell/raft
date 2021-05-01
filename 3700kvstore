@@ -301,6 +301,8 @@ while True:
 						return_msg_json = json.dumps(return_msg)
 						sock.send(return_msg_json.encode())
 						messages["puts"].append(msg["MID"])
+					else:
+						print("refused")
 				# you are leader, append to own log and send out to replicas
 				else:
 					if msg["MID"] not in messages["puts"]:
@@ -323,6 +325,8 @@ while True:
 						return_msg_json = json.dumps(return_msg)
 						sock.send(return_msg_json.encode())
 						messages["gets"].append(msg["MID"])
+					else:
+						print("refused")
 				# if leader, get the value and send back
 				else:
 					if msg["MID"] not in messages["gets"]:
