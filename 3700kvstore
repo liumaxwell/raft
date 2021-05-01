@@ -291,8 +291,7 @@ while True:
 
 					if msg['lead_commit_index'] > commit_index:
 						commit_index = min(msg['lead_commit_index'], len(log) - 1)
-			if leader:
-				print("AFTER BEFORE")
+
 			# if you get a vote, keep track
 			if msg['type'] == "vote" and candidate:
 				votes += 1
@@ -339,6 +338,8 @@ while True:
 						return_msg_json = json.dumps(return_msg)
 						sock.send(return_msg_json.encode())
 						messages["gets"].append(msg["MID"])
+		if leader:
+			print("AFTER BEFORE")
 
 		if candidate and time.time() - election_time > .5:
 			# print(my_id + " sending more votes")
