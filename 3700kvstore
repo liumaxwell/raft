@@ -37,6 +37,7 @@ get_index = 0
 messages = {"puts": [], "gets": []}
 voted_for = None
 last_catchup = False
+redirect_count = 0
 
 first_append_entry = 0
 
@@ -298,9 +299,11 @@ while True:
 					if most_recent_leader != "FFFF":
 						msg["dst"] = most_recent_leader
 						msg["leader"] = most_recent_leader
-						print(msg)
+						# print(msg)
 						sock.send(json.dumps(msg).encode())
 					elif msg["MID"] not in messages["puts"]:
+						redirect_count += 1
+						print(redirect_count)
 						return_msg = {"src": my_id, "dst": msg['src'],
 									"leader": most_recent_leader, "type": "redirect",
 									"MID": msg['MID']}
@@ -327,9 +330,11 @@ while True:
 					if most_recent_leader != "FFFF":
 						msg["dst"] = most_recent_leader
 						msg["leader"] = most_recent_leader
-						print(msg)
+						# print(msg)
 						sock.send(json.dumps(msg).encode())
 					elif msg["MID"] not in messages["gets"]:
+						redirect_count += 1
+						print(redirect_count)
 						return_msg = {"src": my_id, "dst": msg['src'],
 									"leader": most_recent_leader, "type": "redirect",
 									"MID": msg['MID']}
