@@ -152,7 +152,7 @@ def reply_false(msg):
 
 def reply_true(msg):
 	return_msg = {"src": my_id, "dst": msg['src'], "leader": msg['src'],
-	"type": "append_ok", "term": current_term}
+	"type": "append_ok", "term": current_term, "index": msg["prev_index"] + 2}
 	return_msg_json = json.dumps(return_msg)
 	sock.send(return_msg_json.encode())
 
@@ -320,7 +320,7 @@ while True:
 
 		# follower committed
 		if msg['type'] == 'append_ok':
-			next_index[msg['src']] += 1
+			next_index[msg['src']] = msg["index"]
 			match_index[msg['src']] = next_index[msg['src']] - 1
 			# messages["appends"][msg["src"]] = [x for x in messages["appends"][msg["src"]] if x["MID"] != msg["MID"]]
 
@@ -375,7 +375,7 @@ while True:
 						log = log[0 : entry['prev_index'] + 1]
 						log.append({entry['key']: entry['value'], "term": entry['term'], 
 						"client_ID": entry['client_ID'], "MID": entry['MID']})
-						reply_true(msg)
+					reply_true(msg)
 
 			if msg['lead_commit_index'] > commit_index:
 				commit_index = min(msg['lead_commit_index'], len(log) - 1)
