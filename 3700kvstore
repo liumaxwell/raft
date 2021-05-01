@@ -260,24 +260,16 @@ while True:
 		log.append({"no-op": "", "term": current_term, "client_ID": "no-op", "MID": "no-op"})
 		send_append_entry("")
 
-	ready, ignore, exceptional = select.select([sock], [], [], .1)
-	if exceptional:
-		print("TEST")
+	ready = select.select([sock], [], [], .1)[0]
 	if sock in ready:
 		msg_raw = sock.recv(32768)
 		if len(msg_raw) == 0:
 			continue
 		msg = json.loads(msg_raw)
 
-		# if time.time() - print_timer > 0.1:
-		# 	if leader:
-		# 		print("LEADER " + my_id+ ": " + str(commit_index) + ", " + str(len(log)))
-		# 		print(match_index)
-		# 	else:
-		# 		print("FOLLOWER " + my_id+ ": " + str(commit_index) + ", " + str(len(log)))
-		# 	print_timer = time.time()
-		# else:
-		# 	print("FOLLOWER: " + str(applied_index))
+		if time.time() - print_timer > 1:
+			print(my_id + " alive")
+			print_timer = time.time()
 
 		# if leader:
 		# 	print(next_index)
