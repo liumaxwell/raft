@@ -134,6 +134,7 @@ def reply_true(msg, index):
 	return_msg = {"src": my_id, "dst": msg['src'], "leader": most_recent_leader,
 	"type": "append_ok", "term": current_term, "index": index + 2}
 	return_msg_json = json.dumps(return_msg)
+	print("sending message to " + most_recent_leader)
 	sock.send(return_msg_json.encode())
 
 print_timer = 0
