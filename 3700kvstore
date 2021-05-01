@@ -329,6 +329,7 @@ while True:
 			current_term = msg["term"]
 			if not skip:
 				for entry in entries:
+					print("TEST")
 					log_idx = len(log) - 1
 					if entry['prev_index'] == -1:
 						if log_idx == -1:
@@ -374,12 +375,6 @@ while True:
 				sock.send(return_msg_json.encode())
 			# you are leader, append to own log and send out to replicas
 			else:
-				# if msg["MID"] in messages["puts"]:
-				# 	sock.send(json.dumps(messages["puts"][msg["MID"]]).encode())
-				# 	continue
-				# if not leader_ready:
-				# 	cache.append(("put", msg))
-				# else:
 				if msg["MID"] not in messages["puts"]:
 					# put into own log
 					log.append({msg["key"]: msg["value"], "term": current_term,
@@ -443,5 +438,3 @@ while True:
 		# print("requesting votes")
 		election_timeout = False
 		voted_for = None
-
-print("EXITED LOOP")
