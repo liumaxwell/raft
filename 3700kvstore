@@ -314,6 +314,9 @@ while True:
 						# send out append entries
 						send_append_entry("")
 						messages["puts"].append(msg["MID"])
+			
+			if leader:
+				print("AFTER BEFORE")
 
 			# get message from client
 			elif msg['type'] == 'get':
@@ -338,8 +341,6 @@ while True:
 						return_msg_json = json.dumps(return_msg)
 						sock.send(return_msg_json.encode())
 						messages["gets"].append(msg["MID"])
-		if leader:
-			print("AFTER BEFORE")
 
 		if candidate and time.time() - election_time > .5:
 			# print(my_id + " sending more votes")
