@@ -137,7 +137,7 @@ def reply_true(msg, index):
 print_timer = 0
 while True:
 	if leader:
-		print("LEADER" + my_id)
+		print("LOOP START")
 	# if leader:
 	# 	print("LEADER: %s %f" % (my_id, time.time()))
 	# if leader:
@@ -145,7 +145,6 @@ while True:
 	# else:
 	# 	print(my_id)
 	for N in range(commit_index + 1, len(log)):
-		print("test2" + str(time.time()))
 		num_matched = 0
 		for the_id in replica_ids:
 			if match_index[the_id] >= N:
@@ -180,48 +179,6 @@ while True:
 		if clock - append_clock > 1:
 			send_append_entry("")
 			append_clock = time.time()
-		# if catchup_state:
-		# 	if applied_index >= get_index:
-		# 		msg = cache[0][1]
-		# 		value = kvstore.get(msg['key'], "")
-		# 		return_msg = {"src": my_id, "dst": msg['src'],
-		# 		"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
-		# 		return_msg_json = json.dumps(return_msg)
-		# 		sock.send(return_msg_json.encode())
-		# 		last_catchup = False
-		# if not leader_ready and commit_index >= no_op_index:
-		# 	catchup_state = True
-		# 	last_catchup = False
-		# 	first_append_entry = time.time()
-		# 	cache_len = len(cache)
-		# 	puts = False
-		# 	for i in range(cache_len):
-		# 		entry = cache.pop(0)
-		# 		msg = entry[1]
-		# 		if entry[0] == "put":
-		# 			if msg["MID"] not in messages["puts"]:
-		# 				puts = True
-		# 				log.append({msg["key"]: msg["value"], "term": current_term,
-		# 							"client_ID": msg['src'], "MID": msg['MID']})
-		# 				messages["puts"].append(msg["MID"])
-		# 		else:
-		# 			if msg["MID"] not in messages["gets"]:
-		# 				if puts:
-		# 					send_append_entry("")
-		# 					cache.insert(0, entry)
-		# 					messages["gets"].append(msg["MID"])
-		# 					break
-		# 				else:
-		# 					value = kvstore.get(msg['key'], "")
-		# 					return_msg = {"src": my_id, "dst": msg['src'],
-		# 					"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
-		# 					return_msg_json = json.dumps(return_msg)
-		# 					sock.send(return_msg_json.encode())
-		# 				messages["gets"].append(msg["MID"])
-		# 	if not cache:
-		# 		send_append_entry("")
-		# 		leader_ready = True
-		# 		catchup_state = False
 
 	# if have not received a heart beat... (empty list)
 	# if not leader and second_clock - last_other > r:
@@ -244,24 +201,6 @@ while True:
 		for the_id in replica_ids:
 			next_index[the_id] = no_op_index
 			match_index[the_id] = -1
-		# if log_len == 0:
-		# 	prev_term = 1
-		# else:
-		# 	prev_term = log[log_len - 1]['term']
-		# for the_id in replica_ids:
-		# 	entries = [{"key": "no-op", "value": "", "prev_index"}]
-		# 	msg = {"src": my_id, "dst": the_id,
-		# 		"leader": my_id, "type": "append_entry",
-		# 		"key": "no-op", "value": "",
-		# 		"term": current_term, "prev_index": log_len - 1,
-		# 		"prev_term": prev_term, "lead_commit_index": commit_index,
-		# 		"client_ID": "no-op", "MID": "no-op", "time": time.time()}
-
-		# 	new_entry = {"key": the_key, "value": entry[the_key],
-		# 	"prev_index": rep_next_index + i - 1, "prev_term": term,
-		# 	"client_ID": entry['client_ID'], "MID": entry["MID"]}
-		# msg = {"src": my_id, "dst": the_id, "leader": my_id, "term": current_term,
-		# "type": "append_entry", "entries": entries, "lead_commit_index": commit_index}
 		log.append({"no-op": "", "term": current_term, "client_ID": "no-op", "MID": "no-op"})
 		send_append_entry("")
 
@@ -276,7 +215,6 @@ while True:
 			if leader and (msg['type'] == 'append_entry' or msg['type'] == 'bulk_append') and msg["term"] >= current_term:
 				current_term = msg["term"]
 				make_follower()
-				# print(my_id + " DEPOSED " + str(leader))
 
 			# if you get a request vote, vote for them if you have not yet voted in this term
 			if msg['type'] == "RequestVote":
@@ -296,7 +234,6 @@ while True:
 			if msg['type'] == 'append_ok':
 				next_index[msg['src']] = msg["index"]
 				match_index[msg['src']] = next_index[msg['src']] - 1
-				# messages["appends"][msg["src"]] = [x for x in messages["appends"][msg["src"]] if x["MID"] != msg["MID"]]
 
 			if msg['type'] == "append_fail":
 				if msg["term"] > current_term:
@@ -305,8 +242,6 @@ while True:
 				if next_index[msg["src"]] > 0:
 					next_index[msg['src']] -= 1
 				match_index[msg["src"]] = -1
-				
-				#send_to_follower(msg["src"], msg)
 
 			# append_entry from leader, append to own and send back OK
 			if not leader and msg['type'] == 'append_entry':
@@ -355,7 +290,9 @@ while True:
 
 					if msg['lead_commit_index'] > commit_index:
 						commit_index = min(msg['lead_commit_index'], len(log) - 1)
-
+			
+			if leader:
+				print("AFTER APPEND ENTRIES")
 			# if you get a vote, keep track
 			if msg['type'] == "vote" and candidate:
 				votes += 1
