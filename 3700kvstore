@@ -261,9 +261,6 @@ while True:
 		log.append({"no-op": "", "term": current_term, "client_ID": "no-op", "MID": "no-op"})
 		send_append_entry("")
 
-	if time.time() - print_timer > 1:
-		print(my_id + " alive")
-		print_timer = time.time()
 	ready = select.select([sock], [], [], .1)[0]
 	if sock in ready:
 		msg_raw = sock.recv(32768)
