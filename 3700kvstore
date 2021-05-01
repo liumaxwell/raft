@@ -136,6 +136,8 @@ def reply_true(msg, index):
 
 print_timer = 0
 while True:
+	if leader:
+		print("TEST")
 	# if leader:
 	# 	print("LEADER: %s %f" % (my_id, time.time()))
 	# if leader:
@@ -151,7 +153,6 @@ while True:
 			commit_index = N
 
 	while commit_index > applied_index:
-		print("TEST")
 		applied_index += 1
 		if log[applied_index]['client_ID'] != "no-op" and log[applied_index]["MID"]:
 			the_key = ""
