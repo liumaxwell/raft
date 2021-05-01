@@ -269,141 +269,142 @@ while True:
 		log.append({"no-op": "", "term": current_term, "client_ID": "no-op", "MID": "no-op"})
 		send_append_entry("")
 
+	skip_message = False
 	ready = select.select([sock], [], [], .1)[0]
 	if sock in ready:
 		msg_raw = sock.recv(32768)
 		if len(msg_raw) == 0:
-			continue
+			skip_msg = True
 		msg = json.loads(msg_raw)
-
-		if leader and (msg['type'] == 'append_entry' or msg['type'] == 'bulk_append') and msg["term"] >= current_term:
-			current_term = msg["term"]
-			make_follower()
-			print(my_id + " DEPOSED " + str(leader))
-
-		# if you get a request vote, vote for them if you have not yet voted in this term
-		if msg['type'] == "RequestVote" and not candidate:
-			# if you haven't voted yet this term and they have greater or equal term
-			if (not voted_for or voted_for == msg["src"]) and up_to_date(msg):
-				print(my_id + "voted for " + msg["src"])
-				return_msg = {"src": my_id, "dst": msg['src'],
-							  "leader": "FFFF", "type": "vote"}
-				election_timeout = False
+		if not skip_message:
+			if leader and (msg['type'] == 'append_entry' or msg['type'] == 'bulk_append') and msg["term"] >= current_term:
+				current_term = msg["term"]
 				make_follower()
-				return_msg_json = json.dumps(return_msg)
-				sock.send(return_msg_json.encode())
-				voted_for = msg["src"]
+				print(my_id + " DEPOSED " + str(leader))
 
-		# follower committed
-		if msg['type'] == 'append_ok':
-			next_index[msg['src']] = msg["index"]
-			match_index[msg['src']] = next_index[msg['src']] - 1
-			# messages["appends"][msg["src"]] = [x for x in messages["appends"][msg["src"]] if x["MID"] != msg["MID"]]
-
-		if msg['type'] == "append_fail":
-			if msg["term"] > current_term:
-				make_follower()
-				continue
-			if next_index[msg["src"]] > 0:
-				next_index[msg['src']] -= 1
-			match_index[msg["src"]] = -1
-			
-			#send_to_follower(msg["src"], msg)
-
-		# append_entry from leader, append to own and send back OK
-		if not leader and msg['type'] == 'append_entry':
-			voted_for = None
-			most_recent_leader = msg['leader']
-			candidate = False
-			entries = msg["entries"]
-			skip = False
-			if not entries:
-				past_beats.append(1)
-				if msg['lead_commit_index'] > commit_index:
-					commit_index = min(msg['lead_commit_index'], len(log) - 1)
-					skip = True
-			if msg['term'] < current_term:
-				reply_false(msg)
-				skip = True
-			current_term = msg["term"]
-			if not skip:
-				for entry in entries:
-					log_idx = len(log) - 1
-					if entry['prev_index'] == -1:
-						if log_idx == -1:
-							log.append({entry['key']: entry['value'], "term": entry['term'],
-							"client_ID": entry['client_ID'], "MID": entry['MID']})
-							reply_true(msg, entry["prev_index"])
-						elif log[0]["term"] == entry["prev_term"]:
-							reply_true(msg, entry["prev_index"])
-						else:
-							reply_false(msg)
-							break
-					elif log_idx < entry['prev_index'] or \
-							log[entry["prev_index"]]["term"] != entry['prev_term']:
-						reply_false(msg)
-						break
-						#print("log index mismatched")
-					elif log_idx == entry["prev_index"]:
-						log.append({entry['key']: entry['value'], "term": entry['term'], 
-						"client_ID": entry['client_ID'], "MID": entry['MID']})
-						reply_true(msg, entry["prev_index"])
-					elif log_idx > entry['prev_index']:
-						if log[entry['prev_index'] + 1]["term"] != entry['term']:
-							log = log[0 : entry['prev_index'] + 1]
-							log.append({entry['key']: entry['value'], "term": entry['term'], 
-							"client_ID": entry['client_ID'], "MID": entry['MID']})
-						reply_true(msg, entry["prev_index"])
-
-				if msg['lead_commit_index'] > commit_index:
-					commit_index = min(msg['lead_commit_index'], len(log) - 1)
-
-		# if you get a vote, keep track
-		if msg['type'] == "vote" and candidate:
-			votes += 1
-
-		# if you get a put message
-		elif msg['type'] == 'put':
-			# redirect to leader
-			if not leader:
-				return_msg = {"src": my_id, "dst": msg['src'],
-							  "leader": most_recent_leader, "type": "redirect",
-							  "MID": msg['MID']}
-				return_msg_json = json.dumps(return_msg)
-				sock.send(return_msg_json.encode())
-			# you are leader, append to own log and send out to replicas
-			else:
-				if msg["MID"] not in messages["puts"]:
-					# put into own log
-					log.append({msg["key"]: msg["value"], "term": current_term,
-								"client_ID": msg['src'], "MID": msg['MID']})
-					# send out append entries
-					send_append_entry("")
-					messages["puts"].append(msg["MID"])
-
-		# get message from client
-		elif msg['type'] == 'get':
-			# redirect to leader
-			if not leader:
-				return_msg = {"src": my_id, "dst": msg['src'],
-							  "leader": most_recent_leader, "type": "redirect",
-							  "MID": msg['MID']}
-				return_msg_json = json.dumps(return_msg)
-				sock.send(return_msg_json.encode())
-			# if leader, get the value and send back
-			else:
-				if msg["MID"] not in messages["gets"]:
-					value = kvstore.get(msg['key'], "")
-					if not value:
-						return_msg = {"src": my_id, "dst": msg['src'],
-						"leader": my_id, "type": "fail", "MID": msg['MID'], "value": value}
-						sock.send(return_msg_json.encode())
-						continue
+			# if you get a request vote, vote for them if you have not yet voted in this term
+			if msg['type'] == "RequestVote" and not candidate:
+				# if you haven't voted yet this term and they have greater or equal term
+				if (not voted_for or voted_for == msg["src"]) and up_to_date(msg):
+					print(my_id + "voted for " + msg["src"])
 					return_msg = {"src": my_id, "dst": msg['src'],
-								"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
+								"leader": "FFFF", "type": "vote"}
+					election_timeout = False
+					make_follower()
 					return_msg_json = json.dumps(return_msg)
 					sock.send(return_msg_json.encode())
-					messages["gets"].append(msg["MID"])
+					voted_for = msg["src"]
+
+			# follower committed
+			if msg['type'] == 'append_ok':
+				next_index[msg['src']] = msg["index"]
+				match_index[msg['src']] = next_index[msg['src']] - 1
+				# messages["appends"][msg["src"]] = [x for x in messages["appends"][msg["src"]] if x["MID"] != msg["MID"]]
+
+			if msg['type'] == "append_fail":
+				if msg["term"] > current_term:
+					make_follower()
+					continue
+				if next_index[msg["src"]] > 0:
+					next_index[msg['src']] -= 1
+				match_index[msg["src"]] = -1
+				
+				#send_to_follower(msg["src"], msg)
+
+			# append_entry from leader, append to own and send back OK
+			if not leader and msg['type'] == 'append_entry':
+				voted_for = None
+				most_recent_leader = msg['leader']
+				candidate = False
+				entries = msg["entries"]
+				skip = False
+				if not entries:
+					past_beats.append(1)
+					if msg['lead_commit_index'] > commit_index:
+						commit_index = min(msg['lead_commit_index'], len(log) - 1)
+						skip = True
+				if msg['term'] < current_term:
+					reply_false(msg)
+					skip = True
+				current_term = msg["term"]
+				if not skip:
+					for entry in entries:
+						log_idx = len(log) - 1
+						if entry['prev_index'] == -1:
+							if log_idx == -1:
+								log.append({entry['key']: entry['value'], "term": entry['term'],
+								"client_ID": entry['client_ID'], "MID": entry['MID']})
+								reply_true(msg, entry["prev_index"])
+							elif log[0]["term"] == entry["prev_term"]:
+								reply_true(msg, entry["prev_index"])
+							else:
+								reply_false(msg)
+								break
+						elif log_idx < entry['prev_index'] or \
+								log[entry["prev_index"]]["term"] != entry['prev_term']:
+							reply_false(msg)
+							break
+							#print("log index mismatched")
+						elif log_idx == entry["prev_index"]:
+							log.append({entry['key']: entry['value'], "term": entry['term'], 
+							"client_ID": entry['client_ID'], "MID": entry['MID']})
+							reply_true(msg, entry["prev_index"])
+						elif log_idx > entry['prev_index']:
+							if log[entry['prev_index'] + 1]["term"] != entry['term']:
+								log = log[0 : entry['prev_index'] + 1]
+								log.append({entry['key']: entry['value'], "term": entry['term'], 
+								"client_ID": entry['client_ID'], "MID": entry['MID']})
+							reply_true(msg, entry["prev_index"])
+
+					if msg['lead_commit_index'] > commit_index:
+						commit_index = min(msg['lead_commit_index'], len(log) - 1)
+
+			# if you get a vote, keep track
+			if msg['type'] == "vote" and candidate:
+				votes += 1
+
+			# if you get a put message
+			elif msg['type'] == 'put':
+				# redirect to leader
+				if not leader:
+					return_msg = {"src": my_id, "dst": msg['src'],
+								"leader": most_recent_leader, "type": "redirect",
+								"MID": msg['MID']}
+					return_msg_json = json.dumps(return_msg)
+					sock.send(return_msg_json.encode())
+				# you are leader, append to own log and send out to replicas
+				else:
+					if msg["MID"] not in messages["puts"]:
+						# put into own log
+						log.append({msg["key"]: msg["value"], "term": current_term,
+									"client_ID": msg['src'], "MID": msg['MID']})
+						# send out append entries
+						send_append_entry("")
+						messages["puts"].append(msg["MID"])
+
+			# get message from client
+			elif msg['type'] == 'get':
+				# redirect to leader
+				if not leader:
+					return_msg = {"src": my_id, "dst": msg['src'],
+								"leader": most_recent_leader, "type": "redirect",
+								"MID": msg['MID']}
+					return_msg_json = json.dumps(return_msg)
+					sock.send(return_msg_json.encode())
+				# if leader, get the value and send back
+				else:
+					if msg["MID"] not in messages["gets"]:
+						value = kvstore.get(msg['key'], "")
+						if not value:
+							return_msg = {"src": my_id, "dst": msg['src'],
+							"leader": my_id, "type": "fail", "MID": msg['MID'], "value": value}
+							sock.send(return_msg_json.encode())
+							continue
+						return_msg = {"src": my_id, "dst": msg['src'],
+									"leader": my_id, "type": "ok", "MID": msg['MID'], "value": value}
+						return_msg_json = json.dumps(return_msg)
+						sock.send(return_msg_json.encode())
+						messages["gets"].append(msg["MID"])
 
 	# if candidate and time.time() - election_time > .5:
 	# 	print(my_id + " sending more votes")
