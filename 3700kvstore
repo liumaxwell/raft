@@ -259,17 +259,16 @@ while True:
 		# "type": "append_entry", "entries": entries, "lead_commit_index": commit_index}
 		log.append({"no-op": "", "term": current_term, "client_ID": "no-op", "MID": "no-op"})
 		send_append_entry("")
-
+		
+	if time.time() - print_timer > 1:
+		print(my_id + " alive")
+		print_timer = time.time()
 	ready = select.select([sock], [], [], .1)[0]
 	if sock in ready:
 		msg_raw = sock.recv(32768)
 		if len(msg_raw) == 0:
 			continue
 		msg = json.loads(msg_raw)
-
-		if time.time() - print_timer > 1:
-			print(my_id + " alive")
-			print_timer = time.time()
 
 		# if leader:
 		# 	print(next_index)
