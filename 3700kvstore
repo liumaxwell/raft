@@ -215,7 +215,7 @@ while True:
 			next_index[the_id] = no_op_index
 			match_index[the_id] = -1
 		log.append({"no-op": "", "term": current_term, "client_ID": "no-op", "MID": "no-op"})
-		if redirects:
+		if redirects_cache:
 			# log.append({msg["key"]: msg["value"], "term": current_term,
 			# 	"client_ID": msg['src'], "MID": msg['MID']})
 			send_redirects()
