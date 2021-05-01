@@ -294,12 +294,13 @@ while True:
 			elif msg['type'] == 'put':
 				# redirect to leader
 				if not leader:
-					# return_msg = {"src": my_id, "dst": msg['src'],
-					# 			"leader": most_recent_leader, "type": "redirect",
-					# 			"MID": msg['MID']}
-					# return_msg_json = json.dumps(return_msg)
-					# sock.send(return_msg_json.encode())
-					ignore = ""
+					if msg["MID"] not in messages["puts"]:
+						return_msg = {"src": my_id, "dst": msg['src'],
+									"leader": most_recent_leader, "type": "redirect",
+									"MID": msg['MID']}
+						return_msg_json = json.dumps(return_msg)
+						sock.send(return_msg_json.encode())
+						messages["puts"].append(msg["MID"])
 				# you are leader, append to own log and send out to replicas
 				else:
 					if msg["MID"] not in messages["puts"]:
@@ -315,11 +316,13 @@ while True:
 			elif msg['type'] == 'get':
 				# redirect to leader
 				if not leader:
-					return_msg = {"src": my_id, "dst": msg['src'],
-								"leader": most_recent_leader, "type": "redirect",
-								"MID": msg['MID']}
-					return_msg_json = json.dumps(return_msg)
-					sock.send(return_msg_json.encode())
+					if msg["MID"] not in messages["gets"]:
+						return_msg = {"src": my_id, "dst": msg['src'],
+									"leader": most_recent_leader, "type": "redirect",
+									"MID": msg['MID']}
+						return_msg_json = json.dumps(return_msg)
+						sock.send(return_msg_json.encode())
+						messages["gets"].append(msg["MID"])
 				# if leader, get the value and send back
 				else:
 					if msg["MID"] not in messages["gets"]:
