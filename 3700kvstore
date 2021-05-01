@@ -15,6 +15,8 @@ sock.connect(my_id)
 
 time.sleep(random.uniform(.5, 1.5))
 
+sock.settimeout(5)
+
 heartbeats = 0
 num_total = len(replica_ids) + 1
 last = 0
