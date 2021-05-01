@@ -296,6 +296,8 @@ while True:
 			if msg['type'] == "vote" and candidate:
 				votes += 1
 
+			if leader:
+				print("AFTER BEFORE")
 			# if you get a put message
 			elif msg['type'] == 'put':
 				# redirect to leader
@@ -314,9 +316,7 @@ while True:
 						# send out append entries
 						send_append_entry("")
 						messages["puts"].append(msg["MID"])
-			
-			if leader:
-				print("AFTER BEFORE")
+		
 
 			# get message from client
 			elif msg['type'] == 'get':
