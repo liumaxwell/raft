@@ -136,8 +136,8 @@ def reply_true(msg, index):
 
 print_timer = 0
 while True:
-	if leader:
-		print("LOOP START")
+	# if leader:
+	# 	print("LOOP START")
 	# if leader:
 	# 	print("LEADER: %s %f" % (my_id, time.time()))
 	# if leader:
@@ -296,8 +296,8 @@ while True:
 			if msg['type'] == "vote" and candidate:
 				votes += 1
 
-			if leader:
-				print("AFTER BEFORE")
+			# if leader:
+			# 	print("AFTER BEFORE")
 			# if you get a put message
 			elif msg['type'] == 'put':
 				# redirect to leader
