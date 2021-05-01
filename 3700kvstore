@@ -204,10 +204,10 @@ while True:
 		log.append({"no-op": "", "term": current_term, "client_ID": "no-op", "MID": "no-op"})
 		send_append_entry("")
 
-	if leader:
-		print("AFTER BEFORE")
 	skip_message = False
 	ready = select.select([sock], [], [], .1)[0]
+	if leader:
+		print("AFTER BEFORE")
 	if sock in ready:
 		msg_raw = sock.recv(32768)
 		if len(msg_raw) == 0:
