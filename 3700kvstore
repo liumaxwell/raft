@@ -447,3 +447,5 @@ while True:
 		# print("requesting votes")
 		election_timeout = False
 		voted_for = None
+
+print("EXITED THE LOOP")
