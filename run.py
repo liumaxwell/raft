@@ -636,6 +636,7 @@ class Simulation:
             for rid, r in self.replicas.iteritems():
                 if rid != msg['src']:
                     if self.__check_partition__(msg['src'], rid) and random.random() >= self.conf.drops:
+                        print(msg["src"])
                         self.__replica_deliver__(r, raw_msg)
                     else: self.stats.total_drops += 1
 
@@ -652,7 +653,6 @@ class Simulation:
             
     def __accept__(self, sock):
         client = sock.accept()[0]
-        print(client)
         for r in self.replicas.itervalues():
             if r.listen_sock == sock:
                 r.client_sock = client
