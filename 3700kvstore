@@ -399,12 +399,6 @@ while True:
 				sock.send(return_msg_json.encode())
 			# if leader, get the value and send back
 			else:
-				# if msg["MID"] in messages["gets"]:
-				# 	sock.send(json.dumps(messages["gets"][msg["MID"]]).encode())
-				# 	continue
-				# if not leader_ready:
-				# 	cache.append(("get", msg))
-				# else:
 				if msg["MID"] not in messages["gets"]:
 					value = kvstore.get(msg['key'], "")
 					if not value:
@@ -449,3 +443,5 @@ while True:
 		# print("requesting votes")
 		election_timeout = False
 		voted_for = None
+
+print("EXITED LOOP")
