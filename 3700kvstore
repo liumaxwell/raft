@@ -135,8 +135,8 @@ def reply_true(msg, index):
 
 print_timer = 0
 while True:
-	if leader:
-		print("LEADER: %s %f" % (my_id, time.time()))
+	# if leader:
+	# 	print("LEADER: %s %f" % (my_id, time.time()))
 	# if leader:
 	# 	print(my_id + " LEADER")
 	# else:
@@ -260,12 +260,11 @@ while True:
 		log.append({"no-op": "", "term": current_term, "client_ID": "no-op", "MID": "no-op"})
 		send_append_entry("")
 
-	ready = select.select([sock], [], [], .1)[0]
+	ready, ignore, exceptional = select.select([sock], [], [], .1)[0]
+	if exceptional:
+		print("TEST")
 	if sock in ready:
-		try:
-			msg_raw = sock.recv(32768)
-		except:
-			ignore = "ignore"
+		msg_raw = sock.recv(32768)
 		if len(msg_raw) == 0:
 			continue
 		msg = json.loads(msg_raw)
