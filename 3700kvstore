@@ -111,7 +111,7 @@ def up_to_date(msg):
 		return False
 
 def send_heartbeat():
-	# print(my_id + " sending heartbeat")
+	print(my_id + " sending heartbeat")
 	msg = {"src": my_id, "dst": "FFFF", "leader": my_id, "type": "append_entry", 
 	"entries": [], "lead_commit_index": commit_index, "term": current_term}
 	sock.send(json.dumps(msg).encode())
