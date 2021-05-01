@@ -377,7 +377,7 @@ class Replica:
             try:
                 print("IN TRY")
                 print(self.client_sock)
-                self.client_sock.settimeout(1)
+                self.client_sock.settimeout(0)
                 try:
                     print(self.client_sock.recv(16780).decode())
                 except:
