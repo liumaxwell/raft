@@ -60,15 +60,20 @@ for the_id in replica_ids:
 	# messages["appends"][the_id] = []
 append_oks = 0
 
-def not_seen_before(msg):
-	if msg["type"] == "put":
-		entries = follower_messages["puts"]
-	else:
-		entries = follower_messages["gets"]
-	for entry in entries:
-		if entry["key"] == msg["key"] and entry["value"] == msg["value"]:
-			return True
-	return False
+# def not_seen_before(msg):
+# 	if msg["type"] == "put":
+# 		entries = follower_messages["puts"]
+# 	else:
+# 		entries = follower_messages["gets"]
+# 	for entry in entries:
+# 		if entry["key"] == msg["key"] and entry["value"] == msg["value"]:
+# 			return True
+# 	return False
+
+def send_redirects():
+	for msg in redirects_cache:
+		msg["leader"] = most_recent_leader
+		sock.send(json.dumps(msg).encode())
 
 def make_follower():
 	global leader_ready
@@ -255,6 +260,8 @@ while True:
 				candidate = False
 				entries = msg["entries"]
 				skip = False
+				if redirects_cache:
+					send_redirects()
 				if not entries:
 					past_beats.append(1)
 					if msg['lead_commit_index'] > commit_index:
@@ -307,12 +314,14 @@ while True:
 				# redirect to leader
 				if not leader:
 					# if not_seen_before(msg):
-					time.sleep(.01)
-					return_msg = {"src": my_id, "dst": msg['src'],
-								"leader": most_recent_leader, "type": "redirect",
-								"MID": msg['MID']}
-					return_msg_json = json.dumps(return_msg)
-					sock.send(return_msg_json.encode())
+					redirects_cache.append({"src": my_id, "dst": msg['src'],
+											"leader": most_recent_leader, "type": "redirect",
+											"MID": msg['MID']})
+					# return_msg = {"src": my_id, "dst": msg['src'],
+					# 			"leader": most_recent_leader, "type": "redirect",
+					# 			"MID": msg['MID']}
+					# return_msg_json = json.dumps(return_msg)
+					# sock.send(return_msg_json.encode())
 					# follower_messages["puts"].append((msg["key"], msg["value"]))
 					# else:
 					# 	print("refused")
@@ -332,12 +341,14 @@ while True:
 				# redirect to leader
 				if not leader:
 					# if not_seen_before(msg):
-					time.sleep(.01)
-					return_msg = {"src": my_id, "dst": msg['src'],
-								"leader": most_recent_leader, "type": "redirect",
-								"MID": msg['MID']}
-					return_msg_json = json.dumps(return_msg)
-					sock.send(return_msg_json.encode())
+					redirects_cache.append({"src": my_id, "dst": msg['src'],
+											"leader": most_recent_leader, "type": "redirect",
+											"MID": msg['MID']})
+					# return_msg = {"src": my_id, "dst": msg['src'],
+					# 			"leader": most_recent_leader, "type": "redirect",
+					# 			"MID": msg['MID']}
+					# return_msg_json = json.dumps(return_msg)
+					# sock.send(return_msg_json.encode())
 					# follower_messages["puts"].append((msg["key"], msg["value"]))
 					# else:
 					# 	print("refused")
