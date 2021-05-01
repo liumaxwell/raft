@@ -316,7 +316,6 @@ class Client:
         
         # msg type must be ok, mark it as completed
         self.sim.completed.add(mid)
-        print("completed")
         if req.get:
             if 'value' not in msg:
                 fail("*** Simulator Error - get() response missing the value of the key: %s" % (raw_msg))
@@ -380,6 +379,7 @@ class Replica:
             except:
                 print '*** Simulator Error - Unable to send to replica'
                 self.shutdown()
+        print(self.rid + " is dead")
         return False
                                 
 #######################################################################################################
