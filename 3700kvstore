@@ -257,9 +257,10 @@ while True:
 		# 	"client_ID": entry['client_ID'], "MID": entry["MID"]}
 		# msg = {"src": my_id, "dst": the_id, "leader": my_id, "term": current_term,
 		# "type": "append_entry", "entries": entries, "lead_commit_index": commit_index}
+		print("Before send")
 		log.append({"no-op": "", "term": current_term, "client_ID": "no-op", "MID": "no-op"})
 		send_append_entry("")
-		
+
 	if time.time() - print_timer > 1:
 		print(my_id + " alive")
 		print_timer = time.time()
@@ -320,7 +321,7 @@ while True:
 					continue
 			if msg['term'] < current_term:
 				reply_false(msg)
-				break
+				continue
 			current_term = msg["term"]
 			for entry in entries:
 				log_idx = len(log) - 1
