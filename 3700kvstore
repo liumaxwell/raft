@@ -298,7 +298,7 @@ while True:
 					if most_recent_leader != "FFF":
 						msg["dst"] = most_recent_leader
 						sock.send(json.dumps(msg).encode())
-					if msg["MID"] not in messages["puts"]:
+					elif msg["MID"] not in messages["puts"]:
 						return_msg = {"src": my_id, "dst": msg['src'],
 									"leader": most_recent_leader, "type": "redirect",
 									"MID": msg['MID']}
