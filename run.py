@@ -376,6 +376,7 @@ class Replica:
         if self.alive:
             try:
                 print("IN TRY")
+                print(self.client_sock)
                 self.client_sock.send(raw_msg)
                 print("AFTER TRY")
                 return True
