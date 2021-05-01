@@ -15,6 +15,7 @@ sock.connect(my_id)
 
 time.sleep(random.uniform(.5, 1.5))
 
+heartbeats = 0
 num_total = len(replica_ids) + 1
 last = 0
 last_other = 0
@@ -170,6 +171,7 @@ while True:
 		# code runs every 2 seconds
 		if clock - last > 2:
 			# send heartbeat
+			heartbeats += 1
 			send_heartbeat()
 			last = clock
 		if clock - append_clock > 1:
@@ -259,6 +261,9 @@ while True:
 		# "type": "append_entry", "entries": entries, "lead_commit_index": commit_index}
 		log.append({"no-op": "", "term": current_term, "client_ID": "no-op", "MID": "no-op"})
 		send_append_entry("")
+	
+	if leader and heartbeats == 1:
+		print("TEST")
 
 	ready = select.select([sock], [], [], .1)[0]
 	if sock in ready:
