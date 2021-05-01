@@ -372,6 +372,7 @@ class Replica:
             except: pass
 
     def deliver(self, raw_msg):
+        print("IN DELIVER")
         if self.alive:
             try:
                 self.client_sock.send(raw_msg)
