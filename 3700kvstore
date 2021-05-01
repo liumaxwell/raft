@@ -225,6 +225,7 @@ while True:
 	if sock in ready:
 		msg_raw = sock.recv(32768)
 		if len(msg_raw) == 0:
+			print("test")
 			skip_msg = True
 		msg = json.loads(msg_raw)
 
