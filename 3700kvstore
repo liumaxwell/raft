@@ -441,3 +441,4 @@ while True:
 		sock.send(json.dumps(msg).encode())
 		# print("requesting votes")
 		election_timeout = False
+		voted_for = None
