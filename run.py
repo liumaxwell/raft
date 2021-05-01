@@ -379,7 +379,7 @@ class Replica:
                 print(self.rid)
                 print(self.client_sock.proto)
                 ready = select.select([self.client_sock], [], [], 0.1)[0]
-                if sock in ready:
+                if self.client_sock in ready:
                     print("SOCK READY")
                 self.client_sock.send(raw_msg)
                 print("AFTER TRY")
