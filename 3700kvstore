@@ -158,6 +158,7 @@ def reply_true(msg, index):
 
 print_timer = 0
 while True:
+	print(my_id)
 	for N in range(commit_index + 1, len(log)):
 		num_matched = 0
 		for the_id in replica_ids:
