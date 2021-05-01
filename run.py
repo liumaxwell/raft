@@ -377,8 +377,7 @@ class Replica:
             try:
                 print("IN TRY")
                 print(self.rid)
-                print(self.client_sock)
-                print(self.listen_sock)
+                print(self.client_sock.getblocking())
                 self.client_sock.send(raw_msg)
                 print("AFTER TRY")
                 return True
