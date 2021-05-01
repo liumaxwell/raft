@@ -273,8 +273,8 @@ while True:
 		log.append({"no-op": "", "term": current_term, "client_ID": "no-op", "MID": "no-op"})
 		send_append_entry("")
 
-	ready = select.select([sock], [], [], .1)[0]
-	if sock in ready:
+	ready, writeable, ignore = select.select([sock], [sock], [], .1)
+	if sock in ready and sock in writeable:
 		try:
 			msg_raw = sock.recv(32768)
 		except:
