@@ -316,6 +316,7 @@ class Client:
         
         # msg type must be ok, mark it as completed
         self.sim.completed.add(mid)
+        print("completed")
         if req.get:
             if 'value' not in msg:
                 fail("*** Simulator Error - get() response missing the value of the key: %s" % (raw_msg))
@@ -537,7 +538,6 @@ class Simulation:
 
     def __replica_deliver__(self, replica, raw_msg):
         if not replica.deliver(raw_msg) and replica.rid in self.living_rids:
-            print("removing " + replica.rid)
             self.living_rids.remove(replica.rid)
                         
     def __populate_event_queue__(self, clock):
