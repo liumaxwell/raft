@@ -120,30 +120,6 @@ def send_append_entry(dst):
 		"type": "append_entry", "entries": entries, "lead_commit_index": commit_index}
 		if entries:
 			sock.send(json.dumps(msg).encode())
-		# messages["appends"][str(the_id)].append(new_msg)
-
-# def send_to_follower(dst, msg):
-# 	index = next_index[dst]
-# 	the_key = ""
-# 	if index == 0:
-# 		prev_term = 1
-# 	else:
-# 		prev_term = log[index - 1]['term']
-# 		term = current_term
-
-# 	for key in list(log[index].keys()):
-# 		if key != 'term' and key != 'client_ID' and key != 'MID':
-# 			the_key = key
-
-# 	new_msg = {"src": my_id, "dst": dst,
-# 		   "leader": my_id, "type": "append_entry",
-# 		   "key": the_key, "value": log[index][the_key],
-# 		   "term": current_term, "prev_index": index - 1,
-# 		   "prev_term": prev_term, "lead_commit_index": commit_index,
-# 		   "client_ID": msg['client_ID'], "MID": msg["MID"], "time": time.time()}
-# 	json_msg = json.dumps(new_msg)
-# 	sock.send(json_msg.encode())
-# 	messages["appends"][str(dst)].append(new_msg)
 
 def reply_false(msg):
 	return_msg = {"src": my_id, "dst": msg['src'], "leader": msg["src"],
@@ -159,6 +135,8 @@ def reply_true(msg, index):
 
 print_timer = 0
 while True:
+	if leader:
+		print("LEADER: %s %f" % (my_id, time.time()))
 	# if leader:
 	# 	print(my_id + " LEADER")
 	# else:
@@ -170,8 +148,6 @@ while True:
 				num_matched += 1
 		if num_matched >= majority - 1 and log[N]["term"] == current_term:
 			commit_index = N
-	# if applied_index >= no_op_index:
-	# 	leader_ready = True
 
 	while commit_index > applied_index:
 		applied_index += 1
@@ -185,7 +161,6 @@ while True:
 			return_msg = {"src": my_id, "dst": log[applied_index]['client_ID'],
 			"leader": my_id, "type": "ok", "MID": log[applied_index]['MID']}
 			if leader:
-				# print("LEADER %s RESPONDING TO: %s" % (my_id, log[applied_index]["MID"]))
 				return_msg_json = json.dumps(return_msg)
 				sock.send(return_msg_json.encode())
 
