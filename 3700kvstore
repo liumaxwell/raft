@@ -13,8 +13,6 @@ replica_ids = sys.argv[2:]
 sock = socket.socket(socket.AF_UNIX, socket.SOCK_SEQPACKET)
 sock.connect(my_id)
 
-sock.settimeout(5)
-
 time.sleep(random.uniform(.5, 1.5))
 
 heartbeats = 0
@@ -138,6 +136,14 @@ def reply_true(msg, index):
 
 print_timer = 0
 while True:
+	if leader:
+		print("LOOP START")
+	# if leader:
+	# 	print("LEADER: %s %f" % (my_id, time.time()))
+	# if leader:
+	# 	print(my_id + " LEADER")
+	# else:
+	# 	print(my_id)
 	for N in range(commit_index + 1, len(log)):
 		num_matched = 0
 		for the_id in replica_ids:
@@ -290,8 +296,8 @@ while True:
 			if msg['type'] == "vote" and candidate:
 				votes += 1
 
-			# if leader:
-			# 	print("AFTER BEFORE")
+			if leader:
+				print("AFTER BEFORE")
 			# if you get a put message
 			elif msg['type'] == 'put':
 				# redirect to leader
