@@ -453,7 +453,6 @@ class Simulation:
                 # otherwise, this is a client socket connected to a replica
                 else:
                     self.__route_msgs__(sock)
-                    print("AFTER FORS ELSE")
             # check the time and fire off events
             clock = time.time()
             while len(self.events) != 0 and self.events[0][0] < clock:
@@ -583,6 +582,7 @@ class Simulation:
     def __route_msgs__(self, sock):
         try:
             raw_msg = sock.recv(16384)
+            print("RAW")
         except: 
             fail("*** Simulator Error - A replica quit unexpectedly")
             self.__close_replica__(sock)
