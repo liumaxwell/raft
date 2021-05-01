@@ -145,6 +145,7 @@ while True:
 	# else:
 	# 	print(my_id)
 	for N in range(commit_index + 1, len(log)):
+		print("test2")
 		num_matched = 0
 		for the_id in replica_ids:
 			if match_index[the_id] >= N:
@@ -153,6 +154,7 @@ while True:
 			commit_index = N
 
 	while commit_index > applied_index:
+		print("test3")
 		applied_index += 1
 		if log[applied_index]['client_ID'] != "no-op" and log[applied_index]["MID"]:
 			the_key = ""
