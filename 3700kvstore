@@ -271,7 +271,10 @@ while True:
 
 	ready = select.select([sock], [], [], .1)[0]
 	if sock in ready:
-		msg_raw = sock.recv(32768)
+		try:
+			msg_raw = sock.recv(32768)
+		except:
+			continue
 		if len(msg_raw) == 0:
 			continue
 		msg = json.loads(msg_raw)
