@@ -379,7 +379,6 @@ class Replica:
                 print(self.rid)
                 print(self.client_sock)
                 print(self.listen_sock)
-                print(self.client_sock)
                 self.client_sock.send(raw_msg)
                 print("AFTER TRY")
                 return True
