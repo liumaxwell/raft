@@ -433,7 +433,7 @@ while True:
 			   "index": len(log) - 1,
 					   "prev_term": term}
 		sock.send(json.dumps(msg).encode())
-		# print("requesting votes")
+		print("requesting votes")
 		election_timeout = False
 		voted_for = my_id
 
