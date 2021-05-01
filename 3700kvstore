@@ -237,7 +237,7 @@ while True:
 			if msg['type'] == "RequestVote":
 				# if you haven't voted yet this term and they have greater or equal term
 				if (not voted_for or voted_for == msg["src"]) and up_to_date(msg):
-					# print(my_id + "voted for " + msg["src"])
+					print(my_id + "voted for " + msg["src"])
 					return_msg = {"src": my_id, "dst": msg['src'],
 								"leader": "FFFF", "type": "vote"}
 					election_timeout = False
@@ -386,7 +386,7 @@ while True:
 			election_time = time.time()
 
 		if election_timeout:
-			# print(my_id + " starting election")
+			print(my_id + " starting election")
 			# transition to candidate
 			candidate = True
 			# increment the current term
