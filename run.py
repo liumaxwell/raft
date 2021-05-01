@@ -542,6 +542,7 @@ class Simulation:
 
     def __replica_deliver__(self, replica, raw_msg):
         if not replica.deliver(raw_msg) and replica.rid in self.living_rids:
+            print("IN ANOTHER IF")
             self.living_rids.remove(replica.rid)
                         
     def __populate_event_queue__(self, clock):
