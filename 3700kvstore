@@ -136,8 +136,9 @@ def reply_true(msg, index):
 
 print_timer = 0
 while True:
-	if leader:
-		print("TEST")
+	if time.time() - print_timer > 1:
+		print(my_id + " is alive")
+		print_timer = time.time()
 	# if leader:
 	# 	print("LEADER: %s %f" % (my_id, time.time()))
 	# if leader:
@@ -274,9 +275,6 @@ while True:
 			continue
 		msg = json.loads(msg_raw)
 
-		# if leader:
-		# 	print(next_index)
-
 		if leader and (msg['type'] == 'append_entry' or msg['type'] == 'bulk_append') and msg["term"] >= current_term:
 			current_term = msg["term"]
 			make_follower()
@@ -329,7 +327,6 @@ while True:
 			current_term = msg["term"]
 			if not skip:
 				for entry in entries:
-					print("TEST")
 					log_idx = len(log) - 1
 					if entry['prev_index'] == -1:
 						if log_idx == -1:
