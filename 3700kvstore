@@ -211,6 +211,7 @@ while True:
 
 			# if you get a request vote, vote for them if you have not yet voted in this term
 			if msg['type'] == "RequestVote":
+				most_recent_leader = "FFFF"
 				# if you haven't voted yet this term and they have greater or equal term
 				if (not voted_for or voted_for == msg["src"]) and up_to_date(msg):
 					# print(my_id + "voted for " + msg["src"])
