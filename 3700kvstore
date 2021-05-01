@@ -260,7 +260,7 @@ while True:
 		log.append({"no-op": "", "term": current_term, "client_ID": "no-op", "MID": "no-op"})
 		send_append_entry("")
 
-	ready, ignore, exceptional = select.select([sock], [sock], [sock], .1)[0]
+	ready, ignore, exceptional = select.select([sock], [sock], [sock], .1)
 	if exceptional:
 		print("TEST")
 	if sock in ready:
