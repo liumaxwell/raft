@@ -75,7 +75,7 @@ def send_redirects():
 	global redirects_cache
 	for msg in redirects_cache:
 		msg["leader"] = most_recent_leader
-		msg["dst"] = most_recent_leader
+		# msg["dst"] = most_recent_leader
 		sock.send(json.dumps(msg).encode())
 	redirects_cache = []
 
@@ -322,10 +322,10 @@ while True:
 				# redirect to leader
 				if not leader:
 					# if not_seen_before(msg):
-					redirects_cache.append(msg)
-					# redirects_cache.append({"src": my_id, "dst": msg['src'],
-					# 						"leader": most_recent_leader, "type": "redirect",
-					# 						"MID": msg['MID']})
+					# redirects_cache.append(msg)
+					redirects_cache.append({"src": my_id, "dst": msg['src'],
+											"leader": most_recent_leader, "type": "redirect",
+											"MID": msg['MID']})
 					# return_msg = {"src": my_id, "dst": msg['src'],
 					# 			"leader": most_recent_leader, "type": "redirect",
 					# 			"MID": msg['MID']}
@@ -350,10 +350,10 @@ while True:
 				# redirect to leader
 				if not leader:
 					# if not_seen_before(msg):
-					redirects_cache.append(msg)
-					# redirects_cache.append({"src": my_id, "dst": msg['src'],
-					# 						"leader": most_recent_leader, "type": "redirect",
-					# 						"MID": msg['MID']})
+					# redirects_cache.append(msg)
+					redirects_cache.append({"src": my_id, "dst": msg['src'],
+											"leader": most_recent_leader, "type": "redirect",
+											"MID": msg['MID']})
 					# return_msg = {"src": my_id, "dst": msg['src'],
 					# 			"leader": most_recent_leader, "type": "redirect",
 					# 			"MID": msg['MID']}
