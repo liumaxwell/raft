@@ -446,13 +446,13 @@ while True:
 					sock.send(return_msg_json.encode())
 					messages["gets"].append(msg["MID"])
 
-	if candidate and time.time() - election_time > .5:
-		print(my_id + " sending more votes")
-		msg = {'src': my_id, 'dst': "FFFF", 'leader': "FFFF",
-		'type': 'RequestVote', "term": current_term,
-		"index": len(log) - 1, "prev_term": term}
-		sock.send(json.dumps(msg).encode())
-		election_time = time.time()
+	# if candidate and time.time() - election_time > .5:
+	# 	print(my_id + " sending more votes")
+	# 	msg = {'src': my_id, 'dst': "FFFF", 'leader': "FFFF",
+	# 	'type': 'RequestVote', "term": current_term,
+	# 	"index": len(log) - 1, "prev_term": term}
+	# 	sock.send(json.dumps(msg).encode())
+	# 	election_time = time.time()
 
 	if election_timeout and not voted_for:
 		print(my_id + " starting election")
