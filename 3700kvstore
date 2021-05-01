@@ -314,7 +314,7 @@ while True:
 								"MID": msg['MID']}
 					return_msg_json = json.dumps(return_msg)
 					sock.send(return_msg_json.encode())
-					follower_messages["puts"].append((msg["key"], msg["value"]))
+					# follower_messages["puts"].append((msg["key"], msg["value"]))
 					# else:
 					# 	print("refused")
 				# you are leader, append to own log and send out to replicas
@@ -339,7 +339,7 @@ while True:
 								"MID": msg['MID']}
 					return_msg_json = json.dumps(return_msg)
 					sock.send(return_msg_json.encode())
-						follower_messages["puts"].append((msg["key"], msg["value"]))
+					# follower_messages["puts"].append((msg["key"], msg["value"]))
 					# else:
 					# 	print("refused")
 				# if leader, get the value and send back
