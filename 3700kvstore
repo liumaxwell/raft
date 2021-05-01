@@ -264,9 +264,6 @@ while True:
 		# "type": "append_entry", "entries": entries, "lead_commit_index": commit_index}
 		log.append({"no-op": "", "term": current_term, "client_ID": "no-op", "MID": "no-op"})
 		send_append_entry("")
-	
-	if leader and heartbeats == 1:
-		print("TEST")
 
 	ready = select.select([sock], [], [], .1)[0]
 	if sock in ready:
