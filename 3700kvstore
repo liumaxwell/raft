@@ -260,7 +260,7 @@ while True:
 		log.append({"no-op": "", "term": current_term, "client_ID": "no-op", "MID": "no-op"})
 		send_append_entry("")
 
-	ready = select.select([sock], [], [], .2)[0]
+	ready = select.select([sock], [], [], 1)[0]
 	if sock in ready:
 		try:
 			msg_raw = sock.recv(32768)
