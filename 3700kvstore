@@ -122,7 +122,6 @@ def send_append_entry(dst):
 		msg = {"src": my_id, "dst": the_id, "leader": my_id, "term": current_term,
 		"type": "append_entry", "entries": entries, "lead_commit_index": commit_index}
 		if entries:
-			print(the_id)
 			sock.send(json.dumps(msg).encode())
 
 def reply_false(msg):
@@ -135,7 +134,6 @@ def reply_true(msg, index):
 	return_msg = {"src": my_id, "dst": msg['src'], "leader": most_recent_leader,
 	"type": "append_ok", "term": current_term, "index": index + 2}
 	return_msg_json = json.dumps(return_msg)
-	print("sending message to " + most_recent_leader)
 	sock.send(return_msg_json.encode())
 
 print_timer = 0
@@ -143,7 +141,7 @@ while True:
 	if leader:
 		sock.settimeout(1)
 	if time.time() - print_timer > 1:
-		print(my_id + " is alive")
+		# print(my_id + " is alive")
 		print_timer = time.time()
 	# if leader:
 	# 	print("LEADER: %s %f" % (my_id, time.time()))
