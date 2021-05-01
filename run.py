@@ -479,6 +479,7 @@ class Simulation:
 
     def __kill_leader__(self):
         if self.leader != 'FFFF':
+            print("TEST KILLING " + self.leader)
             self.__kill_replica__(self.replicas[self.leader])
             self.leader = 'FFFF'
             for client in self.clients.itervalues(): client.forget()
