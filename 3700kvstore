@@ -204,6 +204,8 @@ while True:
 		log.append({"no-op": "", "term": current_term, "client_ID": "no-op", "MID": "no-op"})
 		send_append_entry("")
 
+	if leader:
+		print("AFTER BEFORE")
 	skip_message = False
 	ready = select.select([sock], [], [], .1)[0]
 	if sock in ready:
@@ -291,8 +293,6 @@ while True:
 					if msg['lead_commit_index'] > commit_index:
 						commit_index = min(msg['lead_commit_index'], len(log) - 1)
 			
-			if leader:
-				print("AFTER APPEND ENTRIES")
 			# if you get a vote, keep track
 			if msg['type'] == "vote" and candidate:
 				votes += 1
