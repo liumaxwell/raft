@@ -283,13 +283,14 @@ while True:
 				print(my_id + " DEPOSED " + str(leader))
 
 			# if you get a request vote, vote for them if you have not yet voted in this term
-			if msg['type'] == "RequestVote" and not candidate:
+			if msg['type'] == "RequestVote":
 				# if you haven't voted yet this term and they have greater or equal term
 				if (not voted_for or voted_for == msg["src"]) and up_to_date(msg):
 					print(my_id + "voted for " + msg["src"])
 					return_msg = {"src": my_id, "dst": msg['src'],
 								"leader": "FFFF", "type": "vote"}
 					election_timeout = False
+					candidate = False
 					make_follower()
 					return_msg_json = json.dumps(return_msg)
 					sock.send(return_msg_json.encode())
