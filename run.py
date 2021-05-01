@@ -537,6 +537,7 @@ class Simulation:
 
     def __replica_deliver__(self, replica, raw_msg):
         if not replica.deliver(raw_msg) and replica.rid in self.living_rids:
+            print("removing " + replica.rid)
             self.living_rids.remove(replica.rid)
                         
     def __populate_event_queue__(self, clock):
@@ -636,7 +637,6 @@ class Simulation:
             for rid, r in self.replicas.iteritems():
                 if rid != msg['src']:
                     if self.__check_partition__(msg['src'], rid) and random.random() >= self.conf.drops:
-                        print(msg["src"])
                         self.__replica_deliver__(r, raw_msg)
                     else: self.stats.total_drops += 1
 
