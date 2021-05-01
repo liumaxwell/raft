@@ -441,7 +441,9 @@ class Simulation:
                     listen_socks.add(r.listen_sock)
                 if r.client_sock: sockets.append(r.client_sock)
 
+            print("BEFORE")
             ready = select.select(sockets, [], [], 0.1)[0]
+            print("AFTER")
             
             for sock in ready:
                 # if this is a listen sock, accept the connection and map it to a replica
