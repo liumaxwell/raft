@@ -206,13 +206,14 @@ while True:
 
 	skip_message = False
 	ready = select.select([sock], [], [], .1)[0]
-	if leader:
-		print("AFTER BEFORE")
 	if sock in ready:
 		msg_raw = sock.recv(32768)
 		if len(msg_raw) == 0:
 			skip_msg = True
 		msg = json.loads(msg_raw)
+
+		if leader:
+			print("AFTER BEFORE")
 		if not skip_message:
 			if leader and (msg['type'] == 'append_entry' or msg['type'] == 'bulk_append') and msg["term"] >= current_term:
 				current_term = msg["term"]
