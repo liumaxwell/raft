@@ -136,9 +136,8 @@ def reply_true(msg, index):
 
 print_timer = 0
 while True:
-	if time.time() - print_timer > 1:
-		# print(my_id + " is alive")
-		print_timer = time.time()
+	if leader:
+		print("LEADER" + my_id)
 	# if leader:
 	# 	print("LEADER: %s %f" % (my_id, time.time()))
 	# if leader:
